@@ -13,8 +13,9 @@ export const DS = {
     card: 'rounded-2xl',   // 12px (standard modern card)
     modal: 'rounded-3xl',  // 24px (emphasized container)
     full: 'rounded-full',  // Pill
+    button: 'rounded-[200px]', // 200px - pill-shaped buttons
   },
-  
+
   // Spacing & Padding
   padding: {
     page: 'px-6 md:px-8 py-10',
