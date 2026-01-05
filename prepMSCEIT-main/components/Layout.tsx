@@ -9,6 +9,7 @@ interface LayoutProps {
     toggleTheme: () => void;
     onLogout: () => void;
     user: any;
+    role: string | null;
 }
 
 interface NavItemProps {
@@ -29,7 +30,9 @@ const TAB_TITLES: Record<string, string> = {
     tutors: 'Mentorship',
     profile: 'Settings',
     assessment: 'Simulation',
-    results: 'Results'
+    results: 'Results',
+    users: 'Users',
+    classes: 'Curriculum'
 };
 
 const NavItem: React.FC<NavItemProps> = ({ id, label, isActive, onClick, icon, isCollapsed, className = '' }) => (
@@ -65,7 +68,7 @@ const AppLogo = ({ isDark }: { isDark: boolean }) => (
     </div>
 );
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleTheme, onLogout, user }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleTheme, onLogout, user, role }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -103,6 +106,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
         { id: 'analytics', label: 'Insight', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" /></svg> },
         { id: 'history', label: 'History', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
     ];
+
+    const adminMenuItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg> },
+        { id: 'users', label: 'Users', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg> },
+        { id: 'classes', label: 'Classes', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg> },
+    ];
+
+    const currentMenuItems = role === 'admin' ? adminMenuItems : menuItems;
 
     const getDynamicHeaderTitle = () => {
         if (activeTab === 'dashboard') {
@@ -214,7 +225,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                     <nav className="flex-1 flex flex-col px-4 gap-1 overflow-y-auto overflow-x-hidden pt-2">
                         {(!isCollapsed || isMobileOpen) && <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">Main Menu</p>}
 
-                        {menuItems.map(item => (
+                        {currentMenuItems.map(item => (
                             <NavItem
                                 key={item.id}
                                 id={item.id}
@@ -226,14 +237,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                             />
                         ))}
 
-                        <NavItem
-                            id="tutors"
-                            label="Tutors"
-                            isActive={activeTab === 'tutors'}
-                            onClick={() => handleMobileNav('tutors')}
-                            isCollapsed={isCollapsed && !isMobileOpen}
-                            icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 14l9-5-9-5-9 5 9 5z" /><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>}
-                        />
+                        {role !== 'admin' && (
+                            <NavItem
+                                id="tutors"
+                                label="Tutors"
+                                isActive={activeTab === 'tutors'}
+                                onClick={() => handleMobileNav('tutors')}
+                                isCollapsed={isCollapsed && !isMobileOpen}
+                                icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 14l9-5-9-5-9 5 9 5z" /><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>}
+                            />
+                        )}
 
                     </nav>
                 </div>
@@ -331,7 +344,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
 
             {!isFocusMode && (
                 <div className={`md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-nav/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-[40] px-6 py-2 pb-safe flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)] transition-all duration-500 ease-in-out ${isSettingsView ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'} ${DS.animation.theme}`}>
-                    {menuItems.map(item => (
+                    {currentMenuItems.map(item => (
                         <button
                             key={item.id}
                             onClick={() => onTabChange(item.id)}

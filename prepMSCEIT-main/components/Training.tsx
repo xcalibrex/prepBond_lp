@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { TRAINING_MODULES } from '../constants';
+import { TRAINING_MODULES as HARDCODED_MODULES } from '../constants';
 import { Branch, TrainingModule, UserStats } from '../types';
+import { supabase } from '../services/supabase';
 
 interface TrainingProps {
     stats: UserStats;
@@ -20,17 +21,40 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
     const [activeBranchMobile, setActiveBranchMobile] = useState<number>(1);
+    const [dbModules, setDbModules] = useState<TrainingModule[]>([]);
+
+    useEffect(() => {
+        const fetchModules = async () => {
+            const { data, error } = await supabase
+                .from('training_modules')
+                .select('*');
+            if (data) {
+                const formatted: TrainingModule[] = data.map(m => ({
+                    id: m.id,
+                    title: m.title,
+                    description: m.description,
+                    branch: m.branch as Branch,
+                    duration: m.duration,
+                    requiredLevel: m.required_level
+                }));
+                setDbModules(formatted);
+            }
+        };
+        fetchModules();
+    }, []);
+
+    const allModules = useMemo(() => [...HARDCODED_MODULES, ...dbModules], [dbModules]);
 
     const branches = ['All', ...Object.values(Branch)];
 
     const filteredModules = useMemo(() => {
-        return TRAINING_MODULES.filter(module => {
+        return allModules.filter(module => {
             const matchesSearch = module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 module.description.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesBranch = selectedBranch === 'All' || module.branch === selectedBranch;
             return matchesSearch && matchesBranch;
         });
-    }, [searchTerm, selectedBranch]);
+    }, [searchTerm, selectedBranch, allModules]);
 
     const handleStart = () => {
         if (selectedModule && onRunModule) {

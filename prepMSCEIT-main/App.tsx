@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { Assessment } from './components/Assessment';
@@ -11,6 +12,9 @@ import { Results } from './components/Results';
 import { History } from './components/History';
 import { Auth } from './components/Auth';
 import { Onboarding } from './components/Onboarding';
+import { AdminDashboard } from './components/Admin/AdminDashboard';
+import { AdminUsers } from './components/Admin/AdminUsers';
+import { AdminClasses } from './components/Admin/AdminClasses';
 import { UserStats, Branch } from './types';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -75,7 +79,18 @@ function SplashScreen({ onFinish, isDark }: { onFinish: () => void, isDark: bool
 }
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract view from URL: /home/:view or /admin/:view
+  const activeTab = React.useMemo(() => {
+    const parts = location.pathname.split('/');
+    if (parts[1] === 'home' || parts[1] === 'admin') {
+      return parts[2] || 'dashboard';
+    }
+    return 'dashboard';
+  }, [location.pathname]);
+
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -92,6 +107,7 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [remoteSyncEnabled, setRemoteSyncEnabled] = useState(true);
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (isDark) {
@@ -201,6 +217,9 @@ function App() {
 
       if (profileData) {
         console.log("Profile loaded:", profileData);
+        setUserRole(profileData.role || 'student');
+      } else {
+        setUserRole('student');
       }
     } catch (err) {
       loadStatsFromLocal();
@@ -283,13 +302,13 @@ function App() {
     }
 
     setLastResult({ score: newScore, branch });
-    setActiveTab('results');
+    navigate('/home/results');
     setSelectedBranch(null);
   };
 
   const handleStartModule = (branch: Branch) => {
     setSelectedBranch(branch);
-    setActiveTab('assessment');
+    navigate('/home/assessment');
   };
 
   const handleUpdateProfile = async (data: { full_name?: string }) => {
@@ -325,7 +344,7 @@ function App() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setActiveTab('dashboard');
+    navigate('/home/dashboard');
   };
 
   if (isLoadingAuth) {
@@ -343,26 +362,60 @@ function App() {
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} isDark={isDark} />;
   if (showOnboarding) return <Onboarding onComplete={handleOnboardingComplete} />;
 
+  if (session && userRole === null) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
+        <div className="relative w-24 h-24 mb-8">
+          <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse"></div>
+          <svg className="animate-spin w-full h-full text-white" viewBox="0 0 50 50">
+            <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="80" strokeDashoffset="20"></circle>
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold mb-2 font-serif italic">Authenticating Nexus...</h2>
+        <p className="text-gray-400 text-sm font-light tracking-wide">Establishing secure connection protocols.</p>
+      </div>
+    );
+  }
+
   return (
     <Layout
       activeTab={activeTab}
       onTabChange={(tab) => {
-        setActiveTab(tab);
+        const base = userRole === 'admin' ? 'admin' : 'home';
+        navigate(`/${base}/${tab}`);
         if (tab !== 'assessment') setSelectedBranch(null);
       }}
       isDark={isDark}
       toggleTheme={toggleTheme}
       onLogout={handleLogout}
       user={session?.user}
+      role={userRole}
     >
-      {activeTab === 'dashboard' && <Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => setActiveTab('assessment')} onStartTraining={() => setActiveTab('training')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={setActiveTab} />}
-      {activeTab === 'assessment' && <Assessment onComplete={handleExamComplete} onCancel={() => { setActiveTab('dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />}
-      {activeTab === 'results' && lastResult && <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => setActiveTab('dashboard')} isDark={isDark} />}
-      {activeTab === 'analytics' && <Analytics stats={stats} isDark={isDark} />}
-      {activeTab === 'history' && <History stats={stats} />}
-      {activeTab === 'training' && <Training stats={stats} onRunModule={handleStartModule} />}
-      {activeTab === 'tutors' && <Tutors />}
-      {activeTab === 'profile' && <Profile user={session?.user} onUpdate={handleUpdateProfile} />}
+      <Routes>
+        {/* Student Routes */}
+        <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
+        <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/home/assessment')} onStartTraining={() => navigate('/home/training')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
+        <Route path="/home/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
+        <Route path="/home/results" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/dashboard')} isDark={isDark} /> : <Navigate to="/home/dashboard" replace />} />
+        <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
+        <Route path="/home/history" element={<History stats={stats} />} />
+        <Route path="/home/training" element={<Training stats={stats} onRunModule={handleStartModule} />} />
+        <Route path="/home/tutors" element={<Tutors />} />
+        <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
+
+        {/* Admin Routes */}
+        {userRole === 'admin' && (
+          <>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/users/:id" element={<AdminUsers />} />
+            <Route path="/admin/classes" element={<AdminClasses />} />
+            <Route path="/admin/classes/:id" element={<AdminClasses />} />
+          </>
+        )}
+
+        <Route path="*" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
+      </Routes>
     </Layout>
   );
 }
