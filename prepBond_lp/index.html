@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>prepBond | Score in the Top 1% of Bond Selection. Guaranteed.</title>
+    <meta name="description"
+        content="The only AI tutor that trains you on consensus-scored emotional intelligence—the exact method used by Bond University medical school admissions.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        background: '#FFFFFF',
+                        section: '#F8F9FD',
+                        primary: '#000000',
+                        accentBlue: '#60A5FA',
+                        accentPurple: '#C084FC',
+                        accentAmber: '#FBBF24',
+                        accentEmerald: '#34D399',
+                    },
+                    borderRadius: {
+                        'card': '24px',
+                        'pill': '200px',
+                    },
+                    boxShadow: {
+                        'custom-sm': '0 2px 4px rgba(0,0,0,0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- AOS (Animate on Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- Heroicons (using SVGs directly for better control) -->
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .bg-glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .text-label {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-primary overflow-x-hidden" x-data="{ openApply: false }">
+
+    <!-- Navigation -->
+    <nav
+        class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 h-16 flex items-center">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="file:///Users/dylanj/.gemini/antigravity/brain/a75f1557-d9b0-490d-932a-7de802300b05/uploaded_image_1767597603015.png"
+                    class="w-10 h-10 object-contain" alt="prepBond Logo">
+                <span class="text-2xl font-serif font-bold tracking-tight">prepBond</span>
+            </div>
+            <button @click="openApply = true"
+                class="bg-black text-white px-6 py-2.5 rounded-pill font-bold hover:opacity-90 transition-all text-sm">
+                Apply Here
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 md:pt-48 md:pb-32 px-6">
+        <div class="container mx-auto text-center max-w-5xl">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-200 mb-8 bg-gray-50 bg-opacity-50">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accentEmerald opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-accentEmerald"></span>
+                </span>
+                <span class="text-label text-gray-500">
+                    <span x-data="{ count: 142 }"
+                        x-init="setInterval(() => count += Math.floor(Math.random() * 3), 5000)"
+                        x-text="count">142</span> applicants training right now
+                </span>
+            </div>
+
+            <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl mb-6 leading-[1.1]" data-aos="fade-up">
+                Score in the Top 1% of <br>Bond Selection. <span class="italic text-accentBlue">Guaranteed.</span>
+            </h1>
+
+            <p class="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed" data-aos="fade-up"
+                data-aos-delay="100">
+                The only AI tutor that trains you on consensus-scored emotional intelligence—the exact method used by
+                Bond admissions.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12" data-aos="fade-up"
+                data-aos-delay="200">
+                <button @click="openApply = true"
+                    class="w-full sm:w-auto bg-black text-white px-10 py-4 rounded-pill font-bold text-lg hover:scale-105 transition-all shadow-lg shadow-black/5">
+                    Apply Here
+                </button>
+                <button
+                    class="w-full sm:w-auto bg-transparent border border-gray-200 text-black px-10 py-4 rounded-pill font-bold text-lg hover:bg-gray-50 transition-all">
+                    Watch Demo
+                </button>
+            </div>
+
+            <!-- Trust / Social Proof Bar -->
+            <div class="flex flex-col items-center justify-center gap-4 mb-20" data-aos="fade-up" data-aos-delay="250">
+                <div class="flex items-center gap-4">
+                    <div class="flex -space-x-3 overflow-hidden">
+                        <img class="inline-block h-10 w-10 rounded-full ring-4 ring-white"
+                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="">
+                        <img class="inline-block h-10 w-10 rounded-full ring-4 ring-white"
+                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" alt="">
+                        <img class="inline-block h-10 w-10 rounded-full ring-4 ring-white"
+                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="">
+                        <img class="inline-block h-10 w-10 rounded-full ring-4 ring-white"
+                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sofia" alt="">
+                        <div
+                            class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-100 ring-4 ring-white">
+                            <span class="text-[10px] font-black text-gray-400">+1k</span>
+                        </div>
+                    </div>
+                    <div class="h-8 w-px bg-gray-100"></div>
+                    <div class="flex flex-col items-start gap-0.5">
+                        <div class="flex items-center gap-0.5">
+                            <template x-for="i in 5">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                    class="w-4 h-4 text-accentAmber">
+                                    <path fill-rule="evenodd"
+                                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </template>
+                        </div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Trusted by 1,000+
+                            Bond Medicine Applicants</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EI Score Preview Widget -->
+            <div class="max-w-3xl mx-auto bg-white border border-gray-100 rounded-card p-8 md:p-12 shadow-2xl shadow-gray-200/50"
+                data-aos="zoom-in" data-aos-delay="300" x-data="{ 
+                perceiving: 45, using: 52, understanding: 38, managing: 48,
+                get percentile() {
+                    let avg = (parseInt(this.perceiving) + parseInt(this.using) + parseInt(this.understanding) + parseInt(this.managing)) / 4;
+                    return Math.min(99, Math.floor(avg + 20));
+                }
+            }">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <div class="text-left">
+                            <h3 class="text-label text-gray-400 mb-4">EI Score Preview</h3>
+                            <p class="font-bold text-xl mb-6">See where you'd rank. <span class="text-accentBlue">Then
+                                    beat it.</span></p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <div
+                                    class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                                    <span>Perceiving</span>
+                                    <span x-text="perceiving + '%'" class="text-accentBlue">45%</span>
+                                </div>
+                                <input type="range" x-model="perceiving" min="0" max="100"
+                                    class="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-accentBlue transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <div
+                                    class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                                    <span>Using</span>
+                                    <span x-text="using + '%'" class="text-accentPurple">52%</span>
+                                </div>
+                                <input type="range" x-model="using" min="0" max="100"
+                                    class="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-accentPurple transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <div
+                                    class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                                    <span>Understanding</span>
+                                    <span x-text="understanding + '%'" class="text-accentAmber">38%</span>
+                                </div>
+                                <input type="range" x-model="understanding" min="0" max="100"
+                                    class="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-accentAmber transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <div
+                                    class="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                                    <span>Managing</span>
+                                    <span x-text="managing + '%'" class="text-accentEmerald">48%</span>
+                                </div>
+                                <input type="range" x-model="managing" min="0" max="100"
+                                    class="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-accentEmerald transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center md:border-l border-gray-100 md:pl-12">
+                        <div class="relative inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 mb-4">
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle cx="50%" cy="50%" r="48%" stroke-width="4" stroke="currentColor"
+                                    fill="transparent" class="text-gray-50" />
+                                <circle cx="50%" cy="50%" r="48%" stroke-width="4" stroke="currentColor"
+                                    fill="transparent" class="text-black transition-all duration-500 ease-out"
+                                    :stroke-dasharray="2 * Math.PI * 76"
+                                    :stroke-dashoffset="2 * Math.PI * 76 * (1 - percentile/100)" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-4xl md:text-5xl font-black" x-text="percentile">0</span>
+                                <span
+                                    class="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Percentile</span>
+                            </div>
+                        </div>
+                        <p class="text-sm font-medium text-gray-500 max-w-[200px] mx-auto">Estimated rank against 4,000+
+                            current applicants.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="py-24 px-6 bg-section">
+        <div class="container mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-serif text-4xl md:text-5xl mb-6">Most Applicants Fail the EI Component. <br><span
+                        class="italic text-gray-400">Silently.</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-card border border-gray-100 hover:shadow-custom-sm transition-all"
+                    data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-4xl font-black mb-4">73%</div>
+                    <p class="text-gray-500 font-medium">of applicants score below the 60th percentile on the first
+                        attempt.</p>
+                </div>
+                <div class="bg-white p-8 rounded-card border border-gray-100 hover:shadow-custom-sm transition-all"
+                    data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-4xl font-black mb-4">2X</div>
+                    <p class="text-gray-500 font-medium">EI scores are weighted 2x in the final holistic selection
+                        review.</p>
+                </div>
+                <div class="bg-white p-8 rounded-card border border-gray-100 hover:shadow-custom-sm transition-all"
+                    data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-4xl font-black mb-4">0</div>
+                    <p class="text-gray-500 font-medium">Effective prep resources exist for Bond University... until
+                        now.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="py-24 px-6 overflow-hidden">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row items-end justify-between gap-6 mb-16" data-aos="fade-up">
+                <div class="max-w-2xl">
+                    <span class="text-label text-accentBlue mb-4 block">The Four Branches</span>
+                    <h2 class="font-serif text-4xl md:text-5xl leading-tight">Master the Framework <br>of Emotional
+                        Intelligence.</h2>
+                </div>
+                <p class="text-gray-500 max-w-sm mb-2">We train you on the exact Mayer-Salovey-Caruso model used by the
+                    consensus scoring engine.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Perceiving -->
+                <div class="group bg-white p-10 rounded-card border border-gray-100 hover:shadow-custom-sm hover:-translate-y-1 transition-all"
+                    data-aos="fade-right">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-accentBlue/10 flex items-center justify-center text-accentBlue mb-8 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.036 12.322a1.012 1.012 0 0 1 0-.644m19.923 0a1.012 1.012 0 0 1 0 .644m-17.839-2.512l.007-.007a2.385 2.385 0 0 1 3.373 0l.007.007m0 0l.007.007a2.385 2.385 0 0 1 3.374 0l.007.007m0 0l.007.007a2.385 2.385 0 0 1 3.374 0l.007.007m0 0l.007.007a2.385 2.385 0 0 1 3.374 0l.007.007M12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Perceiving Emotions</h3>
+                    <p class="text-gray-500 leading-relaxed">Detect subtle micro-expressions and atmospheric cues in
+                        clinical interview scenarios.</p>
+                </div>
+                <!-- Using -->
+                <div class="group bg-white p-10 rounded-card border border-gray-100 hover:shadow-custom-sm hover:-translate-y-1 transition-all"
+                    data-aos="fade-left">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-accentPurple/10 flex items-center justify-center text-accentPurple mb-8 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Using Emotions</h3>
+                    <p class="text-gray-500 leading-relaxed">Leverage emotional states to facilitate critical thinking
+                        and problem-solving under pressure.</p>
+                </div>
+                <!-- Understanding -->
+                <div class="group bg-white p-10 rounded-card border border-gray-100 hover:shadow-custom-sm hover:-translate-y-1 transition-all"
+                    data-aos="fade-right">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-accentAmber/10 flex items-center justify-center text-accentAmber mb-8 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4.26 10.147a60.302 60.302 0 0 1 12.447-3.21 60.303 60.303 0 0 1 3.037 12.447m-15.484-9.237a60.3 60.3 0 0 0-3.21 12.447m18.694-3.21a60.3 60.3 0 0 1-12.447 3.21m-3.21-12.447l.007-.007a2.385 2.385 0 0 1 3.373 0l.007.007m0 0l.007.007a2.385 2.385 0 0 1 3.374 0l.007.007m0 0l.007.007a2.385 2.385 0 0 1 3.374 0l.007.007m0 0l.007.007a2.385 2.385 0 0 1 3.374 0l.007.007" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Understanding Emotions</h3>
+                    <p class="text-gray-500 leading-relaxed">Analyze complex, conflicting emotions and predict their
+                        progression in social dynamics.</p>
+                </div>
+                <!-- Managing -->
+                <div class="group bg-white p-10 rounded-card border border-gray-100 hover:shadow-custom-sm hover:-translate-y-1 transition-all"
+                    data-aos="fade-left">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-accentEmerald/10 flex items-center justify-center text-accentEmerald mb-8 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Managing Emotions</h3>
+                    <p class="text-gray-500 leading-relaxed">Regulate personal and others' responses to achieve desired
+                        clinical outcomes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Bar -->
+    <section class="py-16 border-y border-gray-100">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+                <div class="flex flex-wrap justify-center items-center gap-12 opacity-40 grayscale">
+                    <img src="https://img.logo.dev/google.com?token=pk_ST8C-rYyQreA4u_G5A5G2g" class="h-8"
+                        alt="Partner">
+                    <img src="https://img.logo.dev/apple.com?token=pk_ST8C-rYyQreA4u_G5A5G2g" class="h-8" alt="Partner">
+                    <img src="https://img.logo.dev/microsoft.com?token=pk_ST8C-rYyQreA4u_G5A5G2g" class="h-8"
+                        alt="Partner">
+                    <img src="https://img.logo.dev/amazon.com?token=pk_ST8C-rYyQreA4u_G5A5G2g" class="h-8"
+                        alt="Partner">
+                </div>
+                <div class="flex items-center gap-6 bg-section p-6 rounded-card border border-gray-50">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
+                        class="w-12 h-12 rounded-full border border-white shadow-sm" alt="Dr. Sarah M.">
+                    <div>
+                        <p class="text-sm italic font-medium">"This platform gave me the edge I didn't know I needed."
+                        </p>
+                        <p class="text-[10px] font-black uppercase text-gray-400 mt-1">Dr. Sarah M. • Matched 2024</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Bento Grid -->
+    <section class="py-24 px-6 bg-white">
+        <div class="container mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="text-label text-accentPurple mb-4 block">Platform Features</span>
+                <h2 class="font-serif text-4xl md:text-5xl">Built for Elite Performance.</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+                <!-- Consensus Alignment Engine (Large) -->
+                <div class="md:col-span-2 md:row-span-2 bg-black text-white p-10 rounded-card flex flex-col justify-end relative overflow-hidden group"
+                    data-aos="zoom-in">
+                    <div class="absolute top-0 right-0 p-10 opacity-20 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-32 h-32">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-4 relative z-10">Consensus Alignment Engine</h3>
+                    <p class="text-gray-400 max-w-md relative z-10">The only algorithm that calibrates your responses
+                        against a professional consensus pool, mirroring the actual scoring rubric used by Bond
+                        selection committees.</p>
+                </div>
+                <!-- Adaptive Scenarios -->
+                <div class="bg-section p-8 rounded-card border border-gray-100 flex flex-col justify-between hover:bg-gray-100 transition-colors"
+                    data-aos="fade-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6 text-accentPurple mb-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 0 1-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-8.25zM2.25 17.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v.75c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-.75z" />
+                    </svg>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">Adaptive Scenarios</h4>
+                        <p class="text-sm text-gray-500">Challenges that evolve based on your weaknesses.</p>
+                    </div>
+                </div>
+                <!-- Real-Time Percentile Tracking -->
+                <div class="bg-section p-8 rounded-card border border-gray-100 flex flex-col justify-between hover:bg-gray-100 transition-colors"
+                    data-aos="fade-left" data-aos-delay="100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6 text-accentEmerald mb-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 19.496 6.996 20 6.375 20h-2.25A1.125 1.125 0 0 1 3 18.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125z" />
+                    </svg>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">Percentile Tracking</h4>
+                        <p class="text-sm text-gray-500">Know exactly where you stand against the field.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom 3 features of bento -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="bg-section p-8 rounded-card border border-gray-100 flex flex-col justify-between hover:bg-gray-100 transition-colors"
+                    data-aos="fade-up">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6 text-accentBlue mb-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">Flashcard Mastery</h4>
+                        <p class="text-sm text-gray-500">Drill definitions with spaced repetition AI.</p>
+                    </div>
+                </div>
+                <div class="bg-section p-8 rounded-card border border-gray-100 flex flex-col justify-between hover:bg-gray-100 transition-colors"
+                    data-aos="fade-up" data-aos-delay="100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6 text-accentAmber mb-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0z" />
+                    </svg>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">1:1 Mentoring</h4>
+                        <p class="text-sm text-gray-500">Direct feedback from selection specialists.</p>
+                    </div>
+                </div>
+                <div class="bg-section p-8 rounded-card border border-gray-100 flex flex-col justify-between hover:bg-gray-100 transition-colors"
+                    data-aos="fade-up" data-aos-delay="200">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6 text-accentBlue mb-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">Spaced Repetition</h4>
+                        <p class="text-sm text-gray-500">Retain concepts until the day of your interview.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-24 px-6 bg-section">
+        <div class="container mx-auto">
+            <div class="max-w-xl mx-auto bg-white rounded-card p-12 border border-gray-100 shadow-xl relative overflow-hidden"
+                data-aos="zoom-in">
+                <div
+                    class="absolute top-0 right-0 bg-black text-white px-6 py-2 rounded-bl-card text-[10px] font-black uppercase tracking-widest">
+                    Limited Intake</div>
+
+                <div class="text-center mb-10">
+                    <span class="text-label text-gray-400 mb-4 block">Premium Access</span>
+                    <h2 class="text-4xl font-black mb-4">Seasonal Pass</h2>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-5xl font-black">$997</span>
+                        <span class="text-gray-400 text-sm font-bold uppercase tracking-widest">/ one-time</span>
+                    </div>
+                </div>
+
+                <ul class="space-y-4 mb-10">
+                    <li class="flex items-center gap-3">
+                        <div
+                            class="w-5 h-5 rounded-full bg-accentEmerald/10 text-accentEmerald flex items-center justify-center">
+                            <i data-lucide="check" class="w-3 h-3"></i>
+                        </div>
+                        <span class="font-medium text-gray-600">Full access to all training modules</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div
+                            class="w-5 h-5 rounded-full bg-accentEmerald/10 text-accentEmerald flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                                stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                        </div>
+                        <span class="font-medium text-gray-600">Adaptive AI-driven scenarios</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div
+                            class="w-5 h-5 rounded-full bg-accentEmerald/10 text-accentEmerald flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                                stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                        </div>
+                        <span class="font-medium text-gray-600">Percentile tracking dashboard</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div
+                            class="w-5 h-5 rounded-full bg-accentEmerald/10 text-accentEmerald flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                                stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                        </div>
+                        <span class="font-medium text-gray-600">1:1 specialist mentoring sessions</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div
+                            class="w-5 h-5 rounded-full bg-accentEmerald/10 text-accentEmerald flex items-center justify-center">
+                            <i data-lucide="check" class="w-3 h-3"></i>
+                        </div>
+                        <span class="font-medium text-gray-600 italic">90th percentile guarantee</span>
+                    </li>
+                </ul>
+
+                <button @click="openApply = true"
+                    class="w-full bg-black text-white py-5 rounded-pill font-bold text-xl hover:scale-[1.02] transition-all">
+                    Apply Here
+                </button>
+                <p class="text-center text-[10px] font-black uppercase text-gray-400 mt-6 tracking-widest">Limited spots
+                    per intake</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guarantee Section -->
+    <section class="py-24 px-6 bg-black text-white overflow-hidden">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-12">
+                <div class="max-w-2xl" data-aos="fade-right">
+                    <h2 class="text-4xl md:text-6xl font-serif leading-tight">Score in the 90th percentile <span
+                            class="italic text-accentBlue text-white">or we refund everything.</span></h2>
+                </div>
+                <!-- Circular Seal -->
+                <div class="relative w-48 h-48 flex items-center justify-center" data-aos="zoom-in">
+                    <div
+                        class="absolute inset-0 border border-white/20 rounded-full animate-[spin_20s_linear_infinite]">
+                        <svg viewBox="0 0 100 100" class="w-full h-full p-2 overflow-visible">
+                            <path id="circlePath" fill="none"
+                                d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"></path>
+                            <text class="text-[8px] font-black tracking-[0.2em] fill-white uppercase">
+                                <textPath xlink:href="#circlePath">
+                                    90TH PERCENTILE GUARANTEE • NO RISK PREP • 90TH PERCENTILE GUARANTEE •
+                                </textPath>
+                            </text>
+                        </svg>
+                    </div>
+                    <div
+                        class="w-32 h-32 rounded-full border border-white/40 flex items-center justify-center bg-white/5 backdrop-blur-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-12 h-12 text-white">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.744c0 1.948.465 3.788 1.25 5.424a12.101 12.101 0 003.88 4.754 12.149 12.149 0 005.87 2.332 12.15 12.15 0 005.87-2.332 12.101 12.101 0 003.88-4.754c.785-1.636 1.25-3.476 1.25-5.424a11.99 11.99 0 00-.598-3.744A11.959 11.959 0 0112 2.714z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="py-32 px-6 text-center">
+        <div class="container mx-auto">
+            <h2 class="font-serif text-4xl md:text-6xl mb-12 max-w-4xl mx-auto leading-tight" data-aos="fade-up">Your
+                Emotional Intelligence Score Is the Difference Between <span class="text-accentBlue italic">Matched and
+                    Waitlisted.</span></h2>
+            <div data-aos="fade-up" data-aos-delay="100">
+                <button @click="openApply = true"
+                    class="bg-black text-white px-12 py-5 rounded-pill font-bold text-2xl hover:scale-105 transition-all mb-6">
+                    Apply Here
+                </button>
+                <p class="text-label text-gray-400">Spots fill fast. Secure yours now.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-gray-100">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-3">
+                <img src="file:///Users/dylanj/.gemini/antigravity/brain/a75f1557-d9b0-490d-932a-7de802300b05/uploaded_image_1767597603015.png"
+                    class="w-8 h-8 object-contain" alt="prepBond Logo">
+                <span class="text-xl font-serif font-bold tracking-tight">prepBond</span>
+            </div>
+            <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                <a href="#" class="hover:text-black">Terms</a>
+                <a href="#" class="hover:text-black">Privacy</a>
+                <a href="#" class="hover:text-black">Contact</a>
+            </div>
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">© 2025 prepBond</p>
+        </div>
+    </footer>
+
+    <!-- Application Popup Modal -->
+    <div x-cloak x-show="openApply" class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6"
+        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="openApply = false"></div>
+
+        <!-- Modal Content -->
+        <div x-show="openApply" x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="opacity-0 translate-y-8 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-8 sm:scale-95"
+            class="relative bg-white w-full max-w-lg rounded-card p-10 shadow-2xl overflow-hidden">
+
+            <button @click="openApply = false"
+                class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-black mb-2">Apply for Intake</h3>
+                <p class="text-gray-500 font-medium">Kickstart your path to the 99th percentile.</p>
+            </div>
+
+            <form class="space-y-6"
+                @submit.prevent="alert('Application submitted! We will contact you shortly.'); openApply = false">
+                <div class="space-y-2">
+                    <label class="text-label text-gray-400">Full Name</label>
+                    <input type="text" required
+                        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
+                        placeholder="John Doe">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-label text-gray-400">Email Address</label>
+                    <input type="email" required
+                        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
+                        placeholder="name@email.com">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-label text-gray-400">Phone (Optional)</label>
+                    <input type="tel"
+                        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
+                        placeholder="+61 400 000 000">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-label text-gray-400">Target Intake</label>
+                    <select required
+                        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all appearance-none cursor-pointer">
+                        <option value="">Select Month</option>
+                        <option>March 2025</option>
+                        <option>July 2025</option>
+                        <option>November 2025</option>
+                    </select>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-black text-white py-5 rounded-pill font-bold text-xl hover:scale-[1.02] transition-all mt-4">
+                    Submit Application
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    </script>
+</body>
+
+</html>
