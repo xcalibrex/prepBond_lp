@@ -111,7 +111,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             key={option.id}
                             onClick={() => handleSelect(option.id)}
                             style={{ animationDelay: `${idx * 100}ms` }}
-                            className="group flex items-center gap-6 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] text-left animate-fade-in-up"
+                            className="group flex items-center gap-6 p-6 rounded-[24px] bg-white/5 border border-white/10 hover:bg-white hover:text-black transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] text-left animate-fade-in-up"
                         >
                             <span className="text-3xl grayscale group-hover:grayscale-0 transition-all">{option.icon}</span>
                             <span className="text-lg font-bold">{option.label}</span>

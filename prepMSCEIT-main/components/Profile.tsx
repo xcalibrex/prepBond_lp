@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 
-export const Profile: React.FC = () => {
+interface ProfileProps {
+    user: any;
+    onUpdate: (data: { full_name?: string }) => Promise<void>;
+}
+
+export const Profile: React.FC<ProfileProps> = ({ user, onUpdate }) => {
     const [tab, setTab] = useState<'profile' | 'billing'>('profile');
+    const [name, setName] = useState(user?.user_metadata?.full_name || '');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        await onUpdate({ full_name: name });
+        setIsSaving(false);
+    };
 
     return (
         <div className="max-w-4xl mx-auto animate-fade-in-up">
@@ -36,12 +49,14 @@ export const Profile: React.FC = () => {
             </div>
 
             {tab === 'profile' ? (
-                <div className="bg-white dark:bg-dark-nav rounded-xl p-8 border border-gray-200 dark:border-white/10 space-y-8 animate-fade-in-up">
+                <div className="bg-white dark:bg-dark-nav rounded-[24px] p-8 border border-gray-200 dark:border-white/10 space-y-8 animate-fade-in-up">
                     {/* Avatar Section */}
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-full bg-gray-50 dark:bg-gray-800 border-2 border-white dark:border-gray-700 flex items-center justify-center text-xl font-bold text-gray-400 dark:text-gray-500 shadow-sm">JD</div>
+                        <div className="w-20 h-20 rounded-full bg-gray-50 dark:bg-gray-800 border-2 border-white dark:border-gray-700 flex items-center justify-center text-xl font-bold text-gray-400 dark:text-gray-500 shadow-sm">
+                            {user?.user_metadata?.full_name ? user.user_metadata.full_name.charAt(0).toUpperCase() : 'U'}
+                        </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Johnny Doe</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{user?.user_metadata?.full_name || 'User'}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Level 5 Scholar</p>
                             <button className="text-xs font-bold text-black dark:text-white hover:underline">Change Avatar</button>
                         </div>
@@ -51,11 +66,21 @@ export const Profile: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Full Name</label>
-                            <input type="text" defaultValue="Johnny Doe" className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none" />
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Email Address</label>
-                            <input type="email" defaultValue="johnny.doe@example.com" className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none" />
+                            <input
+                                type="email"
+                                value={user?.email || ''}
+                                disabled
+                                className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-3 text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed opacity-70 outline-none"
+                            />
                         </div>
                     </div>
 
@@ -74,13 +99,19 @@ export const Profile: React.FC = () => {
                     </div>
 
                     <div className="flex justify-end pt-2">
-                        <button className="bg-black dark:bg-white text-white dark:text-black px-8 py-3 rounded-[200px] font-bold text-sm hover:opacity-90 transition-all shadow-md hover:scale-105 active:scale-95">Save Changes</button>
+                        <button
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className="bg-black dark:bg-white text-white dark:text-black px-8 py-3 rounded-[200px] font-bold text-sm hover:opacity-90 transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isSaving ? 'Saving...' : 'Save Changes'}
+                        </button>
                     </div>
                 </div>
             ) : (
                 <div className="space-y-6">
                     {/* Plan Card */}
-                    <div className="bg-white dark:bg-dark-nav text-gray-900 dark:text-white rounded-xl p-8 border border-gray-200 dark:border-white/10 relative overflow-hidden group">
+                    <div className="bg-white dark:bg-dark-nav text-gray-900 dark:text-white rounded-[24px] p-8 border border-gray-200 dark:border-white/10 relative overflow-hidden group">
                         <div className="relative z-10 flex justify-between items-start">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 font-medium">Current Plan</p>

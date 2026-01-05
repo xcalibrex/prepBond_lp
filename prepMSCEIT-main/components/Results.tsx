@@ -47,7 +47,7 @@ export const Results: React.FC<ResultsProps> = ({ score, branch, stats, onBack, 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 {/* Score Card */}
                 <div className="md:col-span-4 space-y-6">
-                    <div className="bg-[#F8F9FD] dark:bg-[#0A0A0A] border border-transparent dark:border-white/5 rounded-2xl p-8 text-center flex flex-col items-center justify-center h-[350px]">
+                    <div className="bg-[#F8F9FD] dark:bg-[#0A0A0A] border border-transparent dark:border-white/5 rounded-[24px] p-8 text-center flex flex-col items-center justify-center h-[350px]">
                         <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-6">{branch}</span>
 
                         <div className="relative w-48 h-48">
@@ -93,7 +93,7 @@ export const Results: React.FC<ResultsProps> = ({ score, branch, stats, onBack, 
 
                 {/* Comparative Radar */}
                 <div className="md:col-span-8">
-                    <div className="bg-[#F8F9FD] dark:bg-[#0A0A0A] border border-transparent dark:border-white/5 rounded-2xl p-6 h-[350px] flex flex-col">
+                    <div className="bg-[#F8F9FD] dark:bg-[#0A0A0A] border border-transparent dark:border-white/5 rounded-[24px] p-6 h-[350px] flex flex-col">
                         <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-4">Competency Overlay</h3>
                         <div className="flex-1 w-full min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
@@ -116,7 +116,7 @@ export const Results: React.FC<ResultsProps> = ({ score, branch, stats, onBack, 
             </div>
 
             {/* Recommendations */}
-            <div className="bg-black dark:bg-white text-white dark:text-black rounded-2xl p-8 shadow-lg">
+            <div className="bg-black dark:bg-white text-white dark:text-black rounded-[24px] p-8 shadow-lg">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
                     <div className="flex-1">
                         <h3 className="text-lg font-bold mb-2">Next Steps</h3>

@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserStats, Branch } from '../types';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { DS } from '../design-system';
 
 interface DashboardProps {
     stats: UserStats;
+    user: any;
     isDark?: boolean;
     onStartExam: () => void;
     onStartTraining: () => void;
+    onLogout: () => void | Promise<void>;
+    toggleTheme: () => void;
+    onTabChange: (tab: string) => void;
 }
 
 const StatCard = ({
@@ -23,12 +27,12 @@ const StatCard = ({
 }) => {
     return (
         <div
-            className={`relative ${DS.radius.card} p-6 flex flex-col justify-between h-[220px] cursor-pointer ${DS.animation.hover} border border-white/60 dark:border-white/5 overflow-hidden group ${gradientClass}`}
+            className={`relative ${DS.radius.card} p-6 flex flex-col justify-between h-[220px] cursor-pointer ${DS.animation.hover} border border-white/60 dark:border-transparent overflow-hidden group ${gradientClass}`}
         >
             <div className="relative z-10 flex flex-col h-full">
                 <div className="mb-4">
                     <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1 opacity-90">{title}</h3>
-                    <span className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter leading-none">{value}</span>
+                    <span className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tighter leading-none">{value}</span>
                 </div>
 
                 <div className="mt-auto pt-4 border-t border-black/5 dark:border-white/10">
@@ -62,19 +66,7 @@ const Calendar = ({ isDark }: { isDark: boolean }) => {
     const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
     return (
-        <div className={`bg-[#F8F9FD] dark:bg-dark-nav ${DS.radius.card} p-6 mb-6 border border-transparent dark:border-white/5`}>
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{monthName} {currentYear}</h3>
-                <div className="flex gap-1">
-                    <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full text-gray-400 transition-colors">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    </button>
-                    <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full text-black dark:text-white transition-colors">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                </div>
-            </div>
-
+        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5`}>
             <div className="grid grid-cols-7 gap-2 text-center mb-2">
                 {days.map(d => (
                     <span key={d} className="text-[10px] font-bold text-gray-400 uppercase">{d}</span>
@@ -102,9 +94,9 @@ const Calendar = ({ isDark }: { isDark: boolean }) => {
                     );
                 })}
             </div>
-        </div>
-    )
-}
+        </div >
+    );
+};
 
 const TaskItem = ({ title, type, date, duration, color }: { title: string, type: string, date: string, duration: string, color: string }) => (
     <div className="flex gap-4 relative group cursor-pointer">
@@ -134,49 +126,71 @@ const BRANCH_COLORS = {
     [Branch.Managing]: '#34D399',
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ stats, isDark = false, onStartExam, onStartTraining }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = false, onStartExam, onStartTraining, onLogout, toggleTheme, onTabChange }) => {
     const [activeChartTab, setActiveChartTab] = useState<string>('All');
     const [mobileTab, setMobileTab] = useState<'stats' | 'trajectory' | 'roadmap'>('stats');
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const userMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const chartData = useMemo(() => {
-        const sortedHistory = [...stats.history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        if (activeChartTab === 'All') {
-            return sortedHistory.slice(-20).map(h => ({
-                name: h.date.split('-').slice(1).join('/'),
-                [h.branch]: h.score,
-            }));
-        } else {
-            return sortedHistory
-                .filter(h => h.branch === activeChartTab)
-                .slice(-10)
-                .map(h => ({
-                    name: h.date.split('-').slice(1).join('/'),
-                    score: h.score,
-                    branch: h.branch
-                }));
+        if (!stats?.history || !Array.isArray(stats.history)) {
+            console.log('Dashboard: stats.history is missing or not an array', stats);
+            return [];
         }
-    }, [stats.history, activeChartTab]);
+
+        try {
+            const sortedHistory = [...stats.history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            if (activeChartTab === 'All') {
+                return sortedHistory.slice(-20).map(h => ({
+                    name: h.date?.split('-').slice(1).join('/') || 'N/A',
+                    [h.branch]: h.score,
+                }));
+            } else {
+                return sortedHistory
+                    .filter(h => h.branch === activeChartTab)
+                    .slice(-10)
+                    .map(h => ({
+                        name: h.date?.split('-').slice(1).join('/') || 'N/A',
+                        score: h.score,
+                        branch: h.branch
+                    }));
+            }
+        } catch (err) {
+            console.error('Dashboard: Error processing chartData', err);
+            return [];
+        }
+    }, [stats?.history, activeChartTab]);
 
     return (
         <div className={`flex flex-col gap-5 ${DS.animation.enter} h-full`}>
 
             {/* Mobile Sub-tabs Navigation */}
-            <div className="md:hidden flex p-1 bg-gray-100 dark:bg-white/5 rounded-2xl w-full sticky top-0 z-20 backdrop-blur-md">
+            <div className="md:hidden flex p-1 bg-gray-100 dark:bg-white/5 rounded-[24px] w-full sticky top-0 z-20 backdrop-blur-md">
                 <button
                     onClick={() => setMobileTab('stats')}
-                    className={`flex-1 py-3 text-xs font-bold rounded-xl transition-all ${mobileTab === 'stats' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
+                    className={`flex-1 py-3 text-xs font-bold rounded-[24px] transition-all ${mobileTab === 'stats' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
                 >
                     Stats
                 </button>
                 <button
                     onClick={() => setMobileTab('trajectory')}
-                    className={`flex-1 py-3 text-xs font-bold rounded-xl transition-all ${mobileTab === 'trajectory' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
+                    className={`flex-1 py-3 text-xs font-bold rounded-[24px] transition-all ${mobileTab === 'trajectory' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
                 >
                     Trajectory
                 </button>
                 <button
                     onClick={() => setMobileTab('roadmap')}
-                    className={`flex-1 py-3 text-xs font-bold rounded-xl transition-all ${mobileTab === 'roadmap' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
+                    className={`flex-1 py-3 text-xs font-bold rounded-[24px] transition-all ${mobileTab === 'roadmap' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
                 >
                     Roadmap
                 </button>
@@ -188,39 +202,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isDark = false, onS
                 <div className="lg:col-span-8 flex flex-col gap-5">
 
                     {/* 1. Hero Banner - Moved inside left column */}
-                    <div className={`rounded-2xl bg-[#001833] dark:bg-dark-nav p-8 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-sm shrink-0`}>
+
+                    {/* 1.5. Hero Banner - Updated Content */}
+                    <div className={`rounded-[24px] bg-[#001833] dark:bg-dark-nav py-7 px-8 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-sm shrink-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
                         <div className="relative z-10 max-w-md">
                             <div className="flex items-center gap-3 mb-2 md:mb-4">
-                                <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center shadow-sm text-white backdrop-blur-sm border border-white/10">
+                                <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center shadow-sm text-blue-400 backdrop-blur-sm border border-blue-400/20">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                 </div>
-                                <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Bond Med Simulation</span>
+                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Next Module</span>
                             </div>
-                            <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">
-                                Welcome back, Johnny Doe
-                            </h1>
-                            <p className="text-gray-300 font-medium text-sm hidden md:block">Med Aspirant &bull; Precision Tier Training</p>
+                            <h2 className="text-2xl font-bold text-white leading-tight mb-2">
+                                Understanding Emotions
+                            </h2>
+                            <button onClick={onStartTraining} className="mt-6 px-6 py-2.5 bg-white text-[#001833] text-sm font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg active:scale-95 flex items-center gap-2">
+                                Start Session
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                            </button>
                         </div>
-                        {/* SVG Overlay positioning adjusted for Circle, Triangle, Square, Plus visibility */}
-                        <div className="absolute right-0 top-0 h-full w-full md:w-1/2 pointer-events-none overflow-hidden hidden md:block">
-                            <svg className="w-full h-full" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet">
-                                {/* Decorative background glow */}
-                                <circle cx="150" cy="100" r="70" fill="#3B82F6" className="opacity-10 blur-3xl" />
-
-                                {/* 1. Circle - Purple */}
-                                <circle cx="140" cy="50" r="22" fill="none" stroke="#A855F7" strokeWidth="2" className="opacity-40 animate-float-slow" />
-
-                                {/* 2. Triangle - Orange */}
-                                <path d="M210 50 L228 85 L192 85 Z" fill="none" stroke="#F97316" strokeWidth="2" className="opacity-40 animate-float-slow" style={{ animationDelay: '1s' }} />
-
-                                {/* 3. Square - Teal */}
-                                <rect x="230" y="110" width="30" height="30" rx="4" fill="none" stroke="#14B8A6" strokeWidth="2" className="opacity-40 animate-float-slow transform rotate-12" style={{ animationDelay: '2s' }} />
-
-                                {/* 4. Plus - White/Blue */}
-                                <g className="opacity-30 animate-float-slow" style={{ animationDelay: '1.5s' }}>
-                                    <path d="M165 130 V150 M155 140 H175" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" />
-                                </g>
-                            </svg>
+                        <div className="absolute right-0 top-0 h-full w-full md:w-[60%] pointer-events-none overflow-hidden hidden md:block z-0">
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#001833] dark:from-dark-nav via-[#001833]/40 dark:via-dark-nav/40 to-transparent z-10"></div>
+                            <img
+                                src="/banner-emotions.png"
+                                alt="Emotions Gradient"
+                                className="w-full h-full object-cover object-right opacity-90"
+                            />
                         </div>
                     </div>
 
@@ -242,14 +248,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isDark = false, onS
                             <StatCard
                                 title="Mastery Status"
                                 subtitle="Tiered Curriculum"
-                                value={`Lvl ${Math.max(...(Object.values(stats.masteryLevels) as number[]))}`}
+                                value={`Lvl ${stats?.masteryLevels ? Math.max(...(Object.values(stats.masteryLevels) as number[])) : 0}`}
                                 gradientClass="bg-violet-50 dark:bg-violet-900/20"
                             />
                         </div>
                     </div>
 
                     {/* Trajectory Chart */}
-                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-[#F8F9FD] dark:bg-dark-nav ${DS.radius.card} p-6 border border-transparent dark:border-white/5 flex-1 min-h-[400px]`}>
+                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5 flex-1 min-h-[400px]`}>
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-4">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white shrink-0">Alignment Trajectory</h3>
                             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide w-full md:w-auto md:pb-0">
@@ -284,7 +290,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isDark = false, onS
                                     <YAxis hide domain={[0, 100]} />
                                     <Tooltip
                                         contentStyle={{
-                                            borderRadius: '12px',
+                                            borderRadius: '16px',
                                             border: 'none',
                                             boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
                                             backgroundColor: isDark ? '#171717' : '#fff',
@@ -324,13 +330,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isDark = false, onS
                 </div>
 
                 {/* Right Column - Desktop (lg and up) */}
-                <div className={`${mobileTab === 'roadmap' ? 'block' : 'hidden lg:flex'} lg:col-span-4 flex flex-col gap-6`}>
+                <div className={`${mobileTab === 'roadmap' ? 'block' : 'hidden lg:flex'} lg:col-span-4 flex flex-col gap-5 pt-0`}>
+
+
+                    {/* Calendar Header Moved Here */}
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-[24px] font-bold font-serif text-gray-900 dark:text-white leading-tight">{new Date().toLocaleString('default', { month: 'long' })} <span className="text-gray-400">{new Date().getFullYear()}</span></h3>
+                        <div className="flex gap-1">
+                            <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full text-gray-400 transition-colors">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+                            <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full text-black dark:text-white transition-colors">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                        </div>
+                    </div>
                     <Calendar isDark={isDark} />
                     <div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
-                            Simulation Roadmap
+                        <h3 className="text-[24px] font-bold font-serif text-gray-900 dark:text-white flex items-center gap-2 mb-3">
+                            Roadmap
                         </h3>
-                        <div className={`bg-[#F8F9FD] dark:bg-dark-nav ${DS.radius.card} p-6 border border-transparent dark:border-white/5`}>
+                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5`}>
                             <div className="mt-1">
                                 <TaskItem title="Bond Selection Mock" type="Full 140-item simulation" date="19 Jan" duration="45 Mins" color="bg-black dark:bg-white" />
                                 <TaskItem title="Perception Drill" type="Micro-expression tuning" date="20-21 Jan" duration="3 Hours" color="bg-amber-400" />

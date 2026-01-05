@@ -54,7 +54,7 @@ function SplashScreen({ onFinish, isDark }: { onFinish: () => void, isDark: bool
 
   return (
     <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center transition-colors duration-500 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
-      <div className="relative w-24 h-24 mb-6 animate-pulse">
+      <div className="relative w-24 h-24 mb-6">
         <img
           src="https://80648f23d1b436c9680a76f256663212.cdn.bubble.io/f1765931308525x632039041304004700/2.png"
           alt="prepMSCEIT Logo Dark"
@@ -162,8 +162,11 @@ function App() {
   const loadStatsFromLocal = () => {
     try {
       const savedStats = localStorage.getItem('userStats');
-      setStats(savedStats ? JSON.parse(savedStats) : INITIAL_STATS);
+      const parsed = savedStats ? JSON.parse(savedStats) : INITIAL_STATS;
+      console.log('App: Loaded stats from local', parsed);
+      setStats(parsed);
     } catch (e) {
+      console.log('App: Error loading stats from local', e);
       setStats(INITIAL_STATS);
     }
     setIsLoadingAuth(false);
@@ -178,11 +181,14 @@ function App() {
         .maybeSingle();
 
       if (error) {
+        console.log('App: Supabase stats error', error);
         setRemoteSyncEnabled(false);
         loadStatsFromLocal();
       } else if (data && data.data) {
+        console.log('App: Loaded stats from Supabase', data.data);
         setStats(data.data as UserStats);
       } else {
+        console.log('App: No stats found in Supabase');
         loadStatsFromLocal();
       }
 
@@ -286,6 +292,37 @@ function App() {
     setActiveTab('assessment');
   };
 
+  const handleUpdateProfile = async (data: { full_name?: string }) => {
+    if (!session) return;
+
+    try {
+      // 1. Update Auth Metadata (Source of truth for session)
+      const { data: { user }, error: authError } = await supabase.auth.updateUser({
+        data: data
+      });
+
+      if (authError) throw authError;
+
+      // 2. Update Public Profile Table
+      if (user) {
+        const { error: profileError } = await supabase.from('profiles').upsert({
+          id: user.id,
+          full_name: data.full_name,
+          updated_at: new Date().toISOString()
+        });
+
+        if (profileError) throw profileError;
+
+        // Force session refresh to reflect changes immediately in UI
+        const { data: { session: newSession } } = await supabase.auth.refreshSession();
+        if (newSession) setSession(newSession);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setActiveTab('dashboard');
@@ -316,15 +353,16 @@ function App() {
       isDark={isDark}
       toggleTheme={toggleTheme}
       onLogout={handleLogout}
+      user={session?.user}
     >
-      {activeTab === 'dashboard' && <Dashboard stats={stats} isDark={isDark} onStartExam={() => setActiveTab('assessment')} onStartTraining={() => setActiveTab('training')} />}
+      {activeTab === 'dashboard' && <Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => setActiveTab('assessment')} onStartTraining={() => setActiveTab('training')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={setActiveTab} />}
       {activeTab === 'assessment' && <Assessment onComplete={handleExamComplete} onCancel={() => { setActiveTab('dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />}
       {activeTab === 'results' && lastResult && <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => setActiveTab('dashboard')} isDark={isDark} />}
       {activeTab === 'analytics' && <Analytics stats={stats} isDark={isDark} />}
       {activeTab === 'history' && <History stats={stats} />}
       {activeTab === 'training' && <Training stats={stats} onRunModule={handleStartModule} />}
       {activeTab === 'tutors' && <Tutors />}
-      {activeTab === 'profile' && <Profile />}
+      {activeTab === 'profile' && <Profile user={session?.user} onUpdate={handleUpdateProfile} />}
     </Layout>
   );
 }

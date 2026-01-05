@@ -3,14 +3,6 @@ import React, { useState } from 'react';
 export const Tutors: React.FC = () => {
     return (
         <div className="space-y-8 animate-fade-in-up relative h-full flex flex-col">
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-100 dark:border-gray-800 pb-0 shrink-0">
-                <div className="pb-6 hidden md:block">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Mentorship</h1>
-                    <p className="text-gray-500 dark:text-gray-400 text-base mt-1">
-                        Connect with industry experts to refine your skills.
-                    </p>
-                </div>
-            </header>
 
             {/* Coming Soon State */}
             <div className="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center animate-fade-in">

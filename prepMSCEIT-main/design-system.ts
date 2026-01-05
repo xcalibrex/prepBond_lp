@@ -9,8 +9,8 @@ export const DS = {
     sm: 'rounded-sm',      // 4px
     md: 'rounded-md',      // 8px
     lg: 'rounded-lg',      // 10px
-    xl: 'rounded-xl',      // 12px
-    card: 'rounded-2xl',   // 12px (standard modern card)
+    xl: 'rounded-3xl',  // 24px
+    card: 'rounded-3xl',   // 24px (standard modern card)
     modal: 'rounded-3xl',  // 24px (emphasized container)
     full: 'rounded-full',  // Pill
     button: 'rounded-[200px]', // 200px - pill-shaped buttons

@@ -82,7 +82,7 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       <div className="flex flex-col items-center justify-center h-full min-h-[80vh] text-center animate-fade-in px-6">
 
         <div className="mb-8 cursor-pointer group" onClick={() => startAssessment()}>
-          <div className="w-24 h-24 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center text-black dark:text-white transition-all duration-500 shadow-md group-hover:scale-110 group-hover:shadow-xl group-hover:border-black dark:group-hover:border-white">
+          <div className="w-24 h-24 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[24px] flex items-center justify-center text-black dark:text-white transition-all duration-500 shadow-md group-hover:scale-110 group-hover:shadow-xl group-hover:border-black dark:group-hover:border-white">
             <svg className="w-10 h-10 transition-transform duration-500 group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
         </div>
@@ -129,7 +129,7 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       {/* Exit Confirmation Modal */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-black/80 backdrop-blur-sm animate-fade-in px-4">
-          <div className="bg-white dark:bg-dark-nav p-6 rounded-2xl shadow-2xl max-w-sm w-full animate-fade-in-up">
+          <div className="bg-white dark:bg-dark-nav p-6 rounded-[24px] shadow-2xl max-w-sm w-full animate-fade-in-up">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">End Session?</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Progress for this module will not be saved.</p>
             <div className="flex gap-3">
@@ -141,10 +141,10 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       )}
 
       {/* Precision Progress Header */}
-      <div className="flex items-center gap-6 mb-8 bg-[#F8F9FD] dark:bg-dark-nav p-5 rounded-2xl shadow-sm border border-transparent dark:border-white/5 animate-fade-in-down">
+      <div className="flex items-center gap-6 mb-8 bg-[#F8F9FD] dark:bg-dark-nav p-5 rounded-[24px] shadow-sm border border-transparent dark:border-white/5 animate-fade-in-down">
         <button
           onClick={() => setShowExitConfirm(true)}
-          className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors"
+          className="p-2 rounded-[24px] hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors"
           title="End Session"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -164,14 +164,14 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       </div>
 
       {/* Question Card */}
-      <div className="bg-[#F8F9FD] dark:bg-dark-nav rounded-2xl p-8 md:p-10 mb-6 flex-1 overflow-y-auto relative shadow-sm border border-transparent dark:border-white/5 animate-fade-in-up" key={currentQ.id}>
+      <div className="bg-[#F8F9FD] dark:bg-dark-nav rounded-[24px] p-8 md:p-10 mb-6 flex-1 overflow-y-auto relative shadow-sm border border-transparent dark:border-white/5 animate-fade-in-up" key={currentQ.id}>
 
         <div className="mb-8 border-b border-gray-200 dark:border-white/5 pb-8">
           <span className="inline-block px-3 py-1 bg-white dark:bg-white/10 text-black dark:text-white text-[10px] font-bold uppercase tracking-wider rounded-md mb-6 border border-gray-100 dark:border-transparent">
             {currentQ.branch}
           </span>
           {currentQ.imageUrl && (
-            <div className="mb-8 rounded-2xl overflow-hidden shadow-sm">
+            <div className="mb-8 rounded-[24px] overflow-hidden shadow-sm">
               <img src={currentQ.imageUrl} alt="Stimulus" className="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-500" />
             </div>
           )}
@@ -185,7 +185,7 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
             <label
               key={opt.id}
               style={{ animationDelay: `${i * 100}ms` }}
-              className={`flex items-center gap-4 p-5 rounded-2xl cursor-pointer transition-all duration-200 border-none animate-fade-in-up hover:-translate-y-1 hover:shadow-lg ${selectedOption === opt.id
+              className={`flex items-center gap-4 p-5 rounded-[24px] cursor-pointer transition-all duration-200 border-none animate-fade-in-up hover:-translate-y-1 hover:shadow-lg ${selectedOption === opt.id
                 ? 'bg-black dark:bg-white text-white dark:text-black shadow-lg shadow-black/20'
                 : 'bg-white dark:bg-dark-nav text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-white/10'
                 }`}

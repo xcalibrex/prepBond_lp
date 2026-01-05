@@ -8,6 +8,7 @@ interface LayoutProps {
     isDark: boolean;
     toggleTheme: () => void;
     onLogout: () => void;
+    user: any;
 }
 
 interface NavItemProps {
@@ -36,11 +37,11 @@ const NavItem: React.FC<NavItemProps> = ({ id, label, isActive, onClick, icon, i
         onClick={onClick}
         title={isCollapsed ? label : undefined}
         aria-label={label}
-        className={`w-full flex items-center gap-3.5 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 mb-1 mx-auto rounded-lg group relative overflow-hidden
+        className={`w-full flex items-center gap-3.5 px-4 py-3 text-sm font-semibold transition-all duration-300 mb-1 mx-auto rounded-[200px] group relative overflow-hidden
       ${isActive
-                ? 'text-black dark:text-white bg-white dark:bg-dark-active shadow-sm'
+                ? 'text-black dark:text-white bg-gray-100/50 dark:bg-white/10'
                 : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/50 dark:text-gray-400 dark:hover:bg-dark-hover dark:hover:text-white'
-            } ${isCollapsed ? 'justify-center' : ''} ${className}`}
+            } ${isCollapsed ? 'justify-center px-0' : ''} ${className}`}
     >
         <div className={`transition-colors duration-200 relative z-10 ${isActive ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}>
             {icon}
@@ -64,9 +65,11 @@ const AppLogo = ({ isDark }: { isDark: boolean }) => (
     </div>
 );
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleTheme, onLogout }) => {
-    const [isCollapsed, setIsCollapsed] = useState(true);
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange, isDark, toggleTheme, onLogout, user }) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const userMenuRef = useRef<HTMLDivElement>(null);
     const [prevTab, setPrevTab] = useState('dashboard');
 
     // Track tab history for back button logic
@@ -75,6 +78,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
             setPrevTab(activeTab);
         }
     }, [activeTab]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const isFocusMode = activeTab === 'assessment';
     const isSettingsView = activeTab === 'profile';
@@ -90,6 +103,21 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
         { id: 'analytics', label: 'Insight', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" /></svg> },
         { id: 'history', label: 'History', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
     ];
+
+    const getDynamicHeaderTitle = () => {
+        if (activeTab === 'dashboard') {
+            return (
+                <h1 className="text-[36px] font-serif font-bold text-black dark:text-white leading-tight">
+                    Welcome back, <span className="text-gray-400">{user?.user_metadata?.full_name || 'Scholar'}</span>
+                </h1>
+            );
+        }
+        return (
+            <h1 className="text-[36px] font-bold font-serif text-gray-900 dark:text-white tracking-tight">
+                {TAB_TITLES[activeTab] || 'prepMSCEIT'}
+            </h1>
+        );
+    };
 
     return (
         <div className={`h-screen w-screen flex flex-col md:flex-row bg-white text-black dark:bg-dark-bg dark:text-white overflow-hidden font-sans relative ${DS.animation.theme}`}>
@@ -142,7 +170,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
 
             {/* Sidebar Drawer */}
             <aside
-                className={`fixed inset-y-0 left-0 z-[60] flex flex-col bg-[#F8F9FD] dark:bg-dark-nav border-r border-transparent dark:border-white/5 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
+                className={`fixed inset-y-0 left-0 z-[60] flex flex-col bg-white dark:bg-dark-nav border-r border-gray-100 dark:border-white/5 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
             md:relative md:translate-x-0
             ${isMobileOpen ? 'translate-x-0 w-72 shadow-2xl' : '-translate-x-full md:translate-x-0'}
             ${isFocusMode ? 'md:-ml-64 md:opacity-0 md:w-0' : 'md:ml-0 md:opacity-100'}
@@ -169,7 +197,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                     </svg>
                 </button>
 
-                <div className="flex flex-col h-full w-full overflow-hidden">
+                <div className="flex flex-col h-full w-full">
                     <div className={`p-6 flex items-center gap-3 mb-2 ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}>
                         <div className="flex items-center gap-2 cursor-pointer group" onClick={() => onTabChange('dashboard')}>
                             <div className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-110 duration-300">
@@ -177,7 +205,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                             </div>
                         </div>
                         {(!isCollapsed || isMobileOpen) && (
-                            <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white animate-fade-in">
+                            <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white animate-fade-in font-serif">
                                 prepMSCEIT
                             </h1>
                         )}
@@ -207,67 +235,94 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                             icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 14l9-5-9-5-9 5 9 5z" /><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>}
                         />
 
-                        {(!isCollapsed || isMobileOpen) && <div className="mt-4 mb-2 px-4 h-px bg-gray-200 dark:bg-gray-800"></div>}
-
-                        <NavItem
-                            id="profile"
-                            label="Settings"
-                            isActive={activeTab === 'profile'}
-                            onClick={() => handleMobileNav('profile')}
-                            isCollapsed={isCollapsed && !isMobileOpen}
-                            icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>}
-                        />
                     </nav>
-
-                    <div className="p-4 mt-auto flex flex-col gap-4">
-                        <div className={`flex items-center gap-3 px-2 cursor-pointer group ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`} onClick={() => handleMobileNav('profile')}>
-                            <div className="w-8 h-8 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">JD</div>
-                            {(!isCollapsed || isMobileOpen) && (
-                                <div className="flex flex-col overflow-hidden">
-                                    <span className="text-sm font-bold text-gray-900 dark:text-white truncate">Johnny Doe</span>
-                                    <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Level 5 Scholar</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className={`px-2 ${isCollapsed && !isMobileOpen ? 'flex justify-center' : ''}`}>
-                            <div onClick={toggleTheme} className={`relative flex items-center bg-gray-200 dark:bg-white/5 rounded-lg p-1 h-9 cursor-pointer transition-colors ${isCollapsed && !isMobileOpen ? 'w-9 justify-center' : 'w-full'}`}>
-                                {isCollapsed && !isMobileOpen ? (
-                                    <div className="text-gray-500 dark:text-gray-400">
-                                        {isDark ? (
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                                        ) : (
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-gray-700 rounded-md shadow-sm transition-all duration-300 ease-out ${isDark ? 'translate-x-[100%] left-1' : 'left-1'}`}></div>
-                                        <div className={`flex-1 flex items-center justify-center z-10 transition-colors duration-300 ${!isDark ? 'text-black' : 'text-gray-400'}`}>
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                                        </div>
-                                        <div className={`flex-1 flex items-center justify-center z-10 transition-colors duration-300 ${isDark ? 'text-white' : 'text-gray-400'}`}>
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        <div onClick={onLogout} className={`flex items-center gap-4 text-gray-400 hover:text-red-500 cursor-pointer transition-colors px-2 ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}>
-                            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                            {(!isCollapsed || isMobileOpen) && <span className="font-medium text-sm">Logout</span>}
-                        </div>
-                    </div>
                 </div>
             </aside>
 
-            <main className={`flex-1 w-full h-full relative overflow-y-auto overflow-x-hidden bg-white dark:bg-dark-bg ${isSettingsView ? 'md:translate-x-0' : ''} ${DS.animation.theme}`}>
-                <div className={`mx-auto transition-all duration-500 min-h-full
-            ${isFocusMode ? 'p-0' : 'max-w-[1600px] px-6 md:px-8 py-10 pb-32 md:pb-10'}
-            ${isSettingsView ? 'animate-slide-in-right md:animate-none' : 'animate-fade-in'}
-         `}>
-                    {children}
+            <main className={`flex-1 w-full h-full relative flex flex-col bg-white dark:bg-dark-bg ${isSettingsView ? 'md:translate-x-0' : ''} ${DS.animation.theme}`}>
+                {!isFocusMode && (
+                    <header className="hidden md:flex pt-4 pb-4 shrink-0">
+                        <div className="max-w-[1600px] mx-auto w-full px-6 md:px-8 flex items-center justify-between">
+                            <div className="flex-1">
+                                {getDynamicHeaderTitle()}
+                            </div>
+
+                            <div className="relative" ref={userMenuRef}>
+                                <div
+                                    className={`flex items-center gap-3 py-2 px-1 rounded-[24px] cursor-pointer transition-all duration-200 group`}
+                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                >
+                                    <div className="flex flex-col overflow-hidden text-right">
+                                        <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                            {user?.user_metadata?.full_name || 'Johnny Doe'}
+                                        </span>
+                                        <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                                            {user?.email || 'johnny@example.com'}
+                                        </span>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-sm font-bold shrink-0 shadow-sm transition-transform group-hover:scale-105">
+                                        {user?.user_metadata?.full_name ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'JD'}
+                                    </div>
+                                </div>
+
+                                {isUserMenuOpen && (
+                                    <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-dark-nav border border-gray-100 dark:border-white/10 rounded-[24px] shadow-xl overflow-hidden animate-fade-in-up z-50">
+                                        <div className="p-2 border-b border-gray-50 dark:border-white/5">
+                                            <button
+                                                onClick={() => {
+                                                    onTabChange('profile');
+                                                    setIsUserMenuOpen(false);
+                                                }}
+                                                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-xl transition-colors"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                                Settings
+                                            </button>
+                                        </div>
+                                        <div className="p-2 border-b border-gray-50 dark:border-white/5">
+                                            <div
+                                                onClick={() => {
+                                                    toggleTheme();
+                                                    setIsUserMenuOpen(false);
+                                                }}
+                                                className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-xl transition-colors cursor-pointer"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    {isDark ? (
+                                                        <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                                    ) : (
+                                                        <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                                                    )}
+                                                    {isDark ? 'Light Mode' : 'Dark Mode'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="p-2">
+                                            <button
+                                                onClick={() => {
+                                                    onLogout();
+                                                    setIsUserMenuOpen(false);
+                                                }}
+                                                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                                Logout
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+                )}
+
+                <div className={`flex-1 w-full overflow-y-auto overflow-x-hidden ${isSettingsView ? 'md:translate-x-0' : ''}`}>
+                    <div className={`mx-auto transition-all duration-500 min-h-full
+                ${isFocusMode ? 'p-0' : 'max-w-[1600px] px-6 md:px-8 py-6 pb-32 md:pb-10'}
+                ${isSettingsView ? 'animate-slide-in-right md:animate-none' : 'animate-fade-in'}
+             `}>
+                        {children}
+                    </div>
                 </div>
                 {isMobileOpen && (
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-50 md:hidden" onClick={() => setIsMobileOpen(false)}></div>
@@ -280,7 +335,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                         <button
                             key={item.id}
                             onClick={() => onTabChange(item.id)}
-                            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200 ${activeTab === item.id
+                            className={`flex flex-col items-center gap-1 p-2 rounded-[24px] transition-all duration-200 ${activeTab === item.id
                                 ? 'text-black dark:text-white scale-110 font-bold'
                                 : 'text-gray-400 dark:text-gray-500 hover:text-gray-600'
                                 }`}

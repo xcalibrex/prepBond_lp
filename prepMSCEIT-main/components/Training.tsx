@@ -16,19 +16,21 @@ const BRANCH_META = {
 };
 
 export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
+    const [selectedBranch, setSelectedBranch] = useState<string>('All');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
-    const [activeBranchMobile, setActiveBranchMobile] = useState<Branch>(Branch.Perceiving);
+    const [activeBranchMobile, setActiveBranchMobile] = useState<number>(1);
 
-    const branches = Object.values(Branch);
+    const branches = ['All', ...Object.values(Branch)];
 
     const filteredModules = useMemo(() => {
         return TRAINING_MODULES.filter(module => {
             const matchesSearch = module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 module.description.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesSearch;
+            const matchesBranch = selectedBranch === 'All' || module.branch === selectedBranch;
+            return matchesSearch && matchesBranch;
         });
-    }, [searchTerm]);
+    }, [searchTerm, selectedBranch]);
 
     const handleStart = () => {
         if (selectedModule && onRunModule) {
@@ -37,13 +39,28 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
         }
     };
 
-    const renderModuleCard = (module: TrainingModule, mastery: number, meta: any) => {
+    const levels = [1, 2, 3, 4, 5];
+
+    const getModulesByLevel = (level: number) => {
+        return filteredModules.filter(m => {
+            if (level === 1) return m.requiredLevel === 1;
+            if (level === 2) return m.requiredLevel >= 4 && m.requiredLevel <= 5;
+            if (level === 3) return m.requiredLevel === 6;
+            if (level === 4) return m.requiredLevel === 7 || m.requiredLevel === 8;
+            if (level === 5) return m.requiredLevel >= 9;
+            return false;
+        });
+    };
+
+    const renderModuleCard = (module: TrainingModule, meta: any) => {
+        const mastery = stats.masteryLevels[module.branch];
         const isLocked = (module.requiredLevel || 0) > mastery;
+
         return (
             <div
                 key={module.id}
                 onClick={() => !isLocked && setSelectedModule(module)}
-                className={`group relative overflow-hidden bg-white dark:bg-transparent border rounded-2xl p-5 transition-all duration-300 min-h-[160px] flex flex-col justify-between 
+                className={`group relative overflow-hidden bg-white dark:bg-transparent border rounded-[24px] p-5 transition-all duration-300 min-h-[160px] flex flex-col justify-between 
                  ${isLocked
                         ? 'opacity-40 cursor-not-allowed border-transparent grayscale'
                         : 'border-transparent dark:border-white/20 cursor-pointer hover:shadow-xl active:scale-[0.98]'
@@ -53,22 +70,29 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
                 <div className={`absolute top-0 left-0 bottom-0 w-1 ${meta.color} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
                 <div className="relative z-10">
                     <div className="flex justify-between items-start mb-2">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight pr-4">
-                            {module.title}
-                        </h4>
+                        <div className="flex flex-col gap-0.5">
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${meta.textColor}`}>
+                                {module.branch.replace(' Emotions', '')}
+                            </span>
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight pr-4">
+                                {module.title}
+                            </h4>
+                        </div>
                         {isLocked ? (
-                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            <div className="bg-gray-100 dark:bg-white/5 p-1.5 rounded-full">
+                                <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            </div>
                         ) : (
-                            <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">Unlocked</span>
+                            <span className="text-[9px] font-black text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-tighter">Ready</span>
                         )}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-3 leading-relaxed">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mt-1">
                         {module.description}
                     </p>
                 </div>
                 <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-100 dark:border-white/5 relative z-10">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
-                        {isLocked ? `Required: Lvl ${module.requiredLevel}` : `ID: ${module.id}`}
+                        {isLocked ? `Lvl ${module.requiredLevel} req` : `Module ${module.id.toUpperCase()}`}
                     </span>
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-700 dark:text-gray-300">
                         <svg className={`w-3 h-3 ${meta.textColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -80,39 +104,52 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
     };
 
     return (
-        <div className="flex flex-col h-full animate-fade-in-up">
+        <div className="flex flex-col h-full animate-fade-in-up overflow-hidden">
 
             {/* Filters Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 shrink-0 px-0.5">
-                <div className="hidden md:block">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Curriculum</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm font-medium">Progress through 10 Tiers of Consensus Mastery.</p>
+                {/* Branch Fillers */}
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2 md:pb-0">
+                    {branches.map(branch => (
+                        <button
+                            key={branch}
+                            onClick={() => setSelectedBranch(branch)}
+                            className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+                                ${selectedBranch === branch
+                                    ? 'bg-black dark:bg-white text-white dark:text-black shadow-lg shadow-black/5'
+                                    : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                                }
+                            `}
+                        >
+                            {branch === 'All' ? 'All Skills' : branch.replace(' Emotions', '')}
+                        </button>
+                    ))}
                 </div>
+
                 <div className="relative group w-full md:w-80">
                     <input
                         type="text"
-                        placeholder="Search training tiers..."
+                        placeholder="Search training levels..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
+                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-[24px] px-4 py-2.5 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
                     />
                     <svg className="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
             </div>
 
-            {/* Branch Tabs for Mobile - Left aligned, No button padding, snug underline */}
+            {/* Mobile Level Tabs - Left aligned */}
             <div className="md:hidden mb-6 sticky top-0 z-20 backdrop-blur-xl bg-white/90 dark:bg-black/90 border-b border-gray-100 dark:border-white/5 overflow-x-auto scrollbar-hide">
-                <div className="flex items-center gap-6 px-0.5">
-                    {branches.map(branch => {
-                        const isActive = activeBranchMobile === branch;
-                        const label = branch.split(' ')[0];
+                <div className="flex items-center gap-10 px-0.5">
+                    {levels.map(level => {
+                        const isActive = activeBranchMobile === (level as any);
                         return (
                             <button
-                                key={branch}
-                                onClick={() => setActiveBranchMobile(branch)}
+                                key={level}
+                                onClick={() => setActiveBranchMobile(level as any)}
                                 className={`py-4 text-[10px] font-black uppercase tracking-widest transition-all relative ${isActive ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                             >
-                                {label}
+                                Level {level}
                                 {isActive && (
                                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black dark:bg-white rounded-t-full animate-fade-in"></div>
                                 )}
@@ -122,30 +159,46 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
                 </div>
             </div>
 
-            {/* Desktop Kanban View */}
-            <div className="hidden md:flex flex-1 overflow-x-auto pb-6 -mx-6 px-6 scrollbar-hide h-full">
+            {/* Desktop Kanban View - Grouped by Level */}
+            <div className="hidden md:flex flex-1 overflow-x-auto pb-6 -mx-8 px-8 scrollbar-hide">
                 <div className="flex gap-6 min-w-max h-full">
-                    {branches.map((branch) => {
-                        const branchModules = filteredModules.filter(m => m.branch === branch);
-                        const meta = BRANCH_META[branch];
-                        const mastery = stats.masteryLevels[branch];
-                        const alignment = stats.scores[branch];
+                    {levels.map((level) => {
+                        const levelModules = getModulesByLevel(level);
+                        const isUnlocked = level === 1 || levelModules.some(m => stats.masteryLevels[m.branch] >= m.requiredLevel);
+
                         return (
-                            <div key={branch} className="w-80 flex flex-col h-full bg-[#F8F9FD] dark:bg-dark-nav rounded-[12px] p-3">
-                                <div className="pb-4 px-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-lg">{meta.icon}</span>
-                                        <h3 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider">{meta.label.split(' ')[0]}</h3>
-                                        <div className="ml-auto flex items-center gap-1 bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded text-[10px] font-black uppercase shadow-sm">
-                                            Lvl {mastery}
+                            <div key={level} className="w-[320px] flex flex-col h-full bg-[#F8F9FD] dark:bg-dark-nav rounded-[24px] p-4 border border-gray-100 dark:border-white/5">
+                                <div className="pb-5 px-1 shrink-0">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-lg bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-xs">
+                                                L{level}
+                                            </div>
+                                            <h3 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wider">Level {level}</h3>
                                         </div>
+                                        {isUnlocked ? (
+                                            <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                                Unlocked
+                                            </span>
+                                        ) : (
+                                            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                        )}
                                     </div>
-                                    <div className="h-1 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                        <div className={`h-full ${meta.color}`} style={{ width: `${alignment}%` }}></div>
-                                    </div>
+                                    <p className="text-[10px] text-gray-500 font-medium uppercase tracking-tight">
+                                        {levelModules.length} Modules in this Tier
+                                    </p>
                                 </div>
                                 <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
-                                    {branchModules.map(module => renderModuleCard(module, mastery, meta))}
+                                    {levelModules.map(module => renderModuleCard(module, BRANCH_META[module.branch]))}
+                                    {levelModules.length === 0 && (
+                                        <div className="flex flex-col items-center justify-center py-10 opacity-30">
+                                            <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-400 mb-3 flex items-center justify-center">
+                                                <span className="text-sm">?</span>
+                                            </div>
+                                            <p className="text-[10px] uppercase font-bold tracking-widest">More Coming</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -153,37 +206,26 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
                 </div>
             </div>
 
-            {/* Mobile Branch Detail View */}
+            {/* Mobile Detail View */}
             <div className="md:hidden flex-1 overflow-y-auto pb-32">
                 {(() => {
-                    const branch = activeBranchMobile;
-                    const meta = BRANCH_META[branch];
-                    const branchModules = filteredModules.filter(m => m.branch === branch);
-                    const mastery = stats.masteryLevels[branch];
-                    const alignment = stats.scores[branch];
+                    const level = (activeBranchMobile as any) || 1;
+                    const levelModules = getModulesByLevel(level);
                     return (
                         <div className="animate-fade-in-up">
-                            <div className="bg-[#F8F9FD] dark:bg-dark-nav rounded-[12px] p-6 mb-6">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <span className="text-3xl">{meta.icon}</span>
+                            <div className="bg-[#F8F9FD] dark:bg-dark-nav rounded-[24px] p-6 mb-6 border border-gray-100 dark:border-white/5">
+                                <div className="flex items-center gap-4 mb-2">
+                                    <div className="w-12 h-12 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-xl">
+                                        {level}
+                                    </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{meta.label}</h3>
-                                        <p className="text-xs text-gray-500">Tier Training Overview</p>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-tight">Level {level}</h3>
+                                        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">{levelModules.length} Modules Available</p>
                                     </div>
-                                    <div className="ml-auto bg-black dark:bg-white text-white dark:text-black px-3 py-1.5 rounded-xl text-xs font-black">
-                                        Lvl {mastery}
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between text-xs font-bold text-gray-400 mb-2 uppercase tracking-tight">
-                                    <span>Mastery Alignment</span>
-                                    <span>{alignment}%</span>
-                                </div>
-                                <div className="h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                    <div className={`h-full ${meta.color}`} style={{ width: `${alignment}%` }}></div>
                                 </div>
                             </div>
                             <div className="space-y-4">
-                                {branchModules.map(module => renderModuleCard(module, mastery, meta))}
+                                {levelModules.map(module => renderModuleCard(module, BRANCH_META[module.branch]))}
                             </div>
                         </div>
                     );
@@ -196,18 +238,23 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
                     <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm" onClick={() => setSelectedModule(null)}></div>
                     <div className="relative bg-white dark:bg-dark-nav border border-gray-100 dark:border-gray-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up p-8">
                         <div className="flex justify-between items-start mb-6">
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full">
-                                {selectedModule.branch}
-                            </span>
-                            <button onClick={() => setSelectedModule(null)} className="text-gray-400 hover:text-black dark:hover:text-white p-1.5">
+                            <div className="flex items-center gap-2">
+                                <span className={`text-[10px] font-black uppercase tracking-wider bg-gray-100 dark:bg-white/10 ${BRANCH_META[selectedModule.branch].textColor} px-3 py-1 rounded-full`}>
+                                    {selectedModule.branch}
+                                </span>
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-gray-100 dark:bg-white/10 text-gray-500 px-3 py-1 rounded-full">
+                                    Level {selectedModule.requiredLevel}
+                                </span>
+                            </div>
+                            <button onClick={() => setSelectedModule(null)} className="text-gray-400 hover:text-black dark:hover:text-white p-1.5 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{selectedModule.title}</h2>
                         <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-sm">{selectedModule.description}</p>
                         <div className="flex gap-4">
-                            <button onClick={() => setSelectedModule(null)} className="flex-1 py-3.5 rounded-[200px] border border-gray-200 dark:border-gray-700 font-bold text-xs text-gray-700 dark:text-gray-300">Defer</button>
-                            <button onClick={handleStart} className="flex-1 py-3.5 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-bold text-xs shadow-lg">Launch</button>
+                            <button onClick={() => setSelectedModule(null)} className="flex-1 py-4 rounded-[200px] border border-gray-200 dark:border-gray-700 font-black text-[10px] uppercase tracking-widest text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Defer</button>
+                            <button onClick={handleStart} className="flex-1 py-4 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">Launch Session</button>
                         </div>
                     </div>
                 </div>,

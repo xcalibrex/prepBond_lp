@@ -7,7 +7,7 @@ interface AuthProps {
 }
 
 const AppLogo = ({ isDark }: { isDark: boolean }) => (
-    <div className="relative w-14 h-14 flex items-center justify-center rounded-xl shadow-lg border border-gray-100 dark:border-white/10 p-4 bg-white dark:bg-zinc-950">
+    <div className="relative w-14 h-14 flex items-center justify-center rounded-[24px] shadow-lg border border-gray-100 dark:border-white/10 p-4 bg-white dark:bg-zinc-950">
         <img
             src="https://80648f23d1b436c9680a76f256663212.cdn.bubble.io/f1765931308525x632039041304004700/2.png"
             alt="prepMSCEIT Logo Dark"
@@ -133,7 +133,7 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme }) => {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none hover:bg-gray-100 dark:hover:bg-white/10"
+                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[24px] px-4 py-4 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none hover:bg-gray-100 dark:hover:bg-white/10"
                                 placeholder="name@email.com"
                             />
                         </div>
@@ -144,12 +144,12 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme }) => {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none hover:bg-gray-100 dark:hover:bg-white/10"
+                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[24px] px-4 py-4 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none hover:bg-gray-100 dark:hover:bg-white/10"
                                 placeholder="••••••••"
                             />
                         </div>
                         {message && (
-                            <div className={`p-4 rounded-xl text-xs font-medium border animate-fade-in ${message.type === 'error' ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-300' : 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:border-green-500/20 dark:text-green-300'}`}>
+                            <div className={`p-4 rounded-[24px] text-xs font-medium border animate-fade-in ${message.type === 'error' ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-300' : 'bg-green-50 text-green-600 border-green-100 dark:bg-green-500/10 dark:border-green-500/20 dark:text-green-300'}`}>
                                 {message.text}
                             </div>
                         )}
