@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { DS } from '../../design-system';
+import { TableSkeleton, RadarChartSkeleton } from '../Skeletons';
 
 interface User {
     id: string;
@@ -36,6 +37,13 @@ export const AdminUsers: React.FC = () => {
     const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'admin'>('all');
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [newUser, setNewUser] = useState({ name: '', email: '', role: 'student' });
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Simulate loading for demo purposes
+    React.useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1500);
+        return () => clearTimeout(timer);
+    }, []);
 
     const filteredUsers = MOCK_USERS.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -103,59 +111,63 @@ export const AdminUsers: React.FC = () => {
                 </button>
             </div>
 
-            <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm`}>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="border-b border-gray-50 dark:border-white/5">
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">User</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Role</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Joined</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-                            {filteredUsers.map(user => (
-                                <tr
-                                    key={user.id}
-                                    onClick={() => handleRowClick(user.id)}
-                                    className="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
-                                >
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center font-bold text-xs text-gray-500">
-                                                {user.name.split(' ').map(n => n[0]).join('')}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-white">{user.name}</p>
-                                                <p className="text-xs text-gray-500">{user.email}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight ${user.role === 'admin' ? 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'}`}>
-                                            {user.role}
-                                        </span>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-1.5">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
-                                            <span className="text-xs font-medium text-gray-700 dark:text-gray-300 capitalize">{user.status}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5 text-sm text-gray-500">{user.joined}</td>
-                                    <td className="px-8 py-5 text-right">
-                                        <button className="p-2 text-gray-400 hover:text-black dark:hover:text-white rounded-lg transition-colors">
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
-                                        </button>
-                                    </td>
+            {isLoading ? (
+                <TableSkeleton rows={5} columns={5} />
+            ) : (
+                <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm`}>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b border-gray-50 dark:border-white/5">
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">User</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Role</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Joined</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+                                {filteredUsers.map(user => (
+                                    <tr
+                                        key={user.id}
+                                        onClick={() => handleRowClick(user.id)}
+                                        className="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
+                                    >
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center font-bold text-xs text-gray-500">
+                                                    {user.name.split(' ').map(n => n[0]).join('')}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900 dark:text-white">{user.name}</p>
+                                                    <p className="text-xs text-gray-500">{user.email}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight ${user.role === 'admin' ? 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'}`}>
+                                                {user.role}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 capitalize">{user.status}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-5 text-sm text-gray-500">{user.joined}</td>
+                                        <td className="px-8 py-5 text-right">
+                                            <button className="p-2 text-gray-400 hover:text-black dark:hover:text-white rounded-lg transition-colors">
+                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Side Panel */}
             {selectedUser && createPortal(

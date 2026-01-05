@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { UserStats, HistoryItem } from '../types';
+import { TableSkeleton, HistoryCardSkeleton } from './Skeletons';
 
 interface HistoryProps {
     stats: UserStats;
 }
 
 export const History: React.FC<HistoryProps> = ({ stats }) => {
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
     // Reverse history to show latest first
     const reversedHistory = [...stats.history].reverse();
     const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
@@ -29,37 +37,40 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
 
             {/* Mobile View: Cards */}
             <div className="md:hidden space-y-4">
-                {reversedHistory.map((item) => (
-                    <div
-                        key={item.id}
-                        onClick={() => setSelectedItem(item)}
-                        className="bg-white dark:bg-dark-nav p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
-                    >
-                        <div className="flex justify-between items-start mb-3">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{item.date}</span>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${item.score >= 75
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                : item.score >= 60
-                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                }`}>
-                                {item.score >= 75 ? 'Excellent' : item.score >= 60 ? 'Passing' : 'Review'}
-                            </span>
+                {isLoading ? (
+                    [1, 2, 3].map(i => <HistoryCardSkeleton key={i} />)
+                ) : reversedHistory.length > 0 ? (
+                    reversedHistory.map((item) => (
+                        <div
+                            key={item.id}
+                            onClick={() => setSelectedItem(item)}
+                            className="bg-white dark:bg-dark-nav p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+                        >
+                            <div className="flex justify-between items-start mb-3">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{item.date}</span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${item.score >= 75
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                    : item.score >= 60
+                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                    }`}>
+                                    {item.score >= 75 ? 'Excellent' : item.score >= 60 ? 'Passing' : 'Review'}
+                                </span>
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{item.branch}</h3>
+                            <div className="flex items-center gap-2 mt-3">
+                                <span className={`text-2xl font-extrabold ${item.score >= 70 ? 'text-black dark:text-white' : 'text-gray-500'}`}>
+                                    {item.score}%
+                                </span>
+                                <div className="h-px flex-1 bg-gray-100 dark:bg-white/5 mx-2"></div>
+                                <span className="text-xs font-bold text-secondary flex items-center gap-1">
+                                    View Report
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                </span>
+                            </div>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{item.branch}</h3>
-                        <div className="flex items-center gap-2 mt-3">
-                            <span className={`text-2xl font-extrabold ${item.score >= 70 ? 'text-black dark:text-white' : 'text-gray-500'}`}>
-                                {item.score}%
-                            </span>
-                            <div className="h-px flex-1 bg-gray-100 dark:bg-white/5 mx-2"></div>
-                            <span className="text-xs font-bold text-secondary flex items-center gap-1">
-                                View Report
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                            </span>
-                        </div>
-                    </div>
-                ))}
-                {reversedHistory.length === 0 && (
+                    ))
+                ) : (
                     <div className="py-12 text-center text-gray-500 dark:text-gray-400 text-base">
                         No assessments completed yet.
                     </div>
@@ -67,65 +78,71 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
             </div>
 
             {/* Desktop View: Table */}
-            <div className="hidden md:block bg-white dark:bg-dark-nav rounded-[24px] border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
-                                <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
-                                <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Module / Branch</th>
-                                <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Score</th>
-                                <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                            {reversedHistory.map((item) => (
-                                <tr
-                                    key={item.id}
-                                    onClick={() => setSelectedItem(item)}
-                                    className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
-                                >
-                                    <td className="py-5 px-6 text-base font-medium text-gray-900 dark:text-white">
-                                        {item.date}
-                                    </td>
-                                    <td className="py-5 px-6">
-                                        <div className="flex items-center gap-3">
-                                            <span className={`w-2.5 h-2.5 rounded-full ${item.branch.includes('Perceiving') ? 'bg-blue-500' :
-                                                item.branch.includes('Using') ? 'bg-purple-500' :
-                                                    item.branch.includes('Understanding') ? 'bg-amber-500' :
-                                                        'bg-emerald-500'
-                                                }`}></span>
-                                            <span className="text-base text-gray-700 dark:text-gray-300">{item.branch}</span>
-                                        </div>
-                                    </td>
-                                    <td className="py-5 px-6">
-                                        <span className={`text-base font-bold ${item.score >= 70 ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
-                                            {item.score}%
-                                        </span>
-                                    </td>
-                                    <td className="py-5 px-6 text-right">
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${item.score >= 75
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                            : item.score >= 60
-                                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                            }`}>
-                                            {item.score >= 75 ? 'Excellent' : item.score >= 60 ? 'Passing' : 'Review'}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                            {reversedHistory.length === 0 && (
-                                <tr>
-                                    <td colSpan={4} className="py-12 text-center text-gray-500 dark:text-gray-400 text-base">
-                                        No assessments completed yet.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+            {isLoading ? (
+                <div className="hidden md:block">
+                    <TableSkeleton rows={5} columns={4} />
                 </div>
-            </div>
+            ) : (
+                <div className="hidden md:block bg-white dark:bg-dark-nav rounded-[24px] border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
+                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
+                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Module / Branch</th>
+                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Score</th>
+                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                {reversedHistory.map((item) => (
+                                    <tr
+                                        key={item.id}
+                                        onClick={() => setSelectedItem(item)}
+                                        className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                                    >
+                                        <td className="py-5 px-6 text-base font-medium text-gray-900 dark:text-white">
+                                            {item.date}
+                                        </td>
+                                        <td className="py-5 px-6">
+                                            <div className="flex items-center gap-3">
+                                                <span className={`w-2.5 h-2.5 rounded-full ${item.branch.includes('Perceiving') ? 'bg-blue-500' :
+                                                    item.branch.includes('Using') ? 'bg-purple-500' :
+                                                        item.branch.includes('Understanding') ? 'bg-amber-500' :
+                                                            'bg-emerald-500'
+                                                    }`}></span>
+                                                <span className="text-base text-gray-700 dark:text-gray-300">{item.branch}</span>
+                                            </div>
+                                        </td>
+                                        <td className="py-5 px-6">
+                                            <span className={`text-base font-bold ${item.score >= 70 ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+                                                {item.score}%
+                                            </span>
+                                        </td>
+                                        <td className="py-5 px-6 text-right">
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${item.score >= 75
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                : item.score >= 60
+                                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                                }`}>
+                                                {item.score >= 75 ? 'Excellent' : item.score >= 60 ? 'Passing' : 'Review'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {reversedHistory.length === 0 && (
+                                    <tr>
+                                        <td colSpan={4} className="py-12 text-center text-gray-500 dark:text-gray-400 text-base">
+                                            No assessments completed yet.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
             {/* Side View Drawer - Portaled to Body */}
             {selectedItem && createPortal(

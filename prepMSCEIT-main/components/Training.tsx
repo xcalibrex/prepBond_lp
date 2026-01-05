@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { TRAINING_MODULES as HARDCODED_MODULES } from '../constants';
 import { Branch, TrainingModule, UserStats } from '../types';
 import { supabase } from '../services/supabase';
+import { KanbanColumnSkeleton, ModuleCardSkeleton } from './Skeletons';
 
 interface TrainingProps {
     stats: UserStats;
@@ -22,9 +23,11 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
     const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
     const [activeBranchMobile, setActiveBranchMobile] = useState<number>(1);
     const [dbModules, setDbModules] = useState<TrainingModule[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchModules = async () => {
+            setIsLoading(true);
             const { data, error } = await supabase
                 .from('training_modules')
                 .select('*');
@@ -39,6 +42,7 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
                 }));
                 setDbModules(formatted);
             }
+            setIsLoading(false);
         };
         fetchModules();
     }, []);
@@ -186,47 +190,53 @@ export const Training: React.FC<TrainingProps> = ({ stats, onRunModule }) => {
             {/* Desktop Kanban View - Grouped by Level */}
             <div className="hidden md:flex flex-1 overflow-x-auto pb-6 -mx-8 px-8 scrollbar-hide">
                 <div className="flex gap-6 min-w-max h-full">
-                    {levels.map((level) => {
-                        const levelModules = getModulesByLevel(level);
-                        const isUnlocked = level === 1 || levelModules.some(m => stats.masteryLevels[m.branch] >= m.requiredLevel);
+                    {isLoading ? (
+                        [1, 2, 3, 4, 5].map(level => (
+                            <KanbanColumnSkeleton key={level} cardCount={2} />
+                        ))
+                    ) : (
+                        levels.map((level) => {
+                            const levelModules = getModulesByLevel(level);
+                            const isUnlocked = level === 1 || levelModules.some(m => stats.masteryLevels[m.branch] >= m.requiredLevel);
 
-                        return (
-                            <div key={level} className="w-[320px] flex flex-col h-full bg-[#F8F9FD] dark:bg-dark-nav rounded-[24px] p-4 border border-gray-100 dark:border-white/5">
-                                <div className="pb-5 px-1 shrink-0">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-lg bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-xs">
-                                                L{level}
+                            return (
+                                <div key={level} className="w-[320px] flex flex-col h-full bg-[#F8F9FD] dark:bg-dark-nav rounded-[24px] p-4 border border-gray-100 dark:border-white/5">
+                                    <div className="pb-5 px-1 shrink-0">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-lg bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-xs">
+                                                    L{level}
+                                                </div>
+                                                <h3 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wider">Level {level}</h3>
                                             </div>
-                                            <h3 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wider">Level {level}</h3>
+                                            {isUnlocked ? (
+                                                <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                                    Unlocked
+                                                </span>
+                                            ) : (
+                                                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                            )}
                                         </div>
-                                        {isUnlocked ? (
-                                            <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                                Unlocked
-                                            </span>
-                                        ) : (
-                                            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                        <p className="text-[10px] text-gray-500 font-medium uppercase tracking-tight">
+                                            {levelModules.length} Modules in this Tier
+                                        </p>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
+                                        {levelModules.map(module => renderModuleCard(module, BRANCH_META[module.branch]))}
+                                        {levelModules.length === 0 && (
+                                            <div className="flex flex-col items-center justify-center py-10 opacity-30">
+                                                <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-400 mb-3 flex items-center justify-center">
+                                                    <span className="text-sm">?</span>
+                                                </div>
+                                                <p className="text-[10px] uppercase font-bold tracking-widest">More Coming</p>
+                                            </div>
                                         )}
                                     </div>
-                                    <p className="text-[10px] text-gray-500 font-medium uppercase tracking-tight">
-                                        {levelModules.length} Modules in this Tier
-                                    </p>
                                 </div>
-                                <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
-                                    {levelModules.map(module => renderModuleCard(module, BRANCH_META[module.branch]))}
-                                    {levelModules.length === 0 && (
-                                        <div className="flex flex-col items-center justify-center py-10 opacity-30">
-                                            <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-400 mb-3 flex items-center justify-center">
-                                                <span className="text-sm">?</span>
-                                            </div>
-                                            <p className="text-[10px] uppercase font-bold tracking-widest">More Coming</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             </div>
 

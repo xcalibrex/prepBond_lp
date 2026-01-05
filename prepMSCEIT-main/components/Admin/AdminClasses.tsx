@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DS } from '../../design-system';
 import { Branch } from '../../types';
 import { supabase } from '../../services/supabase';
+import { ModuleCardSkeleton } from '../Skeletons';
 
 interface Module {
     id: string;
@@ -134,8 +135,8 @@ export const AdminClasses: React.FC = () => {
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isLoading ? (
-                    [1, 2, 3].map(i => (
-                        <div key={i} className="bg-white dark:bg-dark-nav rounded-[24px] h-[200px] border border-gray-100 dark:border-white/5 animate-pulse"></div>
+                    [1, 2, 3, 4, 5, 6].map(i => (
+                        <ModuleCardSkeleton key={i} />
                     ))
                 ) : filteredModules.length > 0 ? (
                     filteredModules.map(module => (

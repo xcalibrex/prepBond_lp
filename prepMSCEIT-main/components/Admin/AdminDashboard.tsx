@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DS } from '../../design-system';
+import { MetricCardSkeleton, ActivityFeedSkeleton, SystemHealthSkeleton } from '../Skeletons';
 
 interface MetricCardProps {
     title: string;
@@ -25,6 +26,29 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, subtitle, icon, c
 );
 
 export const AdminDashboard: React.FC = () => {
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1200);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col gap-8 animate-fade-in-up">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[1, 2, 3].map(i => (
+                        <MetricCardSkeleton key={i} />
+                    ))}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <ActivityFeedSkeleton count={4} />
+                    <SystemHealthSkeleton />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-8 animate-fade-in-up">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
