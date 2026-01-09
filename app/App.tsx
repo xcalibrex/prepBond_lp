@@ -60,12 +60,12 @@ function SplashScreen({ onFinish, isDark }: { onFinish: () => void, isDark: bool
     <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center transition-colors duration-500 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       <div className="relative w-24 h-24 mb-6">
         <img
-          src="https://80648f23d1b436c9680a76f256663212.cdn.bubble.io/f1765931308525x632039041304004700/2.png"
+          src="/media/2.png"
           alt="prepMSCEIT Logo Dark"
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
         <img
-          src="https://80648f23d1b436c9680a76f256663212.cdn.bubble.io/f1765931313852x208585298521758880/3.png"
+          src="/media/3.png"
           alt="prepMSCEIT Logo Light"
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${!isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />

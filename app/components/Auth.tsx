@@ -9,12 +9,12 @@ interface AuthProps {
 const AppLogo = ({ isDark }: { isDark: boolean }) => (
     <div className="relative w-14 h-14 flex items-center justify-center rounded-[24px] shadow-lg border border-gray-100 dark:border-white/10 p-4 bg-white dark:bg-zinc-950">
         <img
-            src="https://80648f23d1b436c9680a76f256663212.cdn.bubble.io/f1765931308525x632039041304004700/2.png"
+            src="/media/2.png"
             alt="prepMSCEIT Logo Dark"
             className={`absolute w-[calc(100%-1.75rem)] h-[calc(100%-1.75rem)] object-contain transition-opacity duration-300 ${isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
         <img
-            src="https://80648f23d1b436c9680a76f256663212.cdn.bubble.io/f1765931313852x208585298521758880/3.png"
+            src="/media/3.png"
             alt="prepMSCEIT Logo Light"
             className={`absolute w-[calc(100%-1.75rem)] h-[calc(100%-1.75rem)] object-contain transition-opacity duration-300 ${!isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
