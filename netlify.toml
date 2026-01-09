@@ -1,16 +1,27 @@
 [build]
-  # Build command: install deps and build the React app
-  command = "cd app && npm install && npm run build"
-  # Publish the root directory (contains static pages)
-  publish = "."
+  # Build command: build React app into deploy folder, then copy static pages
+  command = "cd app && npm install && npm run build && cd .. && cp index.html ebook.html deploy/ && cp -r lp media deploy/"
+  # Publish the deploy folder which contains everything
+  publish = "deploy"
 
-# SPA routing for the /app path
+# Serve static landing pages as-is
 [[redirects]]
-  from = "/app/*"
-  to = "/app/dist/index.html"
+  from = "/lp/*"
+  to = "/lp/:splat"
   status = 200
 
 [[redirects]]
-  from = "/app"
-  to = "/app/dist/index.html"
+  from = "/ebook.html"
+  to = "/ebook.html"
+  status = 200
+
+[[redirects]]
+  from = "/media/*"
+  to = "/media/:splat"
+  status = 200
+
+# SPA routing for the React app at /app
+[[redirects]]
+  from = "/app/*"
+  to = "/app/index.html"
   status = 200
