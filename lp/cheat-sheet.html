@@ -222,32 +222,34 @@
                             <p class="text-muted text-sm">Instant access to your Bond success guide</p>
                         </div>
 
-                        <form class="space-y-4"
-                            @submit.prevent="formSubmitted = true; setTimeout(() => window.location.href = 'index.html', 1500)">
+                        <form class="space-y-4" x-data="formHandler()"
+                            @submit.prevent="submitForm('https://omthentic.app.n8n.cloud/webhook-test/2d1120b1-6725-4264-ab87-8ffc324b0414', () => { formSubmitted = true; setTimeout(() => window.location.href = '../index.html', 1500) })">
                             <div>
                                 <label
                                     class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Full
                                     Name</label>
-                                <input type="text" required
+                                <input type="text" required x-model="name"
                                     class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent transition-colors">
                             </div>
                             <div>
                                 <label
                                     class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Email</label>
-                                <input type="email" required
+                                <input type="email" required x-model="email"
                                     class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent transition-colors">
                             </div>
                             <div>
                                 <label
                                     class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Phone
                                     Number</label>
-                                <input type="tel" required>
+                                <input type="tel" required x-model="phone"
+                                    class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent transition-colors">
                             </div>
-                            <button type="submit"
-                                class="w-full bg-primary text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-                                Send Me The Cheat Sheet
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                    stroke="currentColor" class="w-5 h-5">
+                            <button type="submit" :disabled="isLoading"
+                                class="w-full bg-primary text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                                <span x-show="!isLoading">Send Me The Cheat Sheet</span>
+                                <span x-show="isLoading">Processing...</span>
+                                <svg x-show="!isLoading" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                                 </svg>
@@ -370,6 +372,51 @@
     <div class="h-16"></div>
 
     <script>
+        function formHandler() {
+            return {
+                name: '',
+                email: '',
+                phone: '',
+                isLoading: false,
+                validatePhone(phone) {
+                    const cleaned = phone.replace(/[\s-()]/g, '');
+                    return /^(?:\+61|0)?4\d{8}$/.test(cleaned);
+                },
+                formatPhone(phone) {
+                    let cleaned = phone.replace(/[\s-()]/g, '');
+                    if (cleaned.startsWith('04')) cleaned = '+61' + cleaned.substring(1);
+                    else if (cleaned.startsWith('4')) cleaned = '+61' + cleaned;
+                    const match = cleaned.match(/^(\+61)(4\d{2})(\d{3})(\d{3})$/);
+                    return match ? `${match[1]} ${match[2]} ${match[3]} ${match[4]}` : cleaned;
+                },
+                async submitForm(webhookUrl, callback) {
+                    if (!this.validatePhone(this.phone)) {
+                        alert('Please enter a valid Australian mobile number (e.g. 0412 345 678)');
+                        return;
+                    }
+                    this.isLoading = true;
+                    try {
+                        const response = await fetch(webhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: this.name,
+                                email: this.email,
+                                phone: this.formatPhone(this.phone)
+                            })
+                        });
+                        if (response.ok) {
+                            if (callback) callback();
+                        } else throw new Error();
+                    } catch (e) {
+                        alert('Submission failed. Please try again.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }
+            }
+        }
+
         function countdown() {
             return {
                 days: '00',
