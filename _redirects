@@ -1,0 +1,2 @@
+# Redirect all /app/* routes to the app's index.html for SPA routing
+/app/*    /app/index.html   200
