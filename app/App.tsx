@@ -382,8 +382,9 @@ function App() {
     <Layout
       activeTab={activeTab}
       onTabChange={(tab) => {
-        const base = userRole === 'admin' ? 'admin' : 'home';
-        navigate(`/${base}/${tab}`);
+        // Determine base from current URL, not just role, so admins can stay on /home if viewing student dashboard
+        const currentBase = location.pathname.startsWith('/admin') ? 'admin' : 'home';
+        navigate(`/${currentBase}/${tab}`);
         if (tab !== 'assessment') setSelectedBranch(null);
       }}
       isDark={isDark}
