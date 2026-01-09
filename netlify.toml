@@ -1,0 +1,25 @@
+[build]
+  # Build command: install deps and build the React app
+  command = "cd app && npm install && npm run build"
+  # Publish the root directory (contains static pages)
+  # The React app will be built into app/dist
+  publish = "."
+
+# Move built React app to correct location after build
+[[plugins]]
+  package = "@netlify/plugin-local-install"
+
+[build.processing]
+  skip_processing = false
+
+# SPA routing for the /app path
+[[redirects]]
+  from = "/app/*"
+  to = "/app/dist/index.html"
+  status = 200
+
+# Rewrite /app/dist to /app for cleaner URLs
+[[redirects]]
+  from = "/app"
+  to = "/app/dist/index.html"
+  status = 200

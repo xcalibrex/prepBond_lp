@@ -1,2 +1,2 @@
-# Redirect all /app/* routes to the app's index.html for SPA routing
-/app/*    /app/index.html   200
+# Static pages are served from root as-is
+# React app SPA routing is handled by netlify.toml
