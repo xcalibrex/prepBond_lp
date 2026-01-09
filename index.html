@@ -371,7 +371,7 @@
             </div>
 
             <form class="space-y-4" x-data="formHandler()"
-                @submit.prevent="submitForm('https://omthentic.app.n8n.cloud/webhook/2d1120b1-6725-4264-ab87-8ffc324b0414', () => { alert('You\'re on the waitlist!'); openApply = false })">
+                @submit.prevent="submitForm('https://omthentic.app.n8n.cloud/webhook-test/2d1120b1-6725-4264-ab87-8ffc324b0414', 'AI Platform Home', () => { alert('You\'re on the waitlist!'); openApply = false })">
                 <div>
                     <label class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Full
                         Name</label>
@@ -417,21 +417,33 @@
                     const match = cleaned.match(/^(\+61)(4\d{2})(\d{3})(\d{3})$/);
                     return match ? `${match[1]} ${match[2]} ${match[3]} ${match[4]}` : cleaned;
                 },
-                async submitForm(webhookUrl, callback) {
+                getUtms() {
+                    const params = new URLSearchParams(window.location.search);
+                    const utms = {};
+                    const targets = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
+                    targets.forEach(key => {
+                        if (params.get(key)) utms[key] = params.get(key);
+                    });
+                    return utms;
+                },
+                async submitForm(webhookUrl, angle, callback) {
                     if (!this.validatePhone(this.phone)) {
                         alert('Please enter a valid Australian mobile number (e.g. 0412 345 678)');
                         return;
                     }
                     this.isLoading = true;
                     try {
+                        const payload = {
+                            name: this.name,
+                            email: this.email,
+                            phone: this.formatPhone(this.phone),
+                            angle: angle,
+                            ...this.getUtms()
+                        };
                         const response = await fetch(webhookUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                name: this.name,
-                                email: this.email,
-                                phone: this.formatPhone(this.phone)
-                            })
+                            body: JSON.stringify(payload)
                         });
                         if (response.ok) {
                             if (callback) callback();
