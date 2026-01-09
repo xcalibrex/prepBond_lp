@@ -396,12 +396,12 @@ function App() {
         {/* Student Routes */}
         <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
         <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
-        <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/home/assessment')} onStartTraining={() => navigate('/home/training')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
-        <Route path="/home/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
-        <Route path="/home/results" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/dashboard')} isDark={isDark} /> : <Navigate to="/home/dashboard" replace />} />
+        <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
+        <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
+        <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
         <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
         <Route path="/home/history" element={<History stats={stats} />} />
-        <Route path="/home/training" element={<Training stats={stats} onRunModule={handleStartModule} />} />
+        <Route path="/home/curriculum" element={<Training stats={stats} onRunModule={handleStartModule} />} />
         <Route path="/home/tutors" element={<Tutors />} />
         <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
 
