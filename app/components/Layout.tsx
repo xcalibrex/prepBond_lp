@@ -58,12 +58,12 @@ const AppLogo = ({ isDark }: { isDark: boolean }) => (
     <div className="relative w-8 h-8 flex items-center justify-center rounded-lg overflow-hidden">
         <img
             src="/media/2.png"
-            alt="prepMSCEIT Logo Dark"
+            alt="PrepBond Logo Dark"
             className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
         <img
             src="/media/3.png"
-            alt="prepMSCEIT Logo Light"
+            alt="PrepBond Logo Light"
             className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${!isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
     </div>
@@ -130,7 +130,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
         }
         return (
             <h1 className="text-[36px] font-bold font-serif text-gray-900 dark:text-white tracking-tight">
-                {TAB_TITLES[activeTab] || 'prepMSCEIT'}
+                {TAB_TITLES[activeTab] || 'PrepBond'}
             </h1>
         );
     };
@@ -167,7 +167,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
 
                     <div className="flex-1 flex justify-center">
                         <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white uppercase transition-all duration-300">
-                            {TAB_TITLES[activeTab] || 'prepMSCEIT'}
+                            {TAB_TITLES[activeTab] || 'PrepBond'}
                         </h2>
                     </div>
 
@@ -222,7 +222,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                         </div>
                         {(!isCollapsed || isMobileOpen) && (
                             <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white animate-fade-in font-serif">
-                                prepMSCEIT
+                                <span className="font-serif">PrepBond</span>
                             </h1>
                         )}
                     </div>

@@ -10,12 +10,12 @@ const AppLogo = ({ isDark }: { isDark: boolean }) => (
     <div className="relative w-14 h-14 flex items-center justify-center rounded-[24px] shadow-lg border border-gray-100 dark:border-white/10 p-4 bg-white dark:bg-zinc-950">
         <img
             src="/media/2.png"
-            alt="prepMSCEIT Logo Dark"
+            alt="PrepBond Logo Dark"
             className={`absolute w-[calc(100%-1.75rem)] h-[calc(100%-1.75rem)] object-contain transition-opacity duration-300 ${isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
         <img
             src="/media/3.png"
-            alt="prepMSCEIT Logo Light"
+            alt="PrepBond Logo Light"
             className={`absolute w-[calc(100%-1.75rem)] h-[calc(100%-1.75rem)] object-contain transition-opacity duration-300 ${!isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
     </div>
@@ -88,7 +88,7 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme }) => {
                 <div className="relative z-10 mt-auto p-16 max-w-2xl">
                     <div className="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span className="text-xs font-medium tracking-wide text-white">prepMSCEIT Intelligence v2.0</span>
+                        <span className="text-xs font-medium tracking-wide text-white font-serif">PrepBond Intelligence v2.0</span>
                     </div>
                     <h1 className="text-5xl font-bold tracking-tight mb-6 leading-tight text-white">
                         Master the science of <br />
@@ -119,7 +119,7 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme }) => {
                     </div>
                     <div className="mb-10 text-center lg:text-left">
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-                            {isSignUp ? 'Create your account' : 'Welcome to prepMSCEIT'}
+                            {isSignUp ? 'Create your account' : <span>Welcome to <span className="font-serif">PrepBond</span></span>}
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
                             {isSignUp ? 'Start your neuro-plasticity training today.' : 'Enter your credentials to access the simulation.'}
@@ -163,7 +163,7 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme }) => {
                     </form>
                     <div className="mt-8 text-center pt-8 border-t border-gray-100 dark:border-white/5">
                         <p className="text-sm text-gray-500">
-                            {isSignUp ? 'Already a member? ' : 'New to prepMSCEIT? '}
+                            {isSignUp ? 'Already a member? ' : <span>New to <span className="font-serif">PrepBond</span>? </span>}
                             <button
                                 onClick={() => { setIsSignUp(!isSignUp); setMessage(null); }}
                                 className="text-gray-900 dark:text-white font-bold hover:underline"

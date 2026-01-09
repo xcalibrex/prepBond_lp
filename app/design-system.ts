@@ -1,5 +1,5 @@
 /**
- * prepMSCEIT Design System
+ * PrepBond Design System
  * Use these constants to maintain visual consistency across components.
  */
 

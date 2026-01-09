@@ -78,12 +78,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         return (
             <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
                 <div className="relative w-24 h-24 mb-8">
-                     <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse"></div>
-                     <svg className="animate-spin w-full h-full text-white" viewBox="0 0 50 50">
+                    <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse"></div>
+                    <svg className="animate-spin w-full h-full text-white" viewBox="0 0 50 50">
                         <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="80" strokeDashoffset="20"></circle>
-                     </svg>
+                    </svg>
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Personalizing prepMSCEIT...</h2>
+                <h2 className="text-2xl font-bold mb-2">Personalizing <span className="font-serif">PrepBond</span>...</h2>
                 <p className="text-gray-400">Configuring your neural simulation based on your profile.</p>
             </div>
         );
@@ -95,8 +95,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     return (
         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-2 bg-gray-800">
-                <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out" 
+                <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
                 ></div>
             </div>

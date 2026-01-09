@@ -62,16 +62,16 @@ function SplashScreen({ onFinish, isDark }: { onFinish: () => void, isDark: bool
       <div className="relative w-24 h-24 mb-6">
         <img
           src="/media/2.png"
-          alt="prepMSCEIT Logo Dark"
+          alt="PrepBond Logo Dark"
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
         <img
           src="/media/3.png"
-          alt="prepMSCEIT Logo Light"
+          alt="PrepBond Logo Light"
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${!isDark ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         />
       </div>
-      <h1 className="text-3xl font-bold tracking-tight mb-8 animate-fade-in-up text-black dark:text-white">prepMSCEIT</h1>
+      <h1 className="text-3xl font-bold tracking-tight mb-8 animate-fade-in-up text-black dark:text-white font-serif">PrepBond</h1>
       <p className="text-sm font-medium text-gray-500 max-w-md text-center px-6 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
         "{quote}"
       </p>
