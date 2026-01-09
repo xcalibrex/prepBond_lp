@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Bond Cheat Sheet | Everything You Need to ACE Your Application</title>
+    <meta name="description"
+        content="Get the insider knowledge that successful Bond Medicine applicants use. Your complete cheat sheet to mastering the 2026 admissions cycle.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        primary: '#000000',
+                        secondary: '#FFFFFF',
+                        accent: '#60A5FA',
+                        muted: '#6B7280',
+                        border: '#E5E7EB',
+                        surface: '#F9FAFB',
+                    },
+                    borderRadius: {
+                        'card': '20px',
+                        'pill': '200px',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- AOS (Animate on Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .text-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .countdown-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(96, 165, 250, 0.6);
+            }
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-primary" x-data="{ formSubmitted: false }">
+
+    <!-- Deadline Banner -->
+    <div class="fixed top-0 left-0 right-0 z-[60] bg-primary text-white py-2.5 px-4" x-data="countdown()"
+        x-init="init()">
+        <div class="flex items-center justify-center gap-4 text-base md:text-lg">
+            <span class="hidden md:inline font-semibold">⏰ QTAC Applications close</span>
+            <span class="md:hidden font-semibold">⏰ QTAC closes</span>
+            <div class="flex items-center gap-2 font-bold">
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg" x-text="days + 'd'">15d</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg" x-text="hours + 'h'">09h</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg" x-text="minutes + 'm'">52m</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg hidden sm:inline" x-text="seconds + 's'">37s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav
+        class="fixed top-12 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm h-16 py-2.5 flex items-center border-b border-border">
+        <div class="w-full px-4 md:px-6 flex justify-between items-center max-w-6xl mx-auto">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center gap-2.5">
+                <img src="file:///Users/dylanj/.gemini/antigravity/brain/a75f1557-d9b0-490d-932a-7de802300b05/uploaded_image_1767597603015.png"
+                    class="w-7 h-7 object-contain" alt="PrepBond Logo">
+                <span class="text-xl font-serif font-bold">PrepBond</span>
+            </a>
+
+            <!-- CTA -->
+            <a href="#get-cheatsheet"
+                class="bg-primary text-white px-5 py-2 rounded-pill font-semibold text-sm hover:bg-gray-800 transition-colors">
+                Get Your Cheat Sheet
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="pt-32 pb-24">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Left: Content -->
+                <div data-aos="fade-right">
+                    <span class="text-label text-accent mb-4 block">FREE INSIDER GUIDE</span>
+                    <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
+                        Your Bond <span class="text-accent italic">Cheat Sheet</span>
+                    </h1>
+                    <p class="text-xl text-muted mb-8 max-w-lg">
+                        Everything you need to know to <strong class="text-primary">ACE your chances</strong> of getting
+                        into Bond Medicine in 2026.
+                    </p>
+
+                    <!-- Key Points -->
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="w-3.5 h-3.5 text-accent">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </div>
+                            <span class="text-muted">The exact timeline & key dates you can't miss</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="w-3.5 h-3.5 text-accent">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </div>
+                            <span class="text-muted">MSCEIT & NEO PI-3 scoring insights</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="w-3.5 h-3.5 text-accent">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </div>
+                            <span class="text-muted">The 40% regional quota advantage explained</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="w-3.5 h-3.5 text-accent">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </div>
+                            <span class="text-muted">Interview prep strategies that work</span>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Form (hidden on desktop) -->
+                    <a href="#get-cheatsheet"
+                        class="lg:hidden inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors">
+                        Get Your Free Cheat Sheet
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- Right: Form Card -->
+                <div id="get-cheatsheet" class="lg:order-2" data-aos="fade-left">
+                    <div class="bg-white rounded-[24px] border border-border shadow-xl p-8 pulse-glow"
+                        x-show="!formSubmitted">
+                        <div class="text-center mb-6">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-accent">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2">Get Your Free Cheat Sheet</h3>
+                            <p class="text-muted text-sm">Instant access to your Bond success guide</p>
+                        </div>
+
+                        <form class="space-y-4"
+                            @submit.prevent="formSubmitted = true; setTimeout(() => window.location.href = 'index.html', 1500)">
+                            <div>
+                                <label
+                                    class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Full
+                                    Name</label>
+                                <input type="text" required
+                                    class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
+                                    placeholder="John Doe">
+                            </div>
+                            <div>
+                                <label
+                                    class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Email</label>
+                                <input type="email" required
+                                    class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
+                                    placeholder="name@email.com">
+                            </div>
+                            <div>
+                                <label
+                                    class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Phone
+                                    Number</label>
+                                <input type="tel" required
+                                    class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
+                                    placeholder="+61 400 000 000">
+                            </div>
+                            <button type="submit"
+                                class="w-full bg-primary text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                                Send Me The Cheat Sheet
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                </svg>
+                            </button>
+                            <p class="text-xs text-muted text-center">🔒 Your data is secure. No spam, ever.</p>
+                        </form>
+                    </div>
+
+                    <!-- Success State -->
+                    <div class="bg-white rounded-[24px] border border-border shadow-xl p-8 text-center"
+                        x-show="formSubmitted" x-cloak>
+                        <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-10 h-10 text-green-600">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">You're In! 🎉</h3>
+                        <p class="text-muted mb-4">Redirecting you to your cheat sheet...</p>
+                        <div class="flex items-center justify-center gap-2 text-accent">
+                            <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            <span class="text-sm font-medium">Loading your guide...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- What's Inside Section -->
+        <section class="max-w-6xl mx-auto px-4 md:px-6 mt-24">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <span class="text-label text-accent mb-2 block">WHAT'S INSIDE</span>
+                <h2 class="font-serif text-3xl md:text-4xl">6 Chapters of <span class="text-accent italic">Strategic
+                        Insights</span></h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" data-aos="fade-up" data-aos-delay="100">
+                <div
+                    class="p-6 rounded-[20px] bg-white border border-border hover:border-accent/30 hover:shadow-lg transition-all">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-accent">Chapter 1</span>
+                    <h3 class="font-semibold text-lg mt-2 mb-2">The Bond Advantage</h3>
+                    <p class="text-sm text-muted">MD in 4 years, 8 months. A 2-year career headstart over traditional
+                        pathways.</p>
+                </div>
+                <div
+                    class="p-6 rounded-[20px] bg-white border border-border hover:border-accent/30 hover:shadow-lg transition-all">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-accent">Chapter 2</span>
+                    <h3 class="font-semibold text-lg mt-2 mb-2">The Numbers Game</h3>
+                    <p class="text-sm text-muted">2,000 → 720 → 360 → 180 offers. Understand the elimination funnel.</p>
+                </div>
+                <div
+                    class="p-6 rounded-[20px] bg-white border border-border hover:border-accent/30 hover:shadow-lg transition-all">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-accent">Chapter 3</span>
+                    <h3 class="font-semibold text-lg mt-2 mb-2">Psychometric Decoded</h3>
+                    <p class="text-sm text-muted">MSCEIT and NEO PI-3 scoring logic explained in plain English.</p>
+                </div>
+                <div
+                    class="p-6 rounded-[20px] bg-white border border-border hover:border-accent/30 hover:shadow-lg transition-all">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-accent">Chapter 4</span>
+                    <h3 class="font-semibold text-lg mt-2 mb-2">Regional Advantage</h3>
+                    <p class="text-sm text-muted">The 40% QLD & Tweed reserve policy and how to leverage it.</p>
+                </div>
+                <div
+                    class="p-6 rounded-[20px] bg-white border border-border hover:border-accent/30 hover:shadow-lg transition-all">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-accent">Chapter 5</span>
+                    <h3 class="font-semibold text-lg mt-2 mb-2">Interview Mastery</h3>
+                    <p class="text-sm text-muted">The 50/50 final stage breakdown and proven frameworks.</p>
+                </div>
+                <div
+                    class="p-6 rounded-[20px] bg-white border border-border hover:border-accent/30 hover:shadow-lg transition-all">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-accent">Chapter 6</span>
+                    <h3 class="font-semibold text-lg mt-2 mb-2">Financial ROI</h3>
+                    <p class="text-sm text-muted">$470k investment vs. early earnings advantage analysis.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Proof -->
+        <section class="max-w-4xl mx-auto px-4 md:px-6 mt-24">
+            <div class="bg-surface rounded-[24px] p-8 md:p-12" data-aos="fade-up">
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div>
+                        <p class="text-4xl font-bold text-accent mb-2">2,000+</p>
+                        <p class="text-sm text-muted">Applicants annually</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-bold text-accent mb-2">180</p>
+                        <p class="text-sm text-muted">Offers per intake</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-bold text-accent mb-2">Top 9%</p>
+                        <p class="text-sm text-muted">Acceptance rate</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Fixed Bottom CTA Banner -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-primary py-3 px-4">
+        <div class="flex items-center justify-center gap-4">
+            <span class="text-sm md:text-base font-medium text-white">📚 Get your <span class="font-bold">Free Bond
+                    Cheat Sheet</span> now</span>
+            <a href="#get-cheatsheet"
+                class="bg-white text-primary px-5 py-2 rounded-[20px] font-semibold text-sm hover:bg-gray-100 transition-colors">
+                Download Free
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer spacing -->
+    <div class="h-16"></div>
+
+    <script>
+        function countdown() {
+            return {
+                days: '00',
+                hours: '00',
+                minutes: '00',
+                seconds: '00',
+                init() {
+                    this.updateCountdown();
+                    setInterval(() => this.updateCountdown(), 1000);
+                },
+                updateCountdown() {
+                    // QTAC deadline: January 22, 2026, 11:45 PM QLD time (UTC+10)
+                    const deadline = new Date('2026-01-22T23:45:00+10:00');
+                    const now = new Date();
+                    const diff = deadline - now;
+
+                    if (diff > 0) {
+                        this.days = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                        this.hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                        this.minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                        this.seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+                    } else {
+                        this.days = '00';
+                        this.hours = '00';
+                        this.minutes = '00';
+                        this.seconds = '00';
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script>
+        AOS.init({ duration: 500, once: true, offset: 30 });
+    </script>
+
+</body>
+
+</html>

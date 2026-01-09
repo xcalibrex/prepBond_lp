@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Bond Prep Platform | Mock Tests, Material & Guaranteed Success</title>
+    <meta name="description"
+        content="The only AI-powered prep platform designed specifically for Bond Medicine admissions. Mock tests, study material, and expert strategies.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        primary: '#000000',
+                        secondary: '#FFFFFF',
+                        accent: '#60A5FA',
+                        muted: '#6B7280',
+                        border: '#E5E7EB',
+                        surface: '#F9FAFB',
+                    },
+                    borderRadius: {
+                        'card': '20px',
+                        'pill': '200px',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- AOS (Animate on Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .text-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .countdown-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .gradient-animate {
+            background-size: 200% 200%;
+            animation: gradient-shift 5s ease infinite;
+        }
+
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+
+<body class="bg-white text-primary" x-data="{ openApply: false }">
+
+    <!-- Deadline Banner -->
+    <div class="fixed top-0 left-0 right-0 z-[60] bg-primary text-white py-2.5 px-4" x-data="countdown()"
+        x-init="init()">
+        <div class="flex items-center justify-center gap-4 text-base md:text-lg">
+            <span class="hidden md:inline font-semibold">⏰ QTAC Applications close</span>
+            <span class="md:hidden font-semibold">⏰ QTAC closes</span>
+            <div class="flex items-center gap-2 font-bold">
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg" x-text="days + 'd'">15d</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg" x-text="hours + 'h'">09h</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg" x-text="minutes + 'm'">52m</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-lg hidden sm:inline" x-text="seconds + 's'">37s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav
+        class="fixed top-12 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm h-16 py-2.5 flex items-center border-b border-border">
+        <div class="w-full px-4 md:px-6 flex justify-between items-center max-w-6xl mx-auto">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center gap-2.5">
+                <img src="file:///Users/dylanj/.gemini/antigravity/brain/a75f1557-d9b0-490d-932a-7de802300b05/uploaded_image_1767597603015.png"
+                    class="w-7 h-7 object-contain" alt="PrepBond Logo">
+                <span class="text-xl font-serif font-bold">PrepBond</span>
+            </a>
+
+            <!-- CTA -->
+            <button @click="openApply = true"
+                class="bg-primary text-white px-5 py-2 rounded-pill font-semibold text-sm hover:bg-gray-800 transition-colors">
+                Get Early Access
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="pt-32 pb-24">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <!-- Hero -->
+            <div class="text-center max-w-4xl mx-auto mb-16" data-aos="fade-up">
+                <span class="inline-block text-label text-accent mb-4 px-4 py-2 bg-accent/10 rounded-full">AI-POWERED
+                    PREP PLATFORM</span>
+                <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
+                    Guarantee Your <span class="text-accent italic">Success</span> at Bond
+                </h1>
+                <p class="text-xl text-muted mb-8 max-w-2xl mx-auto">
+                    The only AI-powered preparation platform built specifically for Bond Medicine admissions. Mock
+                    tests, comprehensive material, and data-driven insights.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button @click="openApply = true"
+                        class="bg-primary text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                        Start Your Prep Journey
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </button>
+                    <a href="cheat-sheet.html"
+                        class="bg-surface text-primary px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors border border-border">
+                        Get Free Cheat Sheet First
+                    </a>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <section class="mb-24">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <span class="text-label text-accent mb-2 block">PLATFORM FEATURES</span>
+                    <h2 class="font-serif text-3xl md:text-4xl">Everything You Need to <span
+                            class="text-accent italic">Succeed</span></h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Feature 1 -->
+                    <div class="feature-card bg-white rounded-[20px] border border-border p-6 hover:shadow-xl"
+                        data-aos="fade-up" data-aos-delay="0">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="white" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">MSCEIT Mock Tests</h3>
+                        <p class="text-sm text-muted">Unlimited practice tests calibrated to the exact format and
+                            scoring methodology used by Bond.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-card bg-white rounded-[20px] border border-border p-6 hover:shadow-xl"
+                        data-aos="fade-up" data-aos-delay="50">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="white" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">AI Tutor</h3>
+                        <p class="text-sm text-muted">Get instant feedback and explanations on your answers from our AI
+                            trained on emotional intelligence.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-card bg-white rounded-[20px] border border-border p-6 hover:shadow-xl"
+                        data-aos="fade-up" data-aos-delay="100">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="white" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Study Material</h3>
+                        <p class="text-sm text-muted">Comprehensive guides covering every aspect of the Bond application
+                            process and psychometric tests.</p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="feature-card bg-white rounded-[20px] border border-border p-6 hover:shadow-xl"
+                        data-aos="fade-up" data-aos-delay="150">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="white" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">Progress Analytics</h3>
+                        <p class="text-sm text-muted">Track your improvement over time with detailed analytics and
+                            percentile predictions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Why Our Platform -->
+            <section class="mb-24">
+                <div class="bg-primary text-white rounded-[24px] p-8 md:p-12" data-aos="fade-up">
+                    <div class="grid lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <span class="text-label text-accent mb-4 block">WHY PREPBOND</span>
+                            <h2 class="font-serif text-3xl md:text-4xl mb-6">Built by <span
+                                    class="text-accent italic">Successful</span> Applicants</h2>
+                            <p class="text-white/70 mb-8">Our platform was designed by candidates who made it into Bond
+                                Medicine. We know exactly what works because we've been through it ourselves.</p>
+
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5 text-white">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-white/90">Consensus-scored emotional intelligence training</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5 text-white">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-white/90">Real interview scenarios and feedback</span>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5 text-white">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-white/90">Personalized study plans based on your timeline</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/10 rounded-[20px] p-6 text-center">
+                                <p class="text-4xl font-bold text-accent mb-2">500+</p>
+                                <p class="text-sm text-white/60">Practice Questions</p>
+                            </div>
+                            <div class="bg-white/10 rounded-[20px] p-6 text-center">
+                                <p class="text-4xl font-bold text-accent mb-2">50+</p>
+                                <p class="text-sm text-white/60">Mock Tests</p>
+                            </div>
+                            <div class="bg-white/10 rounded-[20px] p-6 text-center">
+                                <p class="text-4xl font-bold text-accent mb-2">24/7</p>
+                                <p class="text-sm text-white/60">AI Tutor Access</p>
+                            </div>
+                            <div class="bg-white/10 rounded-[20px] p-6 text-center">
+                                <p class="text-4xl font-bold text-accent mb-2">95%</p>
+                                <p class="text-sm text-white/60">Success Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-serif text-3xl md:text-4xl mb-4">Ready to <span class="text-accent italic">Secure Your
+                        Spot?</span></h2>
+                <p class="text-muted mb-8 max-w-xl mx-auto">Join the waitlist for early access to the PrepBond AI
+                    platform and get exclusive launch pricing.</p>
+                <button @click="openApply = true"
+                    class="bg-primary text-white px-10 py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 transition-colors">
+                    Get Early Access Now
+                </button>
+            </section>
+        </div>
+    </main>
+
+    <!-- Fixed Bottom Banner - Free Cheat Sheet Promo (Black with White Button) -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-black py-3 px-4">
+        <div class="flex items-center justify-center gap-4">
+            <span class="text-sm md:text-base font-medium text-white">🎁 <span class="font-bold">Your Free Cheat Sheet
+                    Ebook</span> – Everything you need to ACE your chances</span>
+            <a href="cheat-sheet.html"
+                class="bg-white text-black px-5 py-2 rounded-[20px] font-semibold text-sm hover:bg-gray-100 transition-colors">
+                Claim Now
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer spacing -->
+    <div class="h-16"></div>
+
+    <!-- Application Modal -->
+    <div x-cloak x-show="openApply" class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click="openApply = false"></div>
+
+        <div x-show="openApply" x-transition:enter="transition ease-out duration-200 transform"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150 transform"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+            class="relative bg-white w-full max-w-md rounded-2xl p-8 shadow-xl">
+
+            <button @click="openApply = false"
+                class="absolute top-4 right-4 text-muted hover:text-primary transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-6 h-6 text-accent">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-1">Get Early Access</h3>
+                <p class="text-muted text-sm">Be the first to access our AI prep platform.</p>
+            </div>
+
+            <form class="space-y-4" @submit.prevent="alert('You\'re on the waitlist!'); openApply = false">
+                <div>
+                    <label class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Full
+                        Name</label>
+                    <input type="text" required
+                        class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-primary transition-colors"
+                        placeholder="John Doe">
+                </div>
+                <div>
+                    <label
+                        class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Email</label>
+                    <input type="email" required
+                        class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-primary transition-colors"
+                        placeholder="name@email.com">
+                </div>
+                <div>
+                    <label class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Phone
+                        Number</label>
+                    <input type="tel" required
+                        class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm focus:outline-none focus:border-primary transition-colors"
+                        placeholder="+61 400 000 000">
+                </div>
+                <button type="submit"
+                    class="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm hover:bg-gray-800 transition-colors mt-2">
+                    Join the Waitlist
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function countdown() {
+            return {
+                days: '00',
+                hours: '00',
+                minutes: '00',
+                seconds: '00',
+                init() {
+                    this.updateCountdown();
+                    setInterval(() => this.updateCountdown(), 1000);
+                },
+                updateCountdown() {
+                    // QTAC deadline: January 22, 2026, 11:45 PM QLD time (UTC+10)
+                    const deadline = new Date('2026-01-22T23:45:00+10:00');
+                    const now = new Date();
+                    const diff = deadline - now;
+
+                    if (diff > 0) {
+                        this.days = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                        this.hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                        this.minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                        this.seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+                    } else {
+                        this.days = '00';
+                        this.hours = '00';
+                        this.minutes = '00';
+                        this.seconds = '00';
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script>
+        AOS.init({ duration: 500, once: true, offset: 30 });
+    </script>
+
+</body>
+
+</html>
