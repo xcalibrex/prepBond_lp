@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DS } from '../design-system';
 
 interface LayoutProps {
@@ -114,7 +115,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
         { id: 'classes', label: 'Classes', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg> },
     ];
 
-    const currentMenuItems = role === 'admin' ? adminMenuItems : menuItems;
+    const location = useLocation();
+    // Determine which menu to show based on current path, not user role
+    const isAdminSection = location.pathname.startsWith('/admin');
+    const currentMenuItems = isAdminSection ? adminMenuItems : menuItems;
 
     const getDynamicHeaderTitle = () => {
         if (activeTab === 'dashboard') {

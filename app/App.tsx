@@ -379,47 +379,58 @@ function App() {
   }
 
   return (
-    <Layout
-      activeTab={activeTab}
-      onTabChange={(tab) => {
-        // Determine base from current URL, not just role, so admins can stay on /home if viewing student dashboard
-        const currentBase = location.pathname.startsWith('/admin') ? 'admin' : 'home';
-        navigate(`/${currentBase}/${tab}`);
-        if (tab !== 'assessment') setSelectedBranch(null);
-      }}
-      isDark={isDark}
-      toggleTheme={toggleTheme}
-      onLogout={handleLogout}
-      user={session?.user}
-      role={userRole}
-    >
-      <Routes>
-        {/* Student Routes */}
-        <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
-        <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
-        <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
-        <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
-        <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
-        <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
-        <Route path="/home/history" element={<History stats={stats} />} />
-        <Route path="/home/curriculum" element={<Training stats={stats} onRunModule={handleStartModule} />} />
-        <Route path="/home/tutors" element={<Tutors />} />
-        <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
+    <Routes>
+      {/* Standalone pages - no Layout wrapper */}
+      <Route path="/404" element={<NotFound />} />
+      <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
 
-        {/* Admin Routes */}
-        {userRole === 'admin' && (
-          <>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/users/:id" element={<AdminUsers />} />
-            <Route path="/admin/classes" element={<AdminClasses />} />
-            <Route path="/admin/classes/:id" element={<AdminClasses />} />
-          </>
-        )}
+      {/* All other routes wrapped in Layout */}
+      <Route path="/*" element={
+        <Layout
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            // Determine base from current URL, not just role, so admins can stay on /home if viewing student dashboard
+            const currentBase = location.pathname.startsWith('/admin') ? 'admin' : 'home';
+            navigate(`/${currentBase}/${tab}`);
+            if (tab !== 'assessment') setSelectedBranch(null);
+          }}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          onLogout={handleLogout}
+          user={session?.user}
+          role={userRole}
+        >
+          <Routes>
+            {/* Root redirect */}
+            <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
+            <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Layout>
+            {/* Student Routes */}
+            <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
+            <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
+            <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
+            <Route path="/home/history" element={<History stats={stats} />} />
+            <Route path="/home/curriculum" element={<Training stats={stats} onRunModule={handleStartModule} />} />
+            <Route path="/home/tutors" element={<Tutors />} />
+            <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
+
+            {/* Admin Routes */}
+            {userRole === 'admin' && (
+              <>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/users/:id" element={<AdminUsers />} />
+                <Route path="/admin/classes" element={<AdminClasses />} />
+                <Route path="/admin/classes/:id" element={<AdminClasses />} />
+              </>
+            )}
+
+            {/* Unknown routes redirect to 404 */}
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </Layout>
+      } />
+    </Routes>
   );
 }
 
