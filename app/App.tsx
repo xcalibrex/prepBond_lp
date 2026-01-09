@@ -303,13 +303,13 @@ function App() {
     }
 
     setLastResult({ score: newScore, branch });
-    navigate('/home/results');
+    navigate('/home/history/latest');
     setSelectedBranch(null);
   };
 
   const handleStartModule = (branch: Branch) => {
     setSelectedBranch(branch);
-    navigate('/home/assessment');
+    navigate('/assessment');
   };
 
   const handleUpdateProfile = async (data: { full_name?: string }) => {
