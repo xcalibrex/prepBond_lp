@@ -15,6 +15,7 @@ import { Onboarding } from './components/Onboarding';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { AdminUsers } from './components/Admin/AdminUsers';
 import { AdminClasses } from './components/Admin/AdminClasses';
+import { NotFound } from './components/NotFound';
 import { UserStats, Branch } from './types';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -415,7 +416,7 @@ function App() {
           </>
         )}
 
-        <Route path="*" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>
   );
