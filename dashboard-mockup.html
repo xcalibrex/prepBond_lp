@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Mockup | PrepBond Platform</title>
+    <meta name="description" content="PrepBond Dashboard Preview - AI-powered Bond Medicine preparation platform">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        'dark-bg': '#0A0A0A',
+                        'dark-nav': '#171717',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F8F9FD;
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Fake chart gradient */
+        .chart-area {
+            background: linear-gradient(180deg, rgba(96, 165, 250, 0.15) 0%, transparent 100%);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <!-- Layout Container -->
+    <div class="flex min-h-screen">
+
+        <!-- Sidebar Navigation -->
+        <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 p-6">
+            <!-- Logo -->
+            <div class="flex items-center gap-2.5 mb-10">
+                <img src="media/3.png" class="w-8 h-8 object-contain" alt="PrepBond Logo">
+                <span class="text-xl font-serif font-bold">PrepBond</span>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex flex-col gap-2 flex-1">
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-black text-white font-semibold text-sm">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 hover:bg-gray-50 font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    Curriculum
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 hover:bg-gray-50 font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    Mock Tests
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 hover:bg-gray-50 font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Analytics
+                </a>
+            </nav>
+
+            <!-- User Profile -->
+            <div class="flex items-center gap-3 mt-auto pt-6 border-t border-gray-100">
+                <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                    AP
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-900">Ananya Patel</p>
+                    <p class="text-xs text-gray-400">Bond 2026</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-8 overflow-auto">
+
+            <!-- Header -->
+            <header class="flex items-center justify-between mb-8">
+                <div>
+                    <p class="text-sm text-gray-400 mb-1">Welcome back,</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Ananya Patel</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="p-2 rounded-xl hover:bg-white transition-colors">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                    </button>
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm lg:hidden">
+                        AP
+                    </div>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Left Column -->
+                <div class="lg:col-span-8 flex flex-col gap-6">
+
+                    <!-- Hero Banner -->
+                    <div
+                        class="rounded-3xl bg-[#001833] py-7 px-8 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-lg">
+                        <div class="relative z-10 max-w-md">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div
+                                    class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center shadow-sm text-blue-400 backdrop-blur-sm border border-blue-400/20">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                </div>
+                                <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Next
+                                    Module</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white leading-tight mb-2">
+                                Understanding Emotions
+                            </h2>
+                            <button
+                                class="mt-6 px-6 py-2.5 bg-white text-[#001833] text-sm font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg flex items-center gap-2">
+                                Start Session
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div
+                            class="absolute right-0 top-0 h-full w-[60%] pointer-events-none overflow-hidden hidden md:block z-0">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-[#001833] via-[#001833]/40 to-transparent z-10">
+                            </div>
+                            <div class="w-full h-full bg-gradient-to-br from-blue-500/30 to-purple-500/30"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Consensus Alignment -->
+                        <div
+                            class="stat-card relative rounded-3xl p-6 flex flex-col justify-between h-[220px] cursor-pointer border border-white/60 overflow-hidden bg-emerald-50">
+                            <div class="relative z-10 flex flex-col h-full">
+                                <div class="mb-4">
+                                    <h3
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 opacity-90">
+                                        Consensus Alignment</h3>
+                                    <span
+                                        class="text-4xl font-extrabold text-gray-900 tracking-tighter leading-none">87%</span>
+                                </div>
+                                <div class="mt-auto pt-4 border-t border-black/5">
+                                    <p class="text-xs font-medium text-gray-600 flex items-center gap-2">MSCEIT Expert
+                                        Mean</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Percentile Rank -->
+                        <div
+                            class="stat-card relative rounded-3xl p-6 flex flex-col justify-between h-[220px] cursor-pointer border border-white/60 overflow-hidden bg-amber-100">
+                            <div class="relative z-10 flex flex-col h-full">
+                                <div class="mb-4">
+                                    <h3
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 opacity-90">
+                                        Percentile Rank</h3>
+                                    <span
+                                        class="text-4xl font-extrabold text-gray-900 tracking-tighter leading-none">92%</span>
+                                </div>
+                                <div class="mt-auto pt-4 border-t border-black/5">
+                                    <p class="text-xs font-medium text-gray-600 flex items-center gap-2">Top Med
+                                        Applicants</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mastery Status -->
+                        <div
+                            class="stat-card relative rounded-3xl p-6 flex flex-col justify-between h-[220px] cursor-pointer border border-white/60 overflow-hidden bg-violet-50">
+                            <div class="relative z-10 flex flex-col h-full">
+                                <div class="mb-4">
+                                    <h3
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 opacity-90">
+                                        Mastery Status</h3>
+                                    <span
+                                        class="text-4xl font-extrabold text-gray-900 tracking-tighter leading-none">Lvl
+                                        4</span>
+                                </div>
+                                <div class="mt-auto pt-4 border-t border-black/5">
+                                    <p class="text-xs font-medium text-gray-600 flex items-center gap-2">Tiered
+                                        Curriculum</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trajectory Chart -->
+                    <div class="bg-white rounded-3xl p-6 border border-gray-100 flex-1 min-h-[400px]">
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-4">
+                            <h3 class="text-sm font-bold text-gray-900 shrink-0">Alignment Trajectory</h3>
+                            <div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto md:pb-0">
+                                <button
+                                    class="text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full bg-black text-white shadow-md">All</button>
+                                <button
+                                    class="text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100">Perceiving</button>
+                                <button
+                                    class="text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100">Using</button>
+                                <button
+                                    class="text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100">Understanding</button>
+                                <button
+                                    class="text-xs font-bold whitespace-nowrap px-3 py-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100">Managing</button>
+                            </div>
+                        </div>
+
+                        <!-- Fake Chart -->
+                        <div class="h-72 w-full relative">
+                            <!-- Chart Grid Lines -->
+                            <div class="absolute inset-0 flex flex-col justify-between py-4">
+                                <div class="border-b border-dashed border-gray-200"></div>
+                                <div class="border-b border-dashed border-gray-200"></div>
+                                <div class="border-b border-dashed border-gray-200"></div>
+                                <div class="border-b border-dashed border-gray-200"></div>
+                            </div>
+
+                            <!-- Fake Line Chart SVG -->
+                            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 200"
+                                preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.3" />
+                                        <stop offset="100%" stop-color="#60A5FA" stop-opacity="0" />
+                                    </linearGradient>
+                                    <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#C084FC" stop-opacity="0.3" />
+                                        <stop offset="100%" stop-color="#C084FC" stop-opacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Blue Line -->
+                                <path d="M0,150 Q50,130 100,120 T200,80 T300,90 T400,60" fill="none" stroke="#60A5FA"
+                                    stroke-width="2" />
+                                <path d="M0,150 Q50,130 100,120 T200,80 T300,90 T400,60 L400,200 L0,200 Z"
+                                    fill="url(#blueGrad)" />
+                                <!-- Purple Line -->
+                                <path d="M0,170 Q50,160 100,140 T200,110 T300,100 T400,85" fill="none" stroke="#C084FC"
+                                    stroke-width="2" />
+                                <path d="M0,170 Q50,160 100,140 T200,110 T300,100 T400,85 L400,200 L0,200 Z"
+                                    fill="url(#purpleGrad)" />
+                            </svg>
+
+                            <!-- X-axis Labels -->
+                            <div
+                                class="absolute bottom-0 left-0 right-0 flex justify-between text-[11px] text-gray-400 px-2">
+                                <span>01/05</span>
+                                <span>01/06</span>
+                                <span>01/07</span>
+                                <span>01/08</span>
+                                <span>01/09</span>
+                                <span>01/10</span>
+                                <span>01/11</span>
+                            </div>
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="flex gap-6 justify-center mt-6">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-blue-400"></span>
+                                <span class="text-xs text-gray-500">Perceiving</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-purple-400"></span>
+                                <span class="text-xs text-gray-500">Using</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                                <span class="text-xs text-gray-500">Understanding</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                                <span class="text-xs text-gray-500">Managing</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="lg:col-span-4 flex flex-col gap-5">
+
+                    <!-- Calendar Header -->
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-2xl font-bold font-serif text-gray-900 leading-tight">January <span
+                                class="text-gray-400">2026</span></h3>
+                        <div class="flex gap-1">
+                            <button class="p-1 hover:bg-gray-200 rounded-full text-gray-400 transition-colors">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button class="p-1 hover:bg-gray-200 rounded-full text-black transition-colors">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Calendar -->
+                    <div class="bg-white rounded-3xl p-6 border border-gray-100">
+                        <div class="grid grid-cols-7 gap-2 text-center mb-2">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Mon</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Tue</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Wed</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Thu</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Fri</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Sat</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Sun</span>
+                        </div>
+                        <div class="grid grid-cols-7 gap-y-3 gap-x-1 text-center">
+                            <!-- Empty cells for offset (Jan 2026 starts on Thursday) -->
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <!-- Days -->
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">1</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">2</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">3</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">4</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">5</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">6</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">7</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">8</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">9</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">10</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-300 mx-auto">11</span>
+                            <!-- Current Day -->
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium bg-black text-white shadow-md mx-auto">12</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">13</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">14</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">15</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">16</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">17</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">18</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">19</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">20</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">21</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">22</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">23</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">24</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">25</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">26</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">27</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">28</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">29</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">30</span>
+                            <span
+                                class="w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 cursor-pointer mx-auto">31</span>
+                        </div>
+                    </div>
+
+                    <!-- Roadmap -->
+                    <div>
+                        <h3 class="text-2xl font-bold font-serif text-gray-900 flex items-center gap-2 mb-3">
+                            Roadmap
+                        </h3>
+                        <div class="bg-white rounded-3xl p-6 border border-gray-100">
+                            <div class="mt-1">
+                                <!-- Task 1 -->
+                                <div class="flex gap-4 relative group">
+                                    <div class="flex flex-col items-center">
+                                        <div
+                                            class="w-2.5 h-2.5 rounded-full border-2 border-[#F8F9FD] shadow-sm z-10 bg-black">
+                                        </div>
+                                        <div class="w-0.5 h-full bg-gray-200 absolute top-2.5"></div>
+                                    </div>
+                                    <div class="pb-6 flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="text-sm font-bold text-gray-900">Bond Selection Mock</h4>
+                                                <p class="text-[11px] text-gray-400 mt-0.5">Full 140-item simulation</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[11px] font-bold text-black block">19 Jan</span>
+                                                <span class="text-[10px] text-gray-400">45 Mins</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Task 2 -->
+                                <div class="flex gap-4 relative group">
+                                    <div class="flex flex-col items-center">
+                                        <div
+                                            class="w-2.5 h-2.5 rounded-full border-2 border-[#F8F9FD] shadow-sm z-10 bg-amber-400">
+                                        </div>
+                                        <div class="w-0.5 h-full bg-gray-200 absolute top-2.5"></div>
+                                    </div>
+                                    <div class="pb-6 flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="text-sm font-bold text-gray-900">Perception Drill</h4>
+                                                <p class="text-[11px] text-gray-400 mt-0.5">Micro-expression tuning</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[11px] font-bold text-black block">20-21 Jan</span>
+                                                <span class="text-[10px] text-gray-400">3 Hours</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Task 3 -->
+                                <div class="flex gap-4 relative group">
+                                    <div class="flex flex-col items-center">
+                                        <div
+                                            class="w-2.5 h-2.5 rounded-full border-2 border-[#F8F9FD] shadow-sm z-10 bg-blue-500">
+                                        </div>
+                                        <div class="w-0.5 h-full bg-gray-200 absolute top-2.5"></div>
+                                    </div>
+                                    <div class="pb-6 flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="text-sm font-bold text-gray-900">Managing Scenario</h4>
+                                                <p class="text-[11px] text-gray-400 mt-0.5">Clinical empathy de-brief
+                                                </p>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[11px] font-bold text-black block">22 Jan</span>
+                                                <span class="text-[10px] text-gray-400">50 Mins</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Task 4 -->
+                                <div class="flex gap-4 relative group">
+                                    <div class="flex flex-col items-center">
+                                        <div
+                                            class="w-2.5 h-2.5 rounded-full border-2 border-[#F8F9FD] shadow-sm z-10 bg-emerald-400">
+                                        </div>
+                                    </div>
+                                    <div class="pb-0 flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="text-sm font-bold text-gray-900">Peer Comparison</h4>
+                                                <p class="text-[11px] text-gray-400 mt-0.5">Percentile sync</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[11px] font-bold text-black block">24 Jan</span>
+                                                <span class="text-[10px] text-gray-400">1 Hour</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-gray-200 text-center">
+                                <button
+                                    class="text-black font-bold text-xs hover:underline flex items-center justify-center gap-2 mx-auto">
+                                    Full Schedule
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>
