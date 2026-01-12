@@ -99,7 +99,7 @@
     </style>
 </head>
 
-<body class="bg-white text-primary" x-data="{ formSubmitted: false }">
+<body class="bg-white text-primary overflow-x-hidden" x-data="{ formSubmitted: false }">
 
     <!-- Deadline Banner -->
     <div class="fixed top-0 left-0 right-0 z-[60] bg-primary text-white py-2.5 px-4" x-data="countdown()"
@@ -117,7 +117,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed top-12 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm h-16 pt-4 pb-2.5 flex items-center">
+    <nav class="fixed top-12 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm h-16 pt-6 pb-2.5 flex items-center">
         <div class="w-full px-4 md:px-6 flex justify-between items-center max-w-6xl mx-auto">
             <!-- Logo -->
             <a href="index.html" class="flex items-center gap-2.5">
@@ -363,13 +363,13 @@
     </main>
 
     <!-- Fixed Bottom CTA Banner -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-black py-3 px-4">
-        <div class="flex items-center justify-between gap-2 max-w-6xl mx-auto">
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-black py-3 px-3 sm:px-4 w-full">
+        <div class="flex items-center justify-between gap-2 max-w-6xl mx-auto w-full">
             <span
-                class="text-xs sm:text-sm md:text-base font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis">📚
+                class="text-xs sm:text-sm md:text-base font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">📚
                 Get your <span class="font-bold">Free Bond Cheat Sheet</span></span>
             <a href="#get-cheatsheet"
-                class="bg-white text-black px-4 py-2 rounded-full font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-colors whitespace-nowrap flex-shrink-0">
+                class="bg-white text-black px-3 sm:px-4 py-2 rounded-full font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-colors whitespace-nowrap flex-shrink-0">
                 Download Free
             </a>
         </div>
