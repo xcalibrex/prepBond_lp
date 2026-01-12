@@ -1,6 +1,6 @@
 [build]
   # Build command: build React app into deploy folder, then copy static pages
-  command = "cd app && npm install && npm run build && cd .. && cp index.html ebook.html deploy/ && cp -r lp media deploy/"
+  command = "cd app && npm install && npm run build && cd .. && cp index.html ebook.html cheat-sheet.html dashboard-mockup.html deploy/ && cp -r media deploy/"
   # Publish the deploy folder which contains everything
   publish = "deploy"
 
