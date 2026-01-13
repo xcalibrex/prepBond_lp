@@ -305,7 +305,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                                         <div className="p-2 border-b border-gray-50 dark:border-white/5">
                                             <button
                                                 onClick={() => {
-                                                    onTabChange('profile');
+                                                    navigate('/home/profile');
                                                     setIsUserMenuOpen(false);
                                                 }}
                                                 className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-xl transition-colors"

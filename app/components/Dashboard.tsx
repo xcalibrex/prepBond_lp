@@ -45,7 +45,9 @@ const StatCard = ({
     );
 };
 
-const Calendar = ({ isDark }: { isDark: boolean }) => {
+import { KeyDates } from './KeyDates';
+
+const Calendar = ({ isDark, selectedDate, onSelectDate }: { isDark: boolean, selectedDate: Date, onSelectDate: (date: Date) => void }) => {
     const [today, setToday] = useState(new Date());
 
     useEffect(() => {
@@ -78,15 +80,23 @@ const Calendar = ({ isDark }: { isDark: boolean }) => {
                 ))}
 
                 {dates.map(d => {
+                    const dateObj = new Date(currentYear, currentMonth, d);
                     const isBeforeToday = d < currentDay;
+                    const isSelected = selectedDate.getDate() === d && selectedDate.getMonth() === currentMonth;
+                    const isToday = d === currentDay;
+
                     return (
-                        <div key={d} className={`flex justify-center relative group ${isBeforeToday ? 'cursor-default' : 'cursor-pointer'}`}>
+                        <div key={d} className={`flex justify-center relative group ${isBeforeToday ? 'cursor-default' : 'cursor-pointer'}`}
+                            onClick={() => !isBeforeToday && onSelectDate(dateObj)}
+                        >
                             <span className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-medium transition-all
-                                ${d === currentDay
-                                    ? 'bg-black dark:bg-white text-white dark:text-black shadow-md'
-                                    : isBeforeToday
-                                        ? 'text-gray-300 dark:text-gray-800'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 hover:shadow-sm'}
+                                ${isSelected
+                                    ? 'bg-blue-500 text-white shadow-md scale-110'
+                                    : isToday
+                                        ? 'bg-black dark:bg-white text-white dark:text-black shadow-md'
+                                        : isBeforeToday
+                                            ? 'text-gray-300 dark:text-gray-800'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}
                             `}>
                                 {d}
                             </span>
@@ -99,12 +109,12 @@ const Calendar = ({ isDark }: { isDark: boolean }) => {
 };
 
 const TaskItem = ({ title, type, date, duration, color }: { title: string, type: string, date: string, duration: string, color: string }) => (
-    <div className="flex gap-4 relative group cursor-pointer">
-        <div className="flex flex-col items-center">
+    <div className="flex gap-4 relative group cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 p-2 rounded-xl transition-colors -mx-2">
+        <div className="flex flex-col items-center pt-2">
             <div className={`w-2.5 h-2.5 rounded-full border-2 border-[#F8F9FD] dark:border-dark-nav shadow-sm z-10 ${color}`}></div>
-            <div className="w-0.5 h-full bg-gray-200 dark:bg-white/10 absolute top-2.5 group-last:hidden"></div>
+            <div className="w-0.5 h-full bg-gray-200 dark:bg-white/10 absolute top-4 group-last:hidden"></div>
         </div>
-        <div className="pb-6 flex-1">
+        <div className="pb-2 flex-1">
             <div className="flex justify-between items-start">
                 <div>
                     <h4 className="text-sm font-bold text-gray-900 dark:text-white">{title}</h4>
@@ -126,11 +136,24 @@ const BRANCH_COLORS = {
     [Branch.Managing]: '#34D399',
 };
 
+// Mock data with Date objects for easier filtering
+const MOCK_TASKS = [
+    { title: "Bond Selection Mock", type: "Full 140-item simulation", dateStr: "19 Jan", day: 19, duration: "45 Mins", color: "bg-black dark:bg-white" },
+    { title: "Perception Drill", type: "Micro-expression tuning", dateStr: "20-21 Jan", day: 20, duration: "3 Hours", color: "bg-amber-400" }, // Simplified finding logic
+    { title: "Perception Drill", type: "Micro-expression tuning", dateStr: "20-21 Jan", day: 21, duration: "3 Hours", color: "bg-amber-400" },
+    { title: "Managing Scenario", type: "Clinical empathy de-brief", dateStr: "22 Jan", day: 22, duration: "50 Mins", color: "bg-blue-500" },
+    { title: "Peer Comparison", type: "Percentile sync", dateStr: "24 Jan", day: 24, duration: "1 Hour", color: "bg-emerald-400" },
+];
+
 export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = false, onStartExam, onStartCurriculum, onLogout, toggleTheme, onTabChange }) => {
     const [activeChartTab, setActiveChartTab] = useState<string>('All');
     const [mobileTab, setMobileTab] = useState<'stats' | 'trajectory' | 'roadmap'>('stats');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const userMenuRef = useRef<HTMLDivElement>(null);
+
+    // New State for Roadmap
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [rightPanelTab, setRightPanelTab] = useState<'schedule' | 'key-dates'>('schedule');
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -170,6 +193,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
             return [];
         }
     }, [stats?.history, activeChartTab]);
+
+    // Filter tasks based on selected date
+    const filteredTasks = MOCK_TASKS.filter(task => task.day === selectedDate.getDate());
 
     return (
         <div className={`flex flex-col gap-5 ${DS.animation.enter} h-full`}>
@@ -223,7 +249,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                         <div className="absolute right-0 top-0 h-full w-full md:w-[60%] pointer-events-none overflow-hidden hidden md:block z-0">
                             <div className="absolute inset-0 bg-gradient-to-r from-[#001833] dark:from-dark-nav via-[#001833]/40 dark:via-dark-nav/40 to-transparent z-10"></div>
                             <img
-                                src="../media/Cover.png"
+                                src="/media/Cover.png"
                                 alt="Emotions Gradient"
                                 className="w-full h-full object-cover object-right opacity-90"
                             />
@@ -345,24 +371,61 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                             </button>
                         </div>
                     </div>
-                    <Calendar isDark={isDark} />
-                    <div>
-                        <h3 className="text-[24px] font-bold font-serif text-gray-900 dark:text-white flex items-center gap-2 mb-3">
-                            Roadmap
-                        </h3>
-                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5`}>
-                            <div className="mt-1">
-                                <TaskItem title="Bond Selection Mock" type="Full 140-item simulation" date="19 Jan" duration="45 Mins" color="bg-black dark:bg-white" />
-                                <TaskItem title="Perception Drill" type="Micro-expression tuning" date="20-21 Jan" duration="3 Hours" color="bg-amber-400" />
-                                <TaskItem title="Managing Scenario" type="Clinical empathy de-brief" date="22 Jan" duration="50 Mins" color="bg-blue-500" />
-                                <TaskItem title="Peer Comparison" type="Percentile sync" date="24 Jan" duration="1 Hour" color="bg-emerald-400" />
-                            </div>
-                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 text-center">
-                                <button className="text-black dark:text-white font-bold text-xs hover:underline flex items-center justify-center gap-2 mx-auto">
-                                    Full Schedule
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    <Calendar isDark={isDark} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-[20px] font-bold font-serif text-gray-900 dark:text-white flex items-center gap-2">
+                                Roadmap
+                            </h3>
+                            {/* Tabs */}
+                            <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-full">
+                                <button
+                                    onClick={() => setRightPanelTab('schedule')}
+                                    className={`px-3 py-1 text-[10px] font-bold rounded-full transition-all ${rightPanelTab === 'schedule' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
+                                >
+                                    Schedule
+                                </button>
+                                <button
+                                    onClick={() => setRightPanelTab('key-dates')}
+                                    className={`px-3 py-1 text-[10px] font-bold rounded-full transition-all ${rightPanelTab === 'key-dates' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
+                                >
+                                    Key Dates
                                 </button>
                             </div>
+                        </div>
+
+                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-5 border border-gray-100 dark:border-white/5 min-h-[300px]`}>
+                            {rightPanelTab === 'schedule' ? (
+                                <div className="mt-1">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{selectedDate.toLocaleString('default', { day: 'numeric', month: 'short' })}</p>
+                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-500">{filteredTasks.length} Tasks</span>
+                                    </div>
+
+                                    {filteredTasks.length > 0 ? (
+                                        filteredTasks.map((task, i) => (
+                                            <TaskItem key={i} title={task.title} type={task.type} date={task.dateStr} duration={task.duration} color={task.color} />
+                                        ))
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                            <p className="text-sm">No tasks scheduled</p>
+                                            <button className="mt-2 text-xs text-blue-500 font-medium hover:underline">+ Add Task</button>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <KeyDates />
+                            )}
+
+                            {rightPanelTab === 'schedule' && (
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 text-center">
+                                    <button className="text-black dark:text-white font-bold text-xs hover:underline flex items-center justify-center gap-2 mx-auto">
+                                        Full Schedule
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

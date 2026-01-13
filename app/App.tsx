@@ -402,11 +402,13 @@ function App() {
         >
           <Routes>
             {/* Root redirect */}
+            <Route index element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
             <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
             <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
             <Route path="/auth" element={<Navigate to="/" replace />} />
 
             {/* Student Routes */}
+            <Route path="/home" element={<Navigate to="/home/dashboard" replace />} />
             <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
             <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
             <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
@@ -418,6 +420,7 @@ function App() {
             {/* Admin Routes */}
             {userRole === 'admin' && (
               <>
+                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<AdminUsers />} />
                 <Route path="/admin/users/:id" element={<AdminUsers />} />
