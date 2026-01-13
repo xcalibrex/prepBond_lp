@@ -281,7 +281,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                     </div>
 
                     {/* Trajectory Chart */}
-                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5 flex-1 min-h-[250px] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
+                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5 flex-1 min-h-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-4">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white shrink-0">Alignment Trajectory</h3>
                             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide w-full md:w-auto md:pb-0">
@@ -355,8 +355,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                     </div>
                 </div>
 
-                {/* Right Column - Desktop (lg and up) - Fixed full height with internal scrolling */}
-                <div className={`${mobileTab === 'roadmap' ? 'block' : 'hidden lg:flex'} lg:col-span-4 flex flex-col gap-0 pt-0 h-full overflow-hidden`}>
+                {/* Right Column - Desktop (lg and up) - Fixed full height with visible overflow for shadows */}
+                <div className={`${mobileTab === 'roadmap' ? 'block' : 'hidden lg:flex'} lg:col-span-4 flex flex-col gap-0 pt-0 h-full`}>
 
 
                     {/* Calendar Header Moved Here */}
@@ -375,7 +375,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                         <Calendar isDark={isDark} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
                     </div>
 
-                    <div className="flex flex-col flex-1 gap-3 overflow-hidden">
+                    <div className="flex flex-col flex-1 gap-3 min-h-0">
                         <div className="flex items-center justify-between shrink-0 px-1">
                             <h3 className="text-[20px] font-bold font-serif text-gray-900 dark:text-white flex items-center gap-2">
                                 Roadmap
@@ -397,7 +397,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                             </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-5 border border-gray-100 dark:border-white/5 flex-1 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
+                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-5 border border-gray-100 dark:border-white/5 flex-1 min-h-0 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
                             {rightPanelTab === 'schedule' ? (
                                 <div className="mt-1 flex flex-col h-full">
                                     <div className="flex items-center justify-between mb-4 shrink-0">
