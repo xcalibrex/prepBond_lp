@@ -246,12 +246,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             </button>
                         </div>
-                        <div className="absolute right-0 top-0 h-full w-full md:w-[60%] pointer-events-none overflow-hidden hidden md:block z-0">
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#001833] dark:from-dark-nav via-[#001833]/40 dark:via-dark-nav/40 to-transparent z-10"></div>
+                        <div className="absolute right-0 top-0 h-full w-full md:w-[60%] pointer-events-none overflow-hidden z-0">
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#001833] dark:from-dark-nav via-[#001833]/60 dark:via-dark-nav/60 to-transparent z-10 md:via-[#001833]/40 md:dark:via-dark-nav/40"></div>
                             <img
                                 src="/media/Cover.png"
                                 alt="Emotions Gradient"
-                                className="w-full h-full object-cover object-right opacity-90"
+                                className="w-full h-full object-cover object-right opacity-80 md:opacity-90"
                             />
                         </div>
                     </div>
@@ -281,7 +281,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                     </div>
 
                     {/* Trajectory Chart */}
-                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5 flex-1 min-h-[400px] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
+                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5 flex-1 min-h-[250px] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-4">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white shrink-0">Alignment Trajectory</h3>
                             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide w-full md:w-auto md:pb-0">
