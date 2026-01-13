@@ -59,3 +59,15 @@ export interface TrainingModule {
   duration: string;
   requiredLevel?: number;
 }
+
+export type TaskType = 'user_created' | 'group_class' | 'curriculum' | 'key_date';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  due_date: string;
+  type: TaskType;
+  user_id: string;
+  is_public?: boolean;
+}

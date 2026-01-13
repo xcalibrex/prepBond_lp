@@ -233,6 +233,91 @@ export const AdminClasses: React.FC = () => {
                 </>,
                 document.body
             )}
+
+            {/* Create Module Modal */}
+            {showCreateModal && createPortal(
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-md" onClick={() => setShowCreateModal(false)}></div>
+                    <form onSubmit={handleCreate} className="relative bg-white dark:bg-dark-nav border border-gray-100 dark:border-gray-800 rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up p-10">
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-serif">Create Module</h2>
+                                <p className="text-xs text-gray-500 mt-1">Add a new training module to the platform.</p>
+                            </div>
+                            <button type="button" onClick={() => setShowCreateModal(false)} className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white transition-all rounded-full hover:bg-gray-100 dark:hover:bg-white/5">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Module Title</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={newModule.title}
+                                    onChange={e => setNewModule({ ...newModule, title: e.target.value })}
+                                    placeholder="e.g., Recognizing Facial Expressions"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Description</label>
+                                <textarea
+                                    required
+                                    value={newModule.description}
+                                    onChange={e => setNewModule({ ...newModule, description: e.target.value })}
+                                    placeholder="Describe what this module covers..."
+                                    rows={3}
+                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none resize-none"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Branch</label>
+                                    <select
+                                        value={newModule.branch}
+                                        onChange={e => setNewModule({ ...newModule, branch: e.target.value as Branch })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
+                                    >
+                                        {Object.values(Branch).map(b => (
+                                            <option key={b} value={b}>{b}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Required Level</label>
+                                    <select
+                                        value={newModule.required_level}
+                                        onChange={e => setNewModule({ ...newModule, required_level: parseInt(e.target.value) })}
+                                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
+                                    >
+                                        {[1, 2, 3, 4, 5].map(lvl => (
+                                            <option key={lvl} value={lvl}>Level {lvl}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Duration</label>
+                                <input
+                                    type="text"
+                                    value={newModule.duration}
+                                    onChange={e => setNewModule({ ...newModule, duration: e.target.value })}
+                                    placeholder="e.g., 15 min"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 mt-10">
+                            <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-4 rounded-[200px] border border-gray-200 dark:border-gray-700 font-black text-[10px] uppercase tracking-widest text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Cancel</button>
+                            <button type="submit" className="flex-1 py-4 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">Create Module</button>
+                        </div>
+                    </form>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };

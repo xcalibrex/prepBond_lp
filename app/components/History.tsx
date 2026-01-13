@@ -83,44 +83,44 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
                     <TableSkeleton rows={5} columns={4} />
                 </div>
             ) : (
-                <div className="hidden md:block bg-white dark:bg-dark-nav rounded-[24px] border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm">
+                <div className="hidden md:block bg-white dark:bg-dark-nav rounded-xl border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
-                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
-                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Module / Branch</th>
-                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Score</th>
-                                    <th className="py-4 px-6 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">Status</th>
+                                <tr className="border-b border-gray-50 dark:border-white/5">
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Module / Branch</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Score</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                            <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                                 {reversedHistory.map((item) => (
                                     <tr
                                         key={item.id}
                                         onClick={() => setSelectedItem(item)}
-                                        className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                                        className="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
                                     >
-                                        <td className="py-5 px-6 text-base font-medium text-gray-900 dark:text-white">
+                                        <td className="px-8 py-5 text-sm font-medium text-gray-900 dark:text-white">
                                             {item.date}
                                         </td>
-                                        <td className="py-5 px-6">
+                                        <td className="px-8 py-5">
                                             <div className="flex items-center gap-3">
                                                 <span className={`w-2.5 h-2.5 rounded-full ${item.branch.includes('Perceiving') ? 'bg-blue-500' :
                                                     item.branch.includes('Using') ? 'bg-purple-500' :
                                                         item.branch.includes('Understanding') ? 'bg-amber-500' :
                                                             'bg-emerald-500'
                                                     }`}></span>
-                                                <span className="text-base text-gray-700 dark:text-gray-300">{item.branch}</span>
+                                                <span className="text-sm text-gray-700 dark:text-gray-300">{item.branch}</span>
                                             </div>
                                         </td>
-                                        <td className="py-5 px-6">
-                                            <span className={`text-base font-bold ${item.score >= 70 ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+                                        <td className="px-8 py-5">
+                                            <span className={`text-sm font-bold ${item.score >= 70 ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
                                                 {item.score}%
                                             </span>
                                         </td>
-                                        <td className="py-5 px-6 text-right">
-                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${item.score >= 75
+                                        <td className="px-8 py-5 text-right">
+                                            <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight ${item.score >= 75
                                                 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                                                 : item.score >= 60
                                                     ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
@@ -133,7 +133,7 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
                                 ))}
                                 {reversedHistory.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="py-12 text-center text-gray-500 dark:text-gray-400 text-base">
+                                        <td colSpan={4} className="py-12 text-center text-gray-500 dark:text-gray-400 text-sm">
                                             No assessments completed yet.
                                         </td>
                                     </tr>

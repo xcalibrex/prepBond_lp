@@ -122,7 +122,7 @@
             <!-- Logo -->
             <a href="index.html" class="flex items-center gap-2.5">
                 <img src="/media/3.png" class="w-7 h-7 object-contain" alt="PrepBond Logo">
-                <span class="text-xl font-serif font-bold">PrepBond</span>
+                <span class="text-xl font-bold font-serif">PrepBond</span>
             </a>
 
             <!-- CTA -->
@@ -146,7 +146,7 @@
                 <!-- Left: Content -->
                 <div data-aos="fade-right">
                     <span class="text-label text-accent mb-4 block">FREE INSIDER GUIDE</span>
-                    <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                         Your Bond <span class="text-accent italic">Cheat Sheet</span>
                     </h1>
                     <p class="text-sm md:text-lg text-muted mb-8 max-w-lg">
@@ -229,7 +229,7 @@
                         </div>
 
                         <form class="space-y-4" x-data="formHandler()"
-                            @submit.prevent="submitForm('https://omthentic.app.n8n.cloud/webhook/2d1120b1-6725-4264-ab87-8ffc324b0414', 'Cheat Sheet Landing Page', () => { formSubmitted = true; setTimeout(() => window.location.href = 'index.html', 1500) })">
+                            @submit.prevent="submitForm('https://qngyxbhttcmkrcjvahku.supabase.co/functions/v1/register-ebook-user', 'Cheat Sheet Landing Page', () => { formSubmitted = true; setTimeout(() => window.location.href = 'app/index.html', 3000) })">
                             <div>
                                 <label
                                     class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Full
@@ -275,7 +275,7 @@
                             </svg>
                         </div>
                         <h3 class="text-2xl font-bold mb-2">You're In! 🎉</h3>
-                        <p class="text-muted mb-4">Redirecting you to your cheat sheet...</p>
+                        <p class="text-muted mb-4">Account created! Redirecting to login...</p>
                         <div class="flex items-center justify-center gap-2 text-accent">
                             <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24">
@@ -285,7 +285,7 @@
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                 </path>
                             </svg>
-                            <span class="text-sm font-medium">Loading your guide...</span>
+                            <span class="text-sm font-medium">Check your email for login details...</span>
                         </div>
                     </div>
                 </div>
@@ -296,7 +296,7 @@
         <section class="max-w-6xl mx-auto px-4 md:px-6 mt-24">
             <div class="text-center mb-12" data-aos="fade-up">
                 <span class="text-label text-accent mb-2 block">WHAT'S INSIDE</span>
-                <h2 class="font-serif text-3xl md:text-4xl">6 Chapters of <span class="text-accent italic">Strategic
+                <h2 class="text-3xl md:text-4xl font-bold">6 Chapters of <span class="text-accent italic">Strategic
                         Insights</span></h2>
             </div>
 
@@ -364,9 +364,9 @@
 
     <!-- Fixed Bottom CTA Banner -->
     <div class="fixed bottom-0 left-0 right-0 z-50 bg-black py-3 px-3 sm:px-4 w-full">
-        <div class="flex items-center justify-between gap-2 max-w-6xl mx-auto w-full">
+        <div class="flex items-center justify-center gap-4 max-w-6xl mx-auto w-full">
             <span
-                class="text-xs sm:text-sm md:text-base font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">📚
+                class="text-xs sm:text-sm md:text-base font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis">📚
                 Get your <span class="font-bold">Free Bond Cheat Sheet</span></span>
             <a href="#get-cheatsheet"
                 class="bg-white text-black px-3 sm:px-4 py-2 rounded-full font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-colors whitespace-nowrap flex-shrink-0">

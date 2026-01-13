@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { DS } from '../../design-system';
 import { TableSkeleton, RadarChartSkeleton } from '../Skeletons';
+import { supabase } from '../../services/supabase';
 
 interface User {
     id: string;
@@ -15,44 +16,63 @@ interface User {
     scores?: { [key: string]: number };
 }
 
-const MOCK_USERS: User[] = [
-    {
-        id: '1', name: 'Johnny Doe', email: 'johnny@example.com', role: 'student', status: 'active', joined: 'Jan 12, 2025',
-        scores: { 'Perceiving Emotions': 85, 'Using Emotions': 65, 'Understanding Emotions': 78, 'Managing Emotions': 45 }
-    },
-    {
-        id: '2', name: 'Sarah Miller', email: 'sarah@msceit.edu', role: 'admin', status: 'active', joined: 'Jan 05, 2025',
-        scores: { 'Perceiving Emotions': 95, 'Using Emotions': 92, 'Understanding Emotions': 88, 'Managing Emotions': 90 }
-    },
-    {
-        id: '3', name: 'Michael Chen', email: 'm.chen@hospital.org', role: 'student', status: 'pending', joined: 'Jan 04, 2025',
-        scores: { 'Perceiving Emotions': 60, 'Using Emotions': 55, 'Understanding Emotions': 70, 'Managing Emotions': 40 }
-    },
-];
-
 export const AdminUsers: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [users, setUsers] = useState<User[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'admin'>('all');
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [newUser, setNewUser] = useState({ name: '', email: '', role: 'student' });
     const [isLoading, setIsLoading] = useState(true);
 
-    // Simulate loading for demo purposes
-    React.useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 1500);
-        return () => clearTimeout(timer);
+    // Fetch users from Supabase
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch profiles with their auth email
+                const { data: profiles, error } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, role, updated_at')
+                    .order('updated_at', { ascending: false });
+
+                if (error) {
+                    console.error('Error fetching profiles:', error);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Map profiles to User interface
+                const mappedUsers: User[] = (profiles || []).map(p => ({
+                    id: p.id,
+                    name: p.full_name || 'Unknown User',
+                    email: '', // We'll display the ID for now since email needs auth.users access
+                    role: (p.role as 'student' | 'admin') || 'student',
+                    status: 'active' as const,
+                    joined: new Date(p.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    scores: { 'Perceiving Emotions': 0, 'Using Emotions': 0, 'Understanding Emotions': 0, 'Managing Emotions': 0 }
+                }));
+
+                setUsers(mappedUsers);
+            } catch (err) {
+                console.error('Error in fetchUsers:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUsers();
     }, []);
 
-    const filteredUsers = MOCK_USERS.filter(user => {
+    const filteredUsers = users.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesRole = roleFilter === 'all' || user.role === roleFilter;
         return matchesSearch && matchesRole;
     });
 
-    const selectedUser = useMemo(() => MOCK_USERS.find(u => u.id === id), [id]);
+    const selectedUser = useMemo(() => users.find(u => u.id === id), [id, users]);
 
     const handleRowClick = (userId: string) => {
         navigate(`/admin/users/${userId}`);
@@ -81,7 +101,23 @@ export const AdminUsers: React.FC = () => {
 
     return (
         <div className="flex flex-col h-full animate-fade-in-up">
-            <div className="flex flex-col md:flex-row gap-4 mb-8 items-center">
+            <div className="flex flex-col lg:flex-row gap-4 mb-8 items-center">
+                {/* Role Filter Pills - Now before search, styled like Classes branch pills */}
+                <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none w-full lg:w-auto">
+                    {['all', 'student', 'admin'].map((role) => (
+                        <button
+                            key={role}
+                            onClick={() => setRoleFilter(role as any)}
+                            className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${roleFilter === role
+                                ? 'bg-gray-900 text-white dark:bg-white dark:text-black border-transparent shadow-md'
+                                : 'bg-white dark:bg-white/5 text-gray-400 border border-gray-100 dark:border-transparent hover:border-gray-300 dark:hover:bg-white/10'
+                                }`}
+                        >
+                            {role === 'all' ? 'All' : role}s
+                        </button>
+                    ))}
+                </div>
+
                 <div className="relative flex-1 w-full">
                     <input
                         type="text"
@@ -92,20 +128,10 @@ export const AdminUsers: React.FC = () => {
                     />
                     <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    {['all', 'student', 'admin'].map((role) => (
-                        <button
-                            key={role}
-                            onClick={() => setRoleFilter(role as any)}
-                            className={`flex-1 md:flex-none px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${roleFilter === role ? 'bg-gray-900 text-white dark:bg-white dark:text-black' : 'bg-white dark:bg-white/5 text-gray-400 border border-gray-100 dark:border-transparent'}`}
-                        >
-                            {role}s
-                        </button>
-                    ))}
-                </div>
+
                 <button
                     onClick={() => setShowInviteModal(true)}
-                    className="w-full md:w-auto px-8 py-3.5 bg-black dark:bg-white text-white dark:text-black rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all outline-none"
+                    className="w-full lg:w-auto px-8 py-3.5 bg-black dark:bg-white text-white dark:text-black rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all outline-none"
                 >
                     + Invite User
                 </button>
@@ -114,7 +140,7 @@ export const AdminUsers: React.FC = () => {
             {isLoading ? (
                 <TableSkeleton rows={5} columns={5} />
             ) : (
-                <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm`}>
+                <div className="bg-white dark:bg-dark-nav rounded-xl border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>

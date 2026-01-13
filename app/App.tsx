@@ -15,6 +15,7 @@ import { Onboarding } from './components/Onboarding';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { AdminUsers } from './components/Admin/AdminUsers';
 import { AdminClasses } from './components/Admin/AdminClasses';
+import { Ebook } from './components/Ebook';
 import { NotFound } from './components/NotFound';
 import { UserStats, Branch } from './types';
 import { supabase } from './services/supabase';
@@ -386,10 +387,16 @@ function App() {
     );
   }
 
+  // Redirect ebook users who try to access the main app
+  if (userRole === 'ebook' && !location.pathname.startsWith('/ebook')) {
+    return <Navigate to="/ebook" replace />;
+  }
+
   return (
     <Routes>
       {/* Standalone pages - no Layout wrapper */}
       <Route path="/404" element={<NotFound />} />
+      <Route path="/ebook" element={<Ebook />} />
       <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
 
       {/* All other routes wrapped in Layout */}
@@ -410,8 +417,8 @@ function App() {
         >
           <Routes>
             {/* Root redirect */}
-            <Route index element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
-            <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
+            <Route index element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : userRole === 'ebook' ? "/ebook" : "/home/dashboard"} replace />} />
+            <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : userRole === 'ebook' ? "/ebook" : "/home/dashboard"} replace />} />
             <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
             <Route path="/auth" element={<Navigate to="/" replace />} />
 

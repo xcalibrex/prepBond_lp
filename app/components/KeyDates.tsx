@@ -2,7 +2,7 @@ import React from 'react';
 
 export const KeyDates: React.FC = () => {
     return (
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-y-auto max-h-[400px] pr-1 scrollbar-thin">
             {/* Info Session */}
             <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer">
                 <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 flex-shrink-0">
