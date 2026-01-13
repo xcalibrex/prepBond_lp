@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DS } from '../design-system';
 
 interface LayoutProps {
@@ -75,6 +75,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const userMenuRef = useRef<HTMLDivElement>(null);
     const [prevTab, setPrevTab] = useState('dashboard');
+    const navigate = useNavigate();
 
     // Track tab history for back button logic
     useEffect(() => {
@@ -285,6 +286,22 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
 
                                 {isUserMenuOpen && (
                                     <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-dark-nav border border-gray-100 dark:border-white/10 rounded-[24px] shadow-xl overflow-hidden animate-fade-in-up z-50">
+                                        {role === 'admin' && (
+                                            <div className="p-2 border-b border-gray-50 dark:border-white/5">
+                                                <button
+                                                    onClick={() => {
+                                                        navigate(isAdminSection ? '/home/dashboard' : '/admin/dashboard');
+                                                        setIsUserMenuOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-xl transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                    {isAdminSection ? 'Go to App' : 'Go to Admin'}
+                                                </button>
+                                            </div>
+                                        )}
                                         <div className="p-2 border-b border-gray-50 dark:border-white/5">
                                             <button
                                                 onClick={() => {
