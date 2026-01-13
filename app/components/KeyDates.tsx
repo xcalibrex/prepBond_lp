@@ -55,8 +55,19 @@ export const KeyDates: React.FC = () => {
                 </div>
             </div>
 
-            <p className="text-xs font-semibold text-gray-900 dark:text-white">10-13 Mar · Interviews</p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">~2 hours online</p>
+            {/* Interviews */}
+            <div className="flex items-start gap-3 p-3 rounded-[20px] border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10">
+                <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3" />
+                    </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-white">10-13 Mar · Interviews</p>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400">~2 hours online</p>
+                </div>
+            </div>
+
             {/* Offers */}
             <div className="flex items-start gap-3 p-3 rounded-[20px] border border-green-100 dark:border-green-900/30 bg-green-50/50 dark:bg-green-900/10">
                 <div className="w-9 h-9 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
