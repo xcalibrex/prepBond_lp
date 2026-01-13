@@ -57,11 +57,8 @@ export const KeyDates: React.FC = () => {
 
             <p className="text-xs font-semibold text-gray-900 dark:text-white">10-13 Mar · Interviews</p>
             <p className="text-[10px] text-gray-500 dark:text-gray-400">~2 hours online</p>
-        </div>
-            </div >
-
-    {/* Offers */ }
-    < div className = "flex items-start gap-3 p-3 rounded-[20px] border border-green-100 dark:border-green-900/30 bg-green-50/50 dark:bg-green-900/10" >
+            {/* Offers */}
+            <div className="flex items-start gap-3 p-3 rounded-[20px] border border-green-100 dark:border-green-900/30 bg-green-50/50 dark:bg-green-900/10">
                 <div className="w-9 h-9 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -71,7 +68,7 @@ export const KeyDates: React.FC = () => {
                     <p className="text-xs font-semibold text-green-700 dark:text-green-400">26 Mar · Offers Released</p>
                     <p className="text-[10px] text-green-600/70 dark:text-green-400/70">8:30am QLD</p>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };

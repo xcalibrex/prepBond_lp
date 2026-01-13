@@ -222,7 +222,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
                 {/* Left Column (Main Content Area) - Fixed layout, charts expand to fill */}
                 <div className="lg:col-span-8 flex flex-col gap-5 h-full pb-40 lg:pb-0">
