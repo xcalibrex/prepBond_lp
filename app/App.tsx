@@ -359,7 +359,15 @@ function App() {
     );
   }
 
-  if (!session) return <Auth isDark={isDark} toggleTheme={toggleTheme} />;
+  if (!session) {
+    return (
+      <Routes>
+        <Route path="/auth" element={<Auth isDark={isDark} toggleTheme={toggleTheme} />} />
+        <Route path="/signup" element={<Auth isDark={isDark} toggleTheme={toggleTheme} initialSignup={true} />} />
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      </Routes>
+    );
+  }
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} isDark={isDark} />;
   if (showOnboarding) return <Onboarding onComplete={handleOnboardingComplete} />;
 

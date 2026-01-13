@@ -222,10 +222,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full overflow-hidden">
 
-                {/* Left Column (Main Content Area) */}
-                <div className="lg:col-span-8 flex flex-col gap-5">
+                {/* Left Column (Main Content Area) - Independent Scroll */}
+                <div className="lg:col-span-8 flex flex-col gap-5 h-full overflow-y-auto scrollbar-hide pb-20 lg:pb-0">
 
                     {/* 1. Hero Banner - Moved inside left column */}
 
@@ -355,12 +355,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                     </div>
                 </div>
 
-                {/* Right Column - Desktop (lg and up) */}
-                <div className={`${mobileTab === 'roadmap' ? 'block' : 'hidden lg:flex'} lg:col-span-4 flex flex-col gap-5 pt-0`}>
+                {/* Right Column - Desktop (lg and up) - Fixed full height with internal scrolling */}
+                <div className={`${mobileTab === 'roadmap' ? 'block' : 'hidden lg:flex'} lg:col-span-4 flex flex-col gap-0 pt-0 h-full overflow-hidden`}>
 
 
                     {/* Calendar Header Moved Here */}
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center mb-4 shrink-0 px-1">
                         <h3 className="text-[24px] font-bold font-serif text-gray-900 dark:text-white leading-tight">{new Date().toLocaleString('default', { month: 'long' })} <span className="text-gray-400">{new Date().getFullYear()}</span></h3>
                         <div className="flex gap-1">
                             <button className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full text-gray-400 transition-colors">
@@ -371,10 +371,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                             </button>
                         </div>
                     </div>
-                    <Calendar isDark={isDark} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+                    <div className="shrink-0 mb-6">
+                        <Calendar isDark={isDark} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+                    </div>
 
-                    <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
+                    <div className="flex flex-col flex-1 gap-3 overflow-hidden">
+                        <div className="flex items-center justify-between shrink-0 px-1">
                             <h3 className="text-[20px] font-bold font-serif text-gray-900 dark:text-white flex items-center gap-2">
                                 Roadmap
                             </h3>
@@ -395,37 +397,39 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                             </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-5 border border-gray-100 dark:border-white/5 min-h-[300px]`}>
+                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-5 border border-gray-100 dark:border-white/5 flex-1 overflow-hidden flex flex-col`}>
                             {rightPanelTab === 'schedule' ? (
-                                <div className="mt-1">
-                                    <div className="flex items-center justify-between mb-4">
+                                <div className="mt-1 flex flex-col h-full">
+                                    <div className="flex items-center justify-between mb-4 shrink-0">
                                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{selectedDate.toLocaleString('default', { day: 'numeric', month: 'short' })}</p>
                                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-500">{filteredTasks.length} Tasks</span>
                                     </div>
 
-                                    {filteredTasks.length > 0 ? (
-                                        filteredTasks.map((task, i) => (
-                                            <TaskItem key={i} title={task.title} type={task.type} date={task.dateStr} duration={task.duration} color={task.color} />
-                                        ))
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                                            <p className="text-sm">No tasks scheduled</p>
-                                            <button className="mt-2 text-xs text-blue-500 font-medium hover:underline">+ Add Task</button>
-                                        </div>
-                                    )}
+                                    <div className="flex-1 overflow-y-auto scrollbar-hide -mr-2 pr-2">
+                                        {filteredTasks.length > 0 ? (
+                                            filteredTasks.map((task, i) => (
+                                                <TaskItem key={i} title={task.title} type={task.type} date={task.dateStr} duration={task.duration} color={task.color} />
+                                            ))
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-10 text-gray-400 h-full">
+                                                <p className="text-sm">No tasks scheduled</p>
+                                                <button className="mt-2 text-xs text-blue-500 font-medium hover:underline">+ Add Task</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 text-center shrink-0">
+                                        <button className="text-black dark:text-white font-bold text-xs hover:underline flex items-center justify-center gap-2 mx-auto">
+                                            Full Schedule
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
-                                <KeyDates />
-                            )}
-
-                            {rightPanelTab === 'schedule' && (
-                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 text-center">
-                                    <button className="text-black dark:text-white font-bold text-xs hover:underline flex items-center justify-center gap-2 mx-auto">
-                                        Full Schedule
-                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                    </button>
+                                <div className="h-full overflow-y-auto scrollbar-hide -mr-2 pr-2">
+                                    <KeyDates />
                                 </div>
                             )}
+
                         </div>
                     </div>
                 </div>

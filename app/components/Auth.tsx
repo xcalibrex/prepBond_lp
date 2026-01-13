@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 interface AuthProps {
     isDark?: boolean;
     toggleTheme?: () => void;
+    initialSignup?: boolean;
 }
 
 const AppLogo = ({ isDark }: { isDark: boolean }) => (
@@ -21,11 +22,11 @@ const AppLogo = ({ isDark }: { isDark: boolean }) => (
     </div>
 );
 
-export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme }) => {
+export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme, initialSignup = false }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isSignUp, setIsSignUp] = useState(false);
+    const [isSignUp, setIsSignUp] = useState(initialSignup);
     const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
 
     const handleAuth = async (e: React.FormEvent) => {

@@ -351,8 +351,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                     </header>
                 )}
 
-                <div className={`flex-1 w-full overflow-y-auto overflow-x-hidden ${isSettingsView ? 'md:translate-x-0' : ''}`}>
-                    <div className={`mx-auto transition-all duration-500 min-h-full
+                <div className={`flex-1 w-full overflow-x-hidden ${activeTab === 'dashboard' ? 'overflow-hidden h-full' : 'overflow-y-auto'}`}>
+                    <div className={`mx-auto transition-all duration-500 min-h-full h-full
                 ${isFocusMode ? 'p-0' : 'max-w-[1600px] px-6 md:px-8 py-6 pb-32 md:pb-10'}
                 ${isSettingsView ? 'animate-slide-in-right md:animate-none' : 'animate-fade-in'}
              `}>
