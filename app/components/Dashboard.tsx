@@ -224,8 +224,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full overflow-hidden">
 
-                {/* Left Column (Main Content Area) - Independent Scroll */}
-                <div className="lg:col-span-8 flex flex-col gap-5 h-full overflow-y-auto scrollbar-hide pb-20 lg:pb-0">
+                {/* Left Column (Main Content Area) - Fixed layout, charts expand to fill */}
+                <div className="lg:col-span-8 flex flex-col gap-5 h-full pb-40 lg:pb-0">
 
                     {/* 1. Hero Banner - Moved inside left column */}
 
@@ -281,7 +281,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                     </div>
 
                     {/* Trajectory Chart */}
-                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5 flex-1 min-h-[400px]`}>
+                    <div className={`${mobileTab === 'trajectory' ? 'block' : 'hidden md:block'} bg-white dark:bg-dark-nav ${DS.radius.card} p-6 border border-gray-100 dark:border-white/5 flex-1 min-h-[400px] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-4">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white shrink-0">Alignment Trajectory</h3>
                             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide w-full md:w-auto md:pb-0">
@@ -371,7 +371,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                             </button>
                         </div>
                     </div>
-                    <div className="shrink-0 mb-6">
+                    <div className="shrink-0 mb-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl rounded-xl">
                         <Calendar isDark={isDark} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
                     </div>
 
@@ -397,7 +397,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                             </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-5 border border-gray-100 dark:border-white/5 flex-1 overflow-hidden flex flex-col`}>
+                        <div className={`bg-white dark:bg-dark-nav ${DS.radius.card} p-5 border border-gray-100 dark:border-white/5 flex-1 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
                             {rightPanelTab === 'schedule' ? (
                                 <div className="mt-1 flex flex-col h-full">
                                     <div className="flex items-center justify-between mb-4 shrink-0">
