@@ -404,6 +404,7 @@ function App() {
             {/* Root redirect */}
             <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : "/home/dashboard"} replace />} />
             <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
+            <Route path="/auth" element={<Navigate to="/" replace />} />
 
             {/* Student Routes */}
             <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />

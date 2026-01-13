@@ -223,7 +223,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                         <div className="absolute right-0 top-0 h-full w-full md:w-[60%] pointer-events-none overflow-hidden hidden md:block z-0">
                             <div className="absolute inset-0 bg-gradient-to-r from-[#001833] dark:from-dark-nav via-[#001833]/40 dark:via-dark-nav/40 to-transparent z-10"></div>
                             <img
-                                src="/banner-emotions.png"
+                                src="/media/Cover.png"
                                 alt="Emotions Gradient"
                                 className="w-full h-full object-cover object-right opacity-90"
                             />
