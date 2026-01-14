@@ -109,10 +109,10 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
               Start Session
             </button>
             <button
-              onClick={() => startAssessment(Branch.Managing)}
+              onClick={() => onCancel?.()}
               className="w-full bg-white dark:bg-black text-gray-700 dark:text-gray-300 py-3.5 rounded-[200px] font-medium text-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-all shadow-sm hover:scale-105 hover:-translate-y-1 active:scale-95"
             >
-              Quick Drill
+              Go back to dashboard
             </button>
           </div>
         )}
@@ -130,8 +130,8 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       {showExitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-black/80 backdrop-blur-sm animate-fade-in px-4">
           <div className="bg-white dark:bg-dark-nav p-6 rounded-[24px] shadow-2xl max-w-sm w-full animate-fade-in-up">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">End Session?</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Progress for this module will not be saved.</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Are you sure?</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">You will lose all progress for this mock test.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowExitConfirm(false)} className="flex-1 px-4 py-2.5 rounded-[200px] bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">Cancel</button>
               <button onClick={confirmExit} className="flex-1 px-4 py-2.5 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-red-600 dark:hover:bg-red-500 hover:text-white hover:border-red-600 transition-colors shadow-sm">End Session</button>
