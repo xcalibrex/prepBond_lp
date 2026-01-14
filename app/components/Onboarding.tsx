@@ -42,16 +42,16 @@ const MSCEIT_BRANCHES = [
 ];
 
 const EMOTIONAL_SCALE = [
-    { label: 'Nervous', icon: '😰', value: 1 },
-    { label: 'Uncertain', icon: '🤨', value: 2 },
-    { label: 'Neutral', icon: '😐', value: 3 },
-    { label: 'Curious', icon: '🤔', value: 4 },
-    { label: 'Confident', icon: '✨', value: 5 }
+    { label: 'Nervous', icon: '😰', value: 1, validation: "It's completely normal to feel nervous. Most of our top students felt the same way before they started. We've got your back.", encouragement: "Take a deep breath. You're in precisely the right place to build your confidence step-by-step." },
+    { label: 'Uncertain', icon: '🤨', value: 2, validation: "Uncertainty is just the gap between where you are and where you want to be. Let's fill that gap together.", encouragement: "We'll clarify exactly what Bond is looking for so you can stop guessing and start preparing." },
+    { label: 'Neutral', icon: '😐', value: 3, validation: "A balanced starting point is perfect. We'll help you turn that neutrality into focused precision.", encouragement: "Let's begin calibrating your emotional intelligence for peak performance." },
+    { label: 'Curious', icon: '🤔', value: 4, validation: "Curiosity is the best mindset for learning! You're going to love diving into the mechanics of the MSCEIT.", encouragement: "That inquisitiveness will help you master the subtle nuances that others miss." },
+    { label: 'Confident', icon: '✨', value: 5, validation: "That's the spirit! Let's channel that confidence into mastering the specific strategies required for Bond.", encouragement: "Let's refine those natural instincts into a high-scoring methodology." }
 ];
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-    // Phases: 'password' -> 'walkthrough' -> 'confidence' -> 'complete'
-    const [phase, setPhase] = useState<'password' | 'walkthrough' | 'confidence' | 'complete'>('password');
+    // Phases: 'password' -> 'welcome' -> 'walkthrough' -> 'confidence' -> 'validation' -> 'launch' -> 'complete'
+    const [phase, setPhase] = useState<'password' | 'welcome' | 'walkthrough' | 'confidence' | 'validation' | 'launch' | 'complete'>('password');
     const [walkthroughStep, setWalkthroughStep] = useState(0);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -94,14 +94,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         }
     };
 
-    const handleConfidenceSelect = async (value: number) => {
+    const handleConfidenceSelect = (value: number) => {
         setConfidence(value);
+        setPhase('validation');
+    };
+
+    const handleFinalizeOnboarding = async (startTest: boolean) => {
         setIsSubmitting(true);
         try {
             const { error: updateError } = await supabase.auth.updateUser({
                 data: {
                     onboarding_complete: true,
-                    initial_confidence: value,
+                    initial_confidence: confidence,
                     onboarded_at: new Date().toISOString()
                 }
             });
@@ -117,7 +121,16 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             }
 
             setPhase('complete');
-            setTimeout(onComplete, 2000);
+
+            // Wait for animation then complete
+            setTimeout(() => {
+                if (startTest) {
+                    onComplete(); // App logic starts modules
+                } else {
+                    // Force navigation to dashboard if skipping
+                    window.location.href = window.location.origin + '/app/home/dashboard';
+                }
+            }, 2000);
         } catch (err) {
             console.error("Finalizing onboarding failed", err);
             onComplete();
@@ -128,7 +141,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
     if (phase === 'password') {
         return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top,_#111_0%,_#000_100%)]">
                 <div className="w-full max-w-md animate-fade-in-up">
                     <div className="text-center mb-10">
                         <div className="w-16 h-16 bg-white/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
@@ -173,11 +186,34 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full py-5 bg-white text-black rounded-[200px] font-black text-xs uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                            className="w-full py-5 bg-white text-black rounded-[200px] font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
                         >
                             {isSubmitting ? 'Securing...' : 'Set Password & Continue'}
                         </button>
                     </form>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'welcome') {
+        return (
+            <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
+                <div className="w-full max-w-2xl text-center animate-fade-in-up">
+                    <div className="relative w-32 h-32 mx-auto mb-10">
+                        <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full animate-pulse"></div>
+                        <img src="/media/2.png" className="w-full h-full object-contain relative z-10" alt="Logo" />
+                    </div>
+                    <h1 className="text-5xl md:text-6xl font-bold mb-6 font-serif italic text-white tracking-tight leading-tight">Welcome to the Nexus.</h1>
+                    <p className="text-xl text-gray-400 font-light leading-relaxed mb-12">
+                        You’ve officially unlocked the most advanced AI-driven preparation environment for Bond Medicine. Let’s get you calibrated.
+                    </p>
+                    <button
+                        onClick={() => setPhase('walkthrough')}
+                        className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
+                    >
+                        Initialize Onboarding
+                    </button>
                 </div>
             </div>
         );
@@ -219,13 +255,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                                 setPhase('confidence');
                             }
                         }}
-                        className="px-12 py-5 bg-white text-black rounded-full font-black text-xs uppercase tracking-widest shadow-xl hover:scale-[1.05] active:scale-[0.95] transition-all"
+                        className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
                     >
                         {walkthroughStep < MSCEIT_BRANCHES.length - 1 ? 'Next Branch' : 'Got it, what\'s next?'}
                     </button>
                 </div>
 
-                {/* Decorative background pulse */}
                 <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br ${branch.color} rounded-full blur-[160px] opacity-[0.05] pointer-events-none transition-all duration-1000`} />
             </div>
         );
@@ -234,7 +269,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     if (phase === 'confidence') {
         return (
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
-                <div className="w-full max-w-2xl text-center animate-fade-in-up">
+                <div className="w-full max-w-3xl text-center animate-fade-in-up">
                     <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif italic text-white tracking-tight">How are we feeling?</h2>
                     <p className="text-lg text-gray-500 font-light mb-16">Before we start your first preparation session, how do you feel about the MSCEIT test right now?</p>
 
@@ -249,6 +284,59 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                                 <span className="text-[10px] font-black uppercase tracking-widest opacity-60 group-hover:opacity-100">{item.label}</span>
                             </button>
                         ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'validation') {
+        const selected = EMOTIONAL_SCALE.find(s => s.value === confidence);
+        return (
+            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
+                <div className="w-full max-w-2xl text-center animate-fade-in-up">
+                    <span className="text-5xl block mb-8">{selected?.icon}</span>
+                    <h2 className="text-4xl font-bold mb-8 font-serif italic leading-tight">{selected?.validation}</h2>
+                    <p className="text-xl text-gray-400 font-light leading-relaxed mb-12">
+                        {selected?.encouragement}
+                    </p>
+                    <button
+                        onClick={() => setPhase('launch')}
+                        className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
+                    >
+                        Continue to Simulation
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'launch') {
+        return (
+            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#0a0a0a_0%,_#000_100%)]">
+                <div className="w-full max-w-2xl text-center animate-fade-in-up">
+                    <div className="mb-10 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span className="text-[10px] font-black tracking-widest text-white/60">SIMULATION READY</span>
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif italic text-white tracking-tight leading-tight">Ready to start?</h2>
+                    <p className="text-xl text-gray-400 font-light leading-relaxed mb-12">
+                        Let's start with a diagnostic test to gauge your current scores across the 4 branches. This will identify your weakest areas instantly.
+                    </p>
+
+                    <div className="flex flex-col items-center gap-6">
+                        <button
+                            onClick={() => handleFinalizeOnboarding(true)}
+                            className="w-full md:w-auto px-16 py-5 bg-white text-black rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all"
+                        >
+                            Let's Go
+                        </button>
+                        <button
+                            onClick={() => handleFinalizeOnboarding(false)}
+                            className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors py-2"
+                        >
+                            Skip for now
+                        </button>
                     </div>
                 </div>
             </div>
