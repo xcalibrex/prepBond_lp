@@ -145,8 +145,18 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-all duration-500 pointer-events-auto"
                 style={{
-                    maskImage: `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 20}px, black ${Math.max(targetRect.width, targetRect.height) / 2 + 21}px)`,
-                    WebkitMaskImage: `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 20}px, black ${Math.max(targetRect.width, targetRect.height) / 2 + 21}px)`
+                    clipPath: `polygon(
+                        0% 0%,
+                        0% 100%,
+                        ${targetRect.left - 8}px 100%,
+                        ${targetRect.left - 8}px ${targetRect.top - 8}px,
+                        ${targetRect.right + 8}px ${targetRect.top - 8}px,
+                        ${targetRect.right + 8}px ${targetRect.bottom + 8}px,
+                        ${targetRect.left - 8}px ${targetRect.bottom + 8}px,
+                        ${targetRect.left - 8}px 100%,
+                        100% 100%,
+                        100% 0%
+                    )`
                 }}
             />
 
