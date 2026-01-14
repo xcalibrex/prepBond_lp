@@ -156,17 +156,16 @@ function App() {
     }
   };
 
-  const handleOnboardingComplete = async () => {
+  const handleOnboardingComplete = async (startTest: boolean) => {
     // 1. Refresh session to get latest metadata (including password & onboarding_complete: true)
     const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
     setSession(refreshedSession);
-    setShowOnboarding(false);
 
     if (refreshedSession) {
       // 2. Sync profile to database
       const metadata = refreshedSession.user.user_metadata;
 
-      const { error: profileError } = await supabase.from('profiles').upsert({
+      await supabase.from('profiles').upsert({
         id: refreshedSession.user.id,
         full_name: metadata.full_name || '',
         role: metadata.role || 'student',
@@ -174,12 +173,22 @@ function App() {
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' });
 
-      if (profileError) console.error("Profile sync error:", profileError);
-
-      // 3. Initialize stats and navigate to baseline assessment
+      // 3. Initialize stats and navigate
       saveStats(INITIAL_STATS, refreshedSession);
-      handleStartModule(Branch.Perceiving); // Start with the first branch
+
+      if (startTest) {
+        // Direct jump to assessment to bypass dashboard flicker
+        setSelectedBranch(Branch.Perceiving);
+        navigate('/assessment');
+      } else {
+        navigate('/home/dashboard');
+      }
     }
+
+    // Hide onboarding overlay AFTER navigation has started
+    setTimeout(() => {
+      setShowOnboarding(false);
+    }, 100);
   };
 
   const loadStatsFromLocal = () => {
@@ -375,7 +384,11 @@ function App() {
     );
   }
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} isDark={isDark} />;
-  if (showOnboarding) return <Onboarding onComplete={handleOnboardingComplete} />;
+
+  // Combine onboarding check with navigation to prevent double render
+  if (showOnboarding && !location.pathname.includes('/assessment')) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
 
   if (session && userRole === null) {
     return (

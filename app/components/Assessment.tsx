@@ -88,11 +88,11 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
         </div>
 
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          Simulation Ready
+          Mock Test Ready
         </h2>
 
         <p className="text-gray-500 dark:text-gray-400 text-base mb-8 leading-relaxed max-w-sm mx-auto animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          Enter the simulation. Your responses will adapt in real-time.
+          Enter the mock test. Your responses will adapt in real-time.
         </p>
 
         {isLoading ? (

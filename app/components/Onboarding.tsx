@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 
 interface OnboardingProps {
-    onComplete: () => void;
+    onComplete: (startTest: boolean) => void;
 }
 
 const MSCEIT_BRANCHES = [
@@ -178,16 +178,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
             // Wait for animation then complete
             setTimeout(() => {
-                if (startTest) {
-                    onComplete(); // App logic starts modules
-                } else {
-                    // Force navigation to dashboard if skipping
-                    window.location.href = window.location.origin + '/app/home/dashboard';
-                }
+                onComplete(startTest);
             }, 3000); // 3 seconds for better loading feel
         } catch (err) {
             console.error("Finalizing onboarding failed", err);
-            onComplete();
+            onComplete(false); // Default to dashboard on error
         } finally {
             setIsSubmitting(false);
         }
@@ -303,7 +298,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             disabled={isSubmitting}
                             className="w-full py-5 bg-white text-black rounded-[200px] font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
                         >
-                            {isSubmitting ? 'Updating...' : 'Continue to Nexus'}
+                            {isSubmitting ? 'Updating...' : 'Continue'}
                         </button>
                     </form>
                 </div>
