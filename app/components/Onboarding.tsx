@@ -58,6 +58,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [confidence, setConfidence] = useState<number | null>(null);
+    const [isStartingTest, setIsStartingTest] = useState(false);
 
     const handleBack = () => {
         if (phase === 'welcome') setPhase('password');
@@ -113,6 +114,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
     const handleFinalizeOnboarding = async (startTest: boolean) => {
         setIsSubmitting(true);
+        setIsStartingTest(startTest);
         try {
             const { error: updateError } = await supabase.auth.updateUser({
                 data: {
@@ -142,7 +144,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     // Force navigation to dashboard if skipping
                     window.location.href = window.location.origin + '/app/home/dashboard';
                 }
-            }, 2000);
+            }, 3000); // 3 seconds for better loading feel
         } catch (err) {
             console.error("Finalizing onboarding failed", err);
             onComplete();
@@ -376,7 +378,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 <div className="w-full max-w-2xl text-center animate-fade-in-up">
                     <div className="mb-10 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span className="text-[10px] font-black tracking-widest text-white/60">SIMULATION READY</span>
+                        <span className="text-[10px] font-black tracking-widest text-white/60">MOCK TEST READY</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif italic text-white tracking-tight leading-tight">Ready to start?</h2>
                     <p className="text-xl text-gray-400 font-light leading-relaxed mb-12">
@@ -403,13 +405,23 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     }
 
     return (
-        <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
             <div className="relative w-32 h-32 mb-10">
                 <div className="absolute inset-0 bg-white blur-3xl opacity-20 animate-pulse"></div>
                 <img src="/media/2.png" className="w-full h-full object-contain animate-float" alt="Logo" />
             </div>
-            <h2 className="text-3xl font-bold mb-3 font-serif italic">Nexus Calibrated.</h2>
-            <p className="text-gray-400 text-sm font-light tracking-widest uppercase">Launching your first preparation module...</p>
+
+            <div className="text-center animate-fade-in-up">
+                <h2 className="text-3xl font-bold mb-3 font-serif italic">
+                    {isStartingTest ? "Initializing Mock Test..." : "Nexus Calibrated."}
+                </h2>
+                <div className="w-48 h-1 bg-white/10 rounded-full mx-auto overflow-hidden mb-4">
+                    <div className="h-full bg-white animate-progress-fast shadow-[0_0_10px_white]"></div>
+                </div>
+                <p className="text-gray-400 text-[10px] font-black tracking-widest uppercase">
+                    {isStartingTest ? "Accessing Diagnostic Environment" : "Syncing to Dashboard"}
+                </p>
+            </div>
         </div>
     );
 };
