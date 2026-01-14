@@ -50,8 +50,8 @@ const EMOTIONAL_SCALE = [
 ];
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-    // Phases: 'password' -> 'welcome' -> 'intro' -> 'walkthrough' -> 'confidence' -> 'validation' -> 'launch' -> 'complete'
-    const [phase, setPhase] = useState<'password' | 'welcome' | 'intro' | 'walkthrough' | 'confidence' | 'validation' | 'launch' | 'complete'>('password');
+    // Phases: 'password' -> 'profile' -> 'welcome' -> 'intro' -> 'walkthrough' -> 'confidence' -> 'validation' -> 'launch' -> 'complete'
+    const [phase, setPhase] = useState<'password' | 'profile' | 'welcome' | 'intro' | 'walkthrough' | 'confidence' | 'validation' | 'launch' | 'complete'>('password');
     const [walkthroughStep, setWalkthroughStep] = useState(0);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -59,9 +59,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     const [error, setError] = useState<string | null>(null);
     const [confidence, setConfidence] = useState<number | null>(null);
     const [isStartingTest, setIsStartingTest] = useState(false);
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
 
     const handleBack = () => {
-        if (phase === 'welcome') setPhase('password');
+        if (phase === 'profile') setPhase('password');
+        else if (phase === 'welcome') setPhase('profile');
         else if (phase === 'intro') setPhase('welcome');
         else if (phase === 'walkthrough') {
             if (walkthroughStep > 0) setWalkthroughStep(prev => prev - 1);
@@ -99,9 +102,46 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         try {
             const { error: updateError } = await supabase.auth.updateUser({ password });
             if (updateError) throw updateError;
-            setPhase('welcome');
+            setPhase('profile');
         } catch (err: any) {
             setError(err.message || "Failed to set password.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleProfileSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!firstName.trim() || !lastName.trim()) {
+            setError("Both first and last name are required.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            const fullName = `${firstName.trim()} ${lastName.trim()}`;
+
+            // Update Auth Metadata
+            const { error: authError } = await supabase.auth.updateUser({
+                data: { full_name: fullName }
+            });
+            if (authError) throw authError;
+
+            // Update Profiles Table
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { error: profileError } = await supabase.from('profiles').update({
+                    full_name: fullName,
+                    updated_at: new Date().toISOString()
+                }).eq('id', user.id);
+                if (profileError) throw profileError;
+            }
+
+            setPhase('welcome');
+        } catch (err: any) {
+            setError(err.message || "Failed to update profile.");
         } finally {
             setIsSubmitting(false);
         }
@@ -203,6 +243,67 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             className="w-full py-5 bg-white text-black rounded-[200px] font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
                         >
                             {isSubmitting ? 'Securing...' : 'Set Password & Continue'}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'profile') {
+        return (
+            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top,_#111_0%,_#000_100%)]">
+                <button onClick={handleBack} className="absolute top-10 left-10 flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
+                </button>
+                <div className="w-full max-w-md animate-fade-in-up">
+                    <div className="text-center mb-10">
+                        <div className="w-16 h-16 bg-white/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl">
+                            👤
+                        </div>
+                        <h1 className="text-3xl font-bold mb-2 font-serif italic text-white">Introduce Yourself</h1>
+                        <p className="text-gray-400 text-sm">How should we address you within the Nexus?</p>
+                    </div>
+
+                    <form onSubmit={handleProfileSubmit} className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">First Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-white transition-all outline-none"
+                                    placeholder="John"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Last Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-white transition-all outline-none"
+                                    placeholder="Doe"
+                                />
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs p-4 rounded-xl animate-fade-in">
+                                {error}
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full py-5 bg-white text-black rounded-[200px] font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50"
+                        >
+                            {isSubmitting ? 'Updating...' : 'Continue to Nexus'}
                         </button>
                     </form>
                 </div>
