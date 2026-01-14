@@ -15,6 +15,17 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
         rel="stylesheet">
 
+    <!-- Auth Redirect Handler -->
+    <script>
+        (function () {
+            const hash = window.location.hash;
+            const search = window.location.search;
+            if (hash.includes('access_token=') || hash.includes('type=invite') || search.includes('code=')) {
+                window.location.href = window.location.origin + '/app/' + window.location.search + window.location.hash;
+            }
+        })();
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
