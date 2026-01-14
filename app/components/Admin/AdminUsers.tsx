@@ -101,6 +101,7 @@ export const AdminUsers: React.FC = () => {
                         onboarding_complete: false
                     },
                     shouldCreateUser: true,
+                    emailRedirectTo: window.location.origin
                 }
             });
 
