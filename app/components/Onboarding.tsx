@@ -50,8 +50,8 @@ const EMOTIONAL_SCALE = [
 ];
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-    // Phases: 'password' -> 'welcome' -> 'walkthrough' -> 'confidence' -> 'validation' -> 'launch' -> 'complete'
-    const [phase, setPhase] = useState<'password' | 'welcome' | 'walkthrough' | 'confidence' | 'validation' | 'launch' | 'complete'>('password');
+    // Phases: 'password' -> 'welcome' -> 'intro' -> 'walkthrough' -> 'confidence' -> 'validation' -> 'launch' -> 'complete'
+    const [phase, setPhase] = useState<'password' | 'welcome' | 'intro' | 'walkthrough' | 'confidence' | 'validation' | 'launch' | 'complete'>('password');
     const [walkthroughStep, setWalkthroughStep] = useState(0);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -86,7 +86,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         try {
             const { error: updateError } = await supabase.auth.updateUser({ password });
             if (updateError) throw updateError;
-            setPhase('walkthrough');
+            setPhase('welcome');
         } catch (err: any) {
             setError(err.message || "Failed to set password.");
         } finally {
@@ -209,10 +209,37 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         You’ve officially unlocked the most advanced AI-driven preparation environment for Bond Medicine. Let’s get you calibrated.
                     </p>
                     <button
-                        onClick={() => setPhase('walkthrough')}
+                        onClick={() => setPhase('intro')}
                         className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
                     >
                         Initialize Onboarding
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (phase === 'intro') {
+        return (
+            <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
+                <div className="w-full max-w-2xl text-center animate-fade-in-up">
+                    <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-10 text-3xl">
+                        🎓
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-8 font-serif italic text-white tracking-tight leading-tight">Understanding the Standard</h2>
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 mb-12 text-left space-y-6">
+                        <p className="text-xl text-gray-300 leading-relaxed font-light">
+                            Bond University's Psychometric Test for Medicine is designed to evaluate more than just academic ability. It uses the <span className="text-white font-semibold">MSCEIT exam</span> (Mayer-Salovey-Caruso Emotional Intelligence Test) to measure how you process emotional information.
+                        </p>
+                        <p className="text-xl text-gray-300 leading-relaxed font-light">
+                            The MSCEIT is the gold standard for emotional intelligence assessment. It measures <span className="text-white font-semibold">4 key branches</span> of abilities that are critical for successful medical practitioners.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setPhase('walkthrough')}
+                        className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
+                    >
+                        Explore the 4 Branches
                     </button>
                 </div>
             </div>
