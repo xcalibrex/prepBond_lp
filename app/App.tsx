@@ -12,6 +12,7 @@ import { Results } from './components/Results';
 import { History } from './components/History';
 import { Auth } from './components/Auth';
 import { Onboarding } from './components/Onboarding';
+import { AppTour } from './components/AppTour';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { AdminUsers } from './components/Admin/AdminUsers';
 import { AdminClasses } from './components/Admin/AdminClasses';
@@ -107,6 +108,7 @@ function App() {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [showSplash, setShowSplash] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const [remoteSyncEnabled, setRemoteSyncEnabled] = useState(true);
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -182,6 +184,10 @@ function App() {
         navigate('/assessment');
       } else {
         navigate('/home/dashboard');
+        // Show tour if it's the first time
+        if (!metadata.tour_complete) {
+          setShowTour(true);
+        }
       }
     }
 
@@ -189,6 +195,20 @@ function App() {
     setTimeout(() => {
       setShowOnboarding(false);
     }, 100);
+  };
+
+  const handleTourComplete = async () => {
+    setShowTour(false);
+    if (!session) return;
+
+    // Persist tour status
+    await supabase.auth.updateUser({
+      data: { tour_complete: true }
+    });
+
+    await supabase.from('profiles').update({
+      updated_at: new Date().toISOString()
+    }).eq('id', session.user.id);
   };
 
   const loadStatsFromLocal = () => {
@@ -411,63 +431,66 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* Standalone pages - no Layout wrapper */}
-      <Route path="/404" element={<NotFound />} />
-      <Route path="/ebook" element={<Ebook />} />
-      <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
+    <>
+      {showTour && <AppTour onComplete={handleTourComplete} />}
+      <Routes>
+        {/* Standalone pages - no Layout wrapper */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="/ebook" element={<Ebook />} />
+        <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
 
-      {/* All other routes wrapped in Layout */}
-      <Route path="/*" element={
-        <Layout
-          activeTab={activeTab}
-          onTabChange={(tab) => {
-            // Determine base from current URL, not just role, so admins can stay on /home if viewing student dashboard
-            const currentBase = location.pathname.startsWith('/admin') ? 'admin' : 'home';
-            navigate(`/${currentBase}/${tab}`);
-            if (tab !== 'assessment') setSelectedBranch(null);
-          }}
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-          onLogout={handleLogout}
-          user={session?.user}
-          role={userRole}
-        >
-          <Routes>
-            {/* Root redirect */}
-            <Route index element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : userRole === 'ebook' ? "/ebook" : "/home/dashboard"} replace />} />
-            <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : userRole === 'ebook' ? "/ebook" : "/home/dashboard"} replace />} />
-            <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
-            <Route path="/auth" element={<Navigate to="/" replace />} />
+        {/* All other routes wrapped in Layout */}
+        <Route path="/*" element={
+          <Layout
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+              // Determine base from current URL, not just role, so admins can stay on /home if viewing student dashboard
+              const currentBase = location.pathname.startsWith('/admin') ? 'admin' : 'home';
+              navigate(`/${currentBase}/${tab}`);
+              if (tab !== 'assessment') setSelectedBranch(null);
+            }}
+            isDark={isDark}
+            toggleTheme={toggleTheme}
+            onLogout={handleLogout}
+            user={session?.user}
+            role={userRole}
+          >
+            <Routes>
+              {/* Root redirect */}
+              <Route index element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : userRole === 'ebook' ? "/ebook" : "/home/dashboard"} replace />} />
+              <Route path="/" element={<Navigate to={userRole === 'admin' ? "/admin/dashboard" : userRole === 'ebook' ? "/ebook" : "/home/dashboard"} replace />} />
+              <Route path="/dashboard" element={<Navigate to="/home/dashboard" replace />} />
+              <Route path="/auth" element={<Navigate to="/" replace />} />
 
-            {/* Student Routes */}
-            <Route path="/home" element={<Navigate to="/home/dashboard" replace />} />
-            <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
-            <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
-            <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
-            <Route path="/home/history" element={<History stats={stats} />} />
-            <Route path="/home/curriculum" element={<Training stats={stats} onRunModule={handleStartModule} />} />
-            <Route path="/home/tutors" element={<Tutors />} />
-            <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
+              {/* Student Routes */}
+              <Route path="/home" element={<Navigate to="/home/dashboard" replace />} />
+              <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
+              <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
+              <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
+              <Route path="/home/history" element={<History stats={stats} />} />
+              <Route path="/home/curriculum" element={<Training stats={stats} onRunModule={handleStartModule} />} />
+              <Route path="/home/tutors" element={<Tutors />} />
+              <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
 
-            {/* Admin Routes */}
-            {userRole === 'admin' && (
-              <>
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/users/:id" element={<AdminUsers />} />
-                <Route path="/admin/classes" element={<AdminClasses />} />
-                <Route path="/admin/classes/:id" element={<AdminClasses />} />
-              </>
-            )}
+              {/* Admin Routes */}
+              {userRole === 'admin' && (
+                <>
+                  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/users/:id" element={<AdminUsers />} />
+                  <Route path="/admin/classes" element={<AdminClasses />} />
+                  <Route path="/admin/classes/:id" element={<AdminClasses />} />
+                </>
+              )}
 
-            {/* Unknown routes redirect to 404 */}
-            <Route path="*" element={<Navigate to="/404" replace />} />
-          </Routes>
-        </Layout>
-      } />
-    </Routes>
+              {/* Unknown routes redirect to 404 */}
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Routes>
+          </Layout>
+        } />
+      </Routes>
+    </>
   );
 }
 

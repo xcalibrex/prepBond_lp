@@ -38,6 +38,7 @@ const TAB_TITLES: Record<string, string> = {
 
 const NavItem: React.FC<NavItemProps> = ({ id, label, isActive, onClick, icon, isCollapsed, className = '' }) => (
     <button
+        id={`nav-${id}`}
         onClick={onClick}
         title={isCollapsed ? label : undefined}
         aria-label={label}
@@ -367,6 +368,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                 <div className={`md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-nav/95 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-[40] px-6 py-2 pb-safe flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)] transition-all duration-500 ease-in-out ${isSettingsView ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'} ${DS.animation.theme}`}>
                     {currentMenuItems.map(item => (
                         <button
+                            id={`mobile-nav-${item.id}`}
                             key={item.id}
                             onClick={() => onTabChange(item.id)}
                             className={`flex flex-col items-center gap-1 p-2 rounded-[24px] transition-all duration-200 ${activeTab === item.id
