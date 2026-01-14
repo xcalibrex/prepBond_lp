@@ -59,6 +59,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     const [error, setError] = useState<string | null>(null);
     const [confidence, setConfidence] = useState<number | null>(null);
 
+    const handleBack = () => {
+        if (phase === 'welcome') setPhase('password');
+        else if (phase === 'intro') setPhase('welcome');
+        else if (phase === 'walkthrough') {
+            if (walkthroughStep > 0) setWalkthroughStep(prev => prev - 1);
+            else setPhase('intro');
+        }
+        else if (phase === 'confidence') setPhase('walkthrough');
+        else if (phase === 'validation') setPhase('confidence');
+        else if (phase === 'launch') setPhase('validation');
+    };
+
     // Skip password phase if they already have one (e.g. they signed up normally but haven't onboarded)
     useEffect(() => {
         const checkUser = async () => {
@@ -147,7 +159,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         <div className="w-16 h-16 bg-white/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
                             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                         </div>
-                        <h1 className="text-3xl font-bold mb-2 font-serif italic text-white">Create Your Security Key</h1>
+                        <h1 className="text-3xl font-bold mb-2 font-serif italic text-white">Set Your Password</h1>
                         <p className="text-gray-400 text-sm">Welcome to PrepBond. Please set a password to secure your exclusive access.</p>
                     </div>
 
@@ -204,15 +216,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full animate-pulse"></div>
                         <img src="/media/2.png" className="w-full h-full object-contain relative z-10" alt="Logo" />
                     </div>
-                    <h1 className="text-5xl md:text-6xl font-bold mb-6 font-serif italic text-white tracking-tight leading-tight">Welcome to the Nexus.</h1>
+                    <h1 className="text-5xl md:text-6xl font-bold mb-6 font-serif italic text-white tracking-tight leading-tight">Welcome to PrepBond</h1>
                     <p className="text-xl text-gray-400 font-light leading-relaxed mb-12">
-                        You’ve officially unlocked the most advanced AI-driven preparation environment for Bond Medicine. Let’s get you calibrated.
+                        You've officially unlocked the most advanced platform preparation for Bond Medicine. Let's get you accepted!
                     </p>
                     <button
                         onClick={() => setPhase('intro')}
                         className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
                     >
-                        Initialize Onboarding
+                        Get Started
                     </button>
                 </div>
             </div>
@@ -222,6 +234,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     if (phase === 'intro') {
         return (
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
+                <button onClick={handleBack} className="absolute top-10 left-10 flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
+                </button>
                 <div className="w-full max-w-2xl text-center animate-fade-in-up">
                     <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-10 text-3xl">
                         🎓
@@ -260,6 +276,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 </div>
 
                 <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-3xl mx-auto z-10">
+                    <button onClick={handleBack} className="absolute top-10 left-10 flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
+                        <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
+                    </button>
                     <div key={branch.id} className="animate-fade-in-up">
                         <div className={`w-24 h-24 rounded-[32px] bg-gradient-to-br ${branch.color} flex items-center justify-center text-5xl mb-10 mx-auto shadow-2xl animate-float`}>
                             {branch.icon}
@@ -296,6 +316,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     if (phase === 'confidence') {
         return (
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
+                <button onClick={handleBack} className="absolute top-10 left-10 flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
+                </button>
                 <div className="w-full max-w-3xl text-center animate-fade-in-up">
                     <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif italic text-white tracking-tight">How are we feeling?</h2>
                     <p className="text-lg text-gray-500 font-light mb-16">Before we start your first preparation session, how do you feel about the MSCEIT test right now?</p>
@@ -321,6 +345,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         const selected = EMOTIONAL_SCALE.find(s => s.value === confidence);
         return (
             <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
+                <button onClick={handleBack} className="absolute top-10 left-10 flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
+                </button>
                 <div className="w-full max-w-2xl text-center animate-fade-in-up">
                     <span className="text-5xl block mb-8">{selected?.icon}</span>
                     <h2 className="text-4xl font-bold mb-8 font-serif italic leading-tight">{selected?.validation}</h2>
@@ -331,7 +359,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         onClick={() => setPhase('launch')}
                         className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
                     >
-                        Continue to Simulation
+                        Continue
                     </button>
                 </div>
             </div>
@@ -341,6 +369,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     if (phase === 'launch') {
         return (
             <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#0a0a0a_0%,_#000_100%)]">
+                <button onClick={handleBack} className="absolute top-10 left-10 flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
+                </button>
                 <div className="w-full max-w-2xl text-center animate-fade-in-up">
                     <div className="mb-10 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
@@ -348,7 +380,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     </div>
                     <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif italic text-white tracking-tight leading-tight">Ready to start?</h2>
                     <p className="text-xl text-gray-400 font-light leading-relaxed mb-12">
-                        Let's start with a diagnostic test to gauge your current scores across the 4 branches. This will identify your weakest areas instantly.
+                        Let's start with a diagnostic test to gauge your current scores across the 4 branches. This will identify your greatest opportunities for growth instantly.
                     </p>
 
                     <div className="flex flex-col items-center gap-6">
