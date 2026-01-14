@@ -191,10 +191,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             // Sync with profile (Source of Truth)
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                await supabase.from('profiles').update({
+                await supabase.from('profiles').upsert({
+                    id: user.id,
                     onboarding_complete: true,
+                    full_name: user.user_metadata?.full_name || '',
                     updated_at: new Date().toISOString()
-                }).eq('id', user.id);
+                }, { onConflict: 'id' });
             }
 
             setPhase('complete');
