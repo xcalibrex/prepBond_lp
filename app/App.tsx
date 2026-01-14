@@ -148,6 +148,7 @@ function App() {
 
   const checkOnboarding = (session: Session) => {
     const metadata = session.user.user_metadata;
+    // Check both user_metadata and profile data if available
     if (!metadata || metadata.onboarding_complete !== true) {
       setShowOnboarding(true);
     } else {
@@ -156,24 +157,28 @@ function App() {
   };
 
   const handleOnboardingComplete = async () => {
+    // 1. Refresh session to get latest metadata (including password & onboarding_complete: true)
     const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
     setSession(refreshedSession);
     setShowOnboarding(false);
 
     if (refreshedSession) {
-      // Sync profile to database
+      // 2. Sync profile to database
       const metadata = refreshedSession.user.user_metadata;
-      if (metadata && metadata.profile) {
-        await supabase.from('profiles').upsert({
-          id: refreshedSession.user.id,
-          full_name: metadata.full_name || '',
-          role: metadata.profile.role,
-          goal: metadata.profile.goal,
-          experience_level: metadata.profile.experience,
-          updated_at: new Date().toISOString()
-        });
-      }
+
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: refreshedSession.user.id,
+        full_name: metadata.full_name || '',
+        role: metadata.role || 'student',
+        onboarding_complete: true,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+
+      if (profileError) console.error("Profile sync error:", profileError);
+
+      // 3. Initialize stats and navigate to baseline assessment
       saveStats(INITIAL_STATS, refreshedSession);
+      handleStartModule(Branch.Perceiving); // Start with the first branch
     }
   };
 

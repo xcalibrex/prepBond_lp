@@ -82,11 +82,43 @@ export const AdminUsers: React.FC = () => {
         navigate('/admin/users');
     };
 
-    const handleInvite = (e: React.FormEvent) => {
+    const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, this would call Supabase
-        setShowInviteModal(false);
-        setNewUser({ name: '', email: '', role: 'student' });
+        setIsLoading(true);
+
+        try {
+            // 1. Invite user via Supabase Auth
+            // Note: This requires the Service Role Key or handled via a secure Edge Function.
+            // For now, we use the client-side attempt, but standard anon keys can't do this.
+            // Recommendation to user: Create an Edge Function for "invite-user" to handle this securely.
+
+            const { error: inviteError } = await supabase.auth.signInWithOtp({
+                email: newUser.email,
+                options: {
+                    data: {
+                        full_name: newUser.name,
+                        role: newUser.role,
+                        onboarding_complete: false
+                    },
+                    shouldCreateUser: true,
+                }
+            });
+
+            if (inviteError) throw inviteError;
+
+            // 2. Insert/Upsert into profiles table to ensure role visibility
+            // We usually wait for the user to actually sign up, but pre-creating profiles helps admins.
+            // Using a placeholder ID or handling it on onboarding is better.
+
+            alert(`Invitation sent to ${newUser.email}!`);
+            setShowInviteModal(false);
+            setNewUser({ name: '', email: '', role: 'student' });
+        } catch (err: any) {
+            console.error('Invite failed:', err);
+            alert(`Failed to invite user: ${err.message || 'Unknown error'}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Format data for Radar Chart
