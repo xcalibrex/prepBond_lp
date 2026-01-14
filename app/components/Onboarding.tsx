@@ -281,7 +281,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             👤
                         </div>
                         <h1 className="text-3xl font-bold mb-2 font-serif italic text-white">Introduce Yourself</h1>
-                        <p className="text-gray-400 text-sm">How should we address you within the Nexus?</p>
+                        <p className="text-gray-400 text-sm">How should we address you within PrepBond?</p>
                     </div>
 
                     <form onSubmit={handleProfileSubmit} className="space-y-6">
@@ -532,7 +532,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
             <div className="text-center animate-fade-in-up">
                 <h2 className="text-3xl font-bold mb-3 font-serif italic">
-                    {isStartingTest ? "Initializing Mock Test..." : "Nexus Calibrated."}
+                    {isStartingTest ? "Initializing Mock Test..." : "PrepBond Calibrated."}
                 </h2>
                 <div className="w-48 h-1 bg-white/10 rounded-full mx-auto overflow-hidden mb-4">
                     <div className="h-full bg-white animate-progress-fast shadow-[0_0_10px_white]"></div>

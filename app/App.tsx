@@ -430,7 +430,7 @@ function App() {
             <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="80" strokeDashoffset="20"></circle>
           </svg>
         </div>
-        <h2 className="text-2xl font-bold mb-2 font-serif italic">Authenticating Nexus...</h2>
+        <h2 className="text-2xl font-bold mb-2 font-serif italic">Authenticating...</h2>
         <p className="text-gray-400 text-sm font-light tracking-wide">Establishing secure connection protocols.</p>
       </div>
     );
