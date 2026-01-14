@@ -14,15 +14,45 @@ interface AppTourProps {
 
 const TOUR_STEPS: TourStep[] = [
     {
-        targetId: 'nav-dashboard',
-        title: 'Dashboard',
-        description: 'An overview of your current performance across the 4 branches of the MSCEIT.',
-        position: 'right'
+        targetId: 'tour-banner',
+        title: 'Your Next Step',
+        description: 'This shows you your next module. Start here at any time to continue your journey.',
+        position: 'bottom'
+    },
+    {
+        targetId: 'tour-stats',
+        title: 'Performance Stats',
+        description: "See where you rank and track your progress across key metrics.",
+        position: 'bottom'
+    },
+    {
+        targetId: 'tour-trajectory',
+        title: 'Alignment Trajectory',
+        description: 'Track your growth and trajectory against all 4 branches of the MSCEIT in real-time.',
+        position: 'top'
+    },
+    {
+        targetId: 'tour-roadmap',
+        title: 'Calendar & Roadmap',
+        description: 'Stay on track by adding tasks and following critical PrepBond key dates.',
+        position: 'left'
     },
     {
         targetId: 'nav-curriculum',
         title: 'Curriculum',
-        description: 'Progress your way to your best chance of success by completing the modules successfully.',
+        description: 'Progress your way to success by completing the modules successfully.',
+        position: 'right'
+    },
+    {
+        targetId: 'nav-analytics',
+        title: 'Insight',
+        description: 'Detailed breakdown of your emotional intelligence metrics and trends.',
+        position: 'right'
+    },
+    {
+        targetId: 'nav-history',
+        title: 'History',
+        description: 'Review your previous mock test results and track your improvement over time.',
         position: 'right'
     }
 ];
@@ -41,20 +71,19 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
                 setTargetRect(el.getBoundingClientRect());
                 setIsVisible(true);
             } else {
-                // If element not found (e.g. mobile nav), try mobile ID
-                const mobileEl = document.getElementById(`mobile-${step.targetId}`);
-                if (mobileEl) {
-                    setTargetRect(mobileEl.getBoundingClientRect());
-                    setIsVisible(true);
-                } else {
-                    setIsVisible(false);
-                }
+                setIsVisible(false);
             }
         };
 
-        updateRect();
+        // Small delay to ensure dashboard/nav is rendered
+        const timer = setTimeout(updateRect, 100);
         window.addEventListener('resize', updateRect);
-        return () => window.removeEventListener('resize', updateRect);
+        window.addEventListener('scroll', updateRect);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', updateRect);
+            window.removeEventListener('scroll', updateRect);
+        };
     }, [currentStep, step.targetId]);
 
     const handleNext = () => {
@@ -64,14 +93,6 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
             onComplete();
         }
     };
-
-    const spotlightStyle = useMemo(() => {
-        if (!targetRect) return {};
-        const padding = 8;
-        return {
-            clipPath: `inset(${targetRect.top - padding}px calc(100% - ${targetRect.right + padding}px) calc(100% - ${targetRect.bottom + padding}px) ${targetRect.left - padding}px rounded 12px)`
-        };
-    }, [targetRect]);
 
     const tooltipStyle = useMemo(() => {
         if (!targetRect) return {};
@@ -84,8 +105,37 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
                 transform: 'translateY(-50%)'
             };
         }
+        if (step.position === 'left') {
+            return {
+                top: targetRect.top + targetRect.height / 2,
+                right: (window.innerWidth - targetRect.left) + padding,
+                transform: 'translateY(-50%)'
+            };
+        }
+        if (step.position === 'bottom') {
+            return {
+                top: targetRect.bottom + padding,
+                left: targetRect.left + targetRect.width / 2,
+                transform: 'translateX(-50%)'
+            };
+        }
+        if (step.position === 'top') {
+            return {
+                bottom: (window.innerHeight - targetRect.top) + padding,
+                left: targetRect.left + targetRect.width / 2,
+                transform: 'translateX(-50%)'
+            };
+        }
         return {};
     }, [targetRect, step.position]);
+
+    const arrowStyle = useMemo(() => {
+        if (step.position === 'left') return "top-1/2 -right-2 rotate-45 -translate-y-1/2 border-r border-t";
+        if (step.position === 'right') return "top-1/2 -left-2 rotate-45 -translate-y-1/2 border-l border-b";
+        if (step.position === 'top') return "top-[calc(100%-8px)] left-1/2 rotate-45 -translate-x-1/2 border-r border-b";
+        if (step.position === 'bottom') return "-top-2 left-1/2 rotate-45 -translate-x-1/2 border-l border-t";
+        return "";
+    }, [step.position]);
 
     if (!isVisible || !targetRect) return null;
 
@@ -95,8 +145,8 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-all duration-500 pointer-events-auto"
                 style={{
-                    maskImage: `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 10}px, black ${Math.max(targetRect.width, targetRect.height) / 2 + 11}px)`,
-                    WebkitMaskImage: `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 10}px, black ${Math.max(targetRect.width, targetRect.height) / 2 + 11}px)`
+                    maskImage: `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 20}px, black ${Math.max(targetRect.width, targetRect.height) / 2 + 21}px)`,
+                    WebkitMaskImage: `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 20}px, black ${Math.max(targetRect.width, targetRect.height) / 2 + 21}px)`
                 }}
             />
 
@@ -133,7 +183,7 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
 
                 {/* Arrow */}
                 <div
-                    className="absolute top-1/2 -left-2 w-4 h-4 bg-white dark:bg-dark-nav border-l border-b border-gray-100 dark:border-white/10 rotate-45 -translate-y-1/2"
+                    className={`absolute w-3 h-3 bg-white dark:bg-dark-nav border-gray-100 dark:border-white/10 ${arrowStyle}`}
                 />
             </div>
         </div>
