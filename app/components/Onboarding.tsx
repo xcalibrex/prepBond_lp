@@ -75,14 +75,37 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         else if (phase === 'launch') setPhase('validation');
     };
 
-    // Skip password phase if they already have one (e.g. they signed up normally but haven't onboarded)
+    // Intelligent Initial State
     useEffect(() => {
-        const checkUser = async () => {
+        const initializeOnboarding = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            // This is a simplified check - usually, if they are from an invite, we want them to set it.
-            // If they are logged in with a session, they might already have one.
+            if (!user) return;
+
+            // 1. Check if name is already set
+            const fullName = user.user_metadata?.full_name;
+            if (fullName) {
+                const parts = fullName.split(' ');
+                setFirstName(parts[0] || '');
+                setLastName(parts.slice(1).join(' ') || '');
+            }
+
+            // 2. Check if user was invited (source of truth for password necessity)
+            // If they are a student and haven't onboarded, we usually want them to set a password 
+            // unless they've already done so. Supabase doesn't easily tell us "has_password", 
+            // but we can infer based on the stage.
+
+            // If name is already set, jump past profile. 
+            // If we're at password and they have a name, maybe they just need password.
+            // But if they have a name AND we can verify they've been here before, 
+            // we might want to skip.
+
+            if (fullName && phase === 'password') {
+                setPhase('profile'); // For now, let them see profile to confirm, or jump to welcome.
+                // Actually, let's be aggressive: if name is set, skip to welcome.
+                setPhase('welcome');
+            }
         };
-        checkUser();
+        initializeOnboarding();
     }, []);
 
     const handleSetPassword = async (e: React.FormEvent) => {
@@ -165,7 +188,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             });
             if (updateError) throw updateError;
 
-            // Sync with profile
+            // Sync with profile (Source of Truth)
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 await supabase.from('profiles').update({

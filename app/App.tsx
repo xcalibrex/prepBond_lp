@@ -148,10 +148,15 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkOnboarding = (session: Session) => {
-    const metadata = session.user.user_metadata;
-    // Check both user_metadata and profile data if available
-    if (!metadata || metadata.onboarding_complete !== true) {
+  const checkOnboarding = async (session: Session) => {
+    // Check profile table as source of truth for onboarding
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_complete')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    if (!profile || profile.onboarding_complete !== true) {
       setShowOnboarding(true);
     } else {
       setShowOnboarding(false);
@@ -201,12 +206,13 @@ function App() {
     setShowTour(false);
     if (!session) return;
 
-    // Persist tour status
+    // Persist tour status in metadata (legacy) and profile (new source of truth)
     await supabase.auth.updateUser({
       data: { tour_complete: true }
     });
 
     await supabase.from('profiles').update({
+      walkthrough_complete: true,
       updated_at: new Date().toISOString()
     }).eq('id', session.user.id);
   };
@@ -254,6 +260,11 @@ function App() {
       if (profileData) {
         console.log("Profile loaded:", profileData);
         setUserRole(profileData.role || 'student');
+
+        // Trigger tour if not complete and on a home route
+        if (!profileData.walkthrough_complete && location.pathname.includes('/home')) {
+          setShowTour(true);
+        }
       } else {
         setUserRole('student');
       }
