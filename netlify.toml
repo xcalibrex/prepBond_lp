@@ -1,10 +1,9 @@
 [build]
-  # Build command: build React app into deploy folder, then copy static pages
-  command = "cd app && npm install && npm run build && cd .. && cp web/*.html deploy/ && cp -r web/media deploy/ && cp -r web/lp deploy/ || true"
-  # Publish the deploy folder which contains everything
+  # Marketing site build: just copy web contents to deploy folder
+  command = "cp web/*.html deploy/ && cp -r web/media deploy/ && cp -r web/lp deploy/ || true"
   publish = "deploy"
 
-# Serve static landing pages as-is
+# Redirects for the marketing site files
 [[redirects]]
   from = "/lp/*"
   to = "/lp/:splat"
@@ -20,8 +19,4 @@
   to = "/media/:splat"
   status = 200
 
-# SPA routing for the React app at /app
-[[redirects]]
-  from = "/app/*"
-  to = "/app/index.html"
-  status = 200
+# Note: App routing is now handled by app/netlify.toml when deployed separately

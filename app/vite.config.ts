@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   return {
     base: env.VITE_BASE_URL || '/',
     build: {
-      outDir: '../deploy/app',
+      outDir: 'dist',
       emptyOutDir: true,
     },
     server: {
