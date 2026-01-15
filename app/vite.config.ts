@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: env.VITE_BASE_URL || '/app/',
+    base: env.VITE_BASE_URL || '/',
     build: {
       outDir: '../deploy/app',
       emptyOutDir: true,

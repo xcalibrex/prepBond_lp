@@ -1,0 +1,111 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export function PrivacyPolicy() {
+    const navigate = useNavigate();
+
+    return (
+        <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white p-6 md:p-12 font-sans">
+            <div className="max-w-4xl mx-auto">
+                <button
+                    onClick={() => navigate('/')}
+                    className="mb-8 text-sm text-gray-500 hover:text-black dark:hover:text-white transition-colors flex items-center gap-2"
+                >
+                    ← Back to Home
+                </button>
+
+                <h1 className="text-3xl md:text-5xl font-bold mb-8">Privacy Policy</h1>
+
+                <div className="space-y-6 text-gray-800 dark:text-gray-300 leading-relaxed">
+                    <p>
+                        PrepBond Pty Ltd (“PrepBond”, “we”, “us”, “our”) is committed to protecting and respecting your privacy. This Privacy Policy explains how we collect, use, store, and disclose your personal information when you access or use our website and services.
+                    </p>
+
+                    <p>
+                        By using the PrepBond website, you consent to the collection and use of information in accordance with this Privacy Policy.
+                    </p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Information we Collect</h2>
+                    <p>We may collect and process the following information:</p>
+                    <p>Personal information you provide voluntarily, including:</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li>Email address (e.g. when signing up, joining a mailing list, downloading resources, or registering interest)</li>
+                        <li>Communications, including correspondence via email or contact forms</li>
+                        <li>Marketing preferences, including whether you opt in or opt out of communications</li>
+                    </ul>
+
+                    <p className="mt-4">Technical and usage information, including:</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li>IP address</li>
+                        <li>Browser type and version</li>
+                        <li>Device information</li>
+                        <li>Pages visited, time spent on the site, and referral sources</li>
+                    </ul>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">How we Use your Information</h2>
+                    <p>We use your information to:</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li>Provide access to our services and resources</li>
+                        <li>Communicate with you about your account, updates, or enquiries</li>
+                        <li>Send marketing communications, including educational content, product updates, and promotional offers</li>
+                        <li>Improve our website, content, and user experience</li>
+                        <li>Monitor site performance and usage analytics</li>
+                        <li>Comply with legal and regulatory obligations</li>
+                    </ul>
+                    <p className="mt-4">You may opt out of marketing communications at any time via the unsubscribe link in emails or by contacting us directly.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Cookies and Analytics</h2>
+                    <h3 className="text-xl font-semibold mb-2 text-black dark:text-white">What are cookies?</h3>
+                    <p>Cookies are small text files placed on your device to help websites function efficiently and improve user experience.</p>
+
+                    <h3 className="text-xl font-semibold mt-4 mb-2 text-black dark:text-white">PrepBond uses cookies and similar technologies to:</h3>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li>Analyse website traffic and usage</li>
+                        <li>Understand visitor behaviour</li>
+                        <li>Improve site functionality and performance</li>
+                    </ul>
+                    <p className="mt-4">We do not use cookies to collect personally identifiable information such as your name or address. Most browsers automatically accept cookies. You may disable cookies through your browser settings; however, some site functionality may be limited.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">IP Address and Technical Data</h2>
+                    <p>We may collect IP addresses and related technical data for system administration, security, and analytics purposes. This information is used in aggregate form and does not personally identify individual users.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Marketing and Remarketing</h2>
+                    <p>By providing your email address, you consent to receiving communications from PrepBond. This may include remarketing via:</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li>Email campaigns</li>
+                        <li>Custom audiences on advertising platforms (e.g. Meta, Google)</li>
+                    </ul>
+                    <p className="mt-4">We do not sell, rent, or trade your personal information to third parties.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Disclosure of Information</h2>
+                    <p>We may disclose your information:</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li>To service providers who assist us in operating the website and delivering services (e.g. email platforms, analytics tools)</li>
+                        <li>Where required by law or regulatory authorities</li>
+                        <li>To protect our rights, users, or the integrity of our services</li>
+                    </ul>
+                    <p className="mt-4">All third parties are required to handle your information securely and in accordance with privacy laws.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Data Security</h2>
+                    <p>We take reasonable steps to protect your personal information from misuse, loss, unauthorised access, or disclosure. However, transmission of data over the internet is not completely secure, and we cannot guarantee absolute security.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Access and Correction</h2>
+                    <p>You may request access to or correction of your personal information by contacting us. We may require verification of identity before processing requests, as permitted under the Privacy Act 1988 (Cth).</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Third-Party Links</h2>
+                    <p>Our website may contain links to third-party websites. We are not responsible for the privacy practices or content of those sites. You should review their privacy policies before providing personal information.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Changes to Policy</h2>
+                    <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page and take effect immediately upon publication.</p>
+
+                    <h2 className="text-2xl font-bold mt-8 mb-4 text-black dark:text-white">Contact Us</h2>
+                    <p>If you have any questions about this Privacy Policy or how we handle your data, please contact us at:</p>
+                    <p className="mt-2 font-mono">Email: support@prepbond.com.au</p>
+                    <p className="mt-1">Company ACN: </p>
+
+                    <div className="h-12"></div>
+                </div>
+            </div>
+        </div>
+    );
+}
