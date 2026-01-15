@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found | PrepBond</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        'dark-bg': '#0A0A0A',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-white text-black min-h-screen flex flex-col items-center justify-center overflow-hidden font-sans">
+
+    <div class="relative w-full px-6 flex flex-col items-center text-center">
+        <!-- Large 404 Number -->
+        <div class="relative mb-8 md:mb-12">
+            <h1 class="text-[120px] md:text-[240px] font-bold text-gray-100 leading-none select-none">
+                404
+            </h1>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div
+                    class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-20 blur-3xl">
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative -mt-16 md:-mt-24 z-10">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 font-serif">
+                Page Not Found
+            </h2>
+            <p class="text-gray-500 text-lg max-w-md mb-8 mx-auto">
+                The page you're looking for doesn't exist or has been moved. Let's get you back on track.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="https://app.prepbond.com.au/auth"
+                    class="px-8 py-3 bg-black text-white font-semibold rounded-xl hover:opacity-90 transition-opacity w-full sm:w-auto">
+                    Log In
+                </a>
+                <a href="/index.html"
+                    class="px-8 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors w-full sm:w-auto">
+                    Return Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div
+            class="absolute top-0 left-1/4 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2">
+        </div>
+        <div
+            class="absolute bottom-0 right-1/4 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl pointer-events-none translate-y-1/2">
+        </div>
+    </div>
+
+</body>
+
+</html>

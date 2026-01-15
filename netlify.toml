@@ -1,6 +1,6 @@
 [build]
   # Marketing site build: just copy web contents to deploy folder
-  command = "cp web/*.html deploy/ && cp -r web/media deploy/ && cp -r web/lp deploy/ || true"
+  command = "rm -rf deploy && mkdir deploy && cp web/*.html deploy/ && cp -r web/media deploy/ && (cp -r web/lp deploy/ || true)"
   publish = "deploy"
 
 # Redirects for the marketing site files
