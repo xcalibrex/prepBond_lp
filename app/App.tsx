@@ -17,7 +17,7 @@ import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { AdminUsers } from './components/Admin/AdminUsers';
 import { AdminClasses } from './components/Admin/AdminClasses';
 import { Ebook } from './components/Ebook';
-import { PrivacyPolicy } from './components/PrivacyPolicy';
+
 import { NotFound } from './components/NotFound';
 import { UserStats, Branch } from './types';
 import { supabase } from './services/supabase';
@@ -449,8 +449,7 @@ function App() {
         {/* Standalone pages - no Layout wrapper */}
         <Route path="/404" element={<NotFound />} />
         <Route path="/ebook" element={<Ebook />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/tos" element={<PrivacyPolicy />} />
+
         <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
 
         {/* All other routes wrapped in Layout */}
