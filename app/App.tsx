@@ -136,7 +136,9 @@ function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       if (session) {
-        if (event === 'SIGNED_IN') setShowSplash(true);
+        if (event === 'SIGNED_IN') {
+          // Do nothing on sign in event to prevent splash on tab switch
+        }
         checkOnboarding(session);
         loadStatsFromSupabase(session.user.id);
       } else {
