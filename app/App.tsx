@@ -4,7 +4,8 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { Assessment } from './components/Assessment';
-import { Training } from './components/Training';
+import { Practice } from './components/Practice';
+import { Classroom } from './components/Classroom';
 import { Analytics } from './components/Analytics';
 import { Profile } from './components/Profile';
 import { Tutors } from './components/Tutors';
@@ -479,11 +480,12 @@ function App() {
 
               {/* Student Routes */}
               <Route path="/home" element={<Navigate to="/home/dashboard" replace />} />
-              <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartCurriculum={() => navigate('/home/curriculum')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
+              <Route path="/home/dashboard" element={<Dashboard stats={stats} user={session?.user} isDark={isDark} onStartExam={() => navigate('/assessment')} onStartPractice={() => navigate('/home/practice')} onLogout={handleLogout} toggleTheme={toggleTheme} onTabChange={(tab) => navigate(`/home/${tab}`)} />} />
               <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
               <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
               <Route path="/home/history" element={<History stats={stats} />} />
-              <Route path="/home/curriculum" element={<Training stats={stats} onRunModule={handleStartModule} />} />
+              <Route path="/home/practice" element={<Practice stats={stats} onRunModule={handleStartModule} />} />
+              <Route path="/home/classroom" element={<Classroom />} />
               <Route path="/home/tutors" element={<Tutors />} />
               <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
 

@@ -12,7 +12,7 @@ interface DashboardProps {
     user: User | null;
     isDark?: boolean;
     onStartExam?: () => void;
-    onStartCurriculum?: () => void;
+    onStartPractice?: () => void;
     onLogout?: () => void;
     toggleTheme?: () => void;
     onTabChange?: (tab: string) => void;
@@ -154,7 +154,7 @@ const TASK_TYPE_COLORS: Record<string, string> = {
     'curriculum': 'bg-emerald-400'
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = false, onStartExam, onStartCurriculum, onLogout, toggleTheme, onTabChange }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = false, onStartExam, onStartPractice, onLogout, toggleTheme, onTabChange }) => {
     const [activeChartTab, setActiveChartTab] = useState<string>('All');
     const [mobileTab, setMobileTab] = useState<'stats' | 'trajectory' | 'roadmap'>('stats');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -348,7 +348,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                             <h2 className="text-2xl font-bold text-white leading-tight mb-2">
                                 Understanding Emotions
                             </h2>
-                            <button onClick={onStartCurriculum} className="mt-6 px-6 py-2.5 bg-white text-[#001833] text-sm font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg active:scale-95 flex items-center gap-2">
+                            <button onClick={onStartPractice} className="mt-6 px-6 py-2.5 bg-white text-[#001833] text-sm font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg active:scale-95 flex items-center gap-2">
                                 Start Session
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             </button>
