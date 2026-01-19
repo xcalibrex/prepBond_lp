@@ -544,7 +544,6 @@ function App() {
     return (
       <Routes>
         <Route path="/auth" element={<Auth isDark={isDark} toggleTheme={toggleTheme} />} />
-        <Route path="/signup" element={<Auth isDark={isDark} toggleTheme={toggleTheme} initialSignup={true} />} />
         <Route path="/ebook" element={<Ebook />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>

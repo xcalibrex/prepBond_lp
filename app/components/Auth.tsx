@@ -4,7 +4,6 @@ import { supabase } from '../services/supabase';
 interface AuthProps {
     isDark?: boolean;
     toggleTheme?: () => void;
-    initialSignup?: boolean;
 }
 
 const AppLogo = ({ isDark }: { isDark: boolean }) => (
@@ -22,8 +21,7 @@ const AppLogo = ({ isDark }: { isDark: boolean }) => (
     </div>
 );
 
-export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme, initialSignup = false }) => {
-    const [isSignUp, setIsSignUp] = useState(initialSignup);
+export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -35,24 +33,12 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme, initial
         setMessage(null);
 
         try {
-            const { error } = isSignUp
-                ? await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        emailRedirectTo: `${window.location.origin}/auth/callback`,
-                    },
-                })
-                : await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
             if (error) throw error;
-
-            if (isSignUp) {
-                setMessage({ type: 'success', text: 'Check your email for the confirmation link!' });
-            }
         } catch (error: any) {
             setMessage({ type: 'error', text: error.message || 'An error occurred' });
         } finally {
@@ -119,10 +105,10 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme, initial
                     </div>
                     <div className="mb-10 text-center lg:text-left">
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-                            {isSignUp ? 'Create your account' : <span>Welcome to <span className="font-serif">PrepBond</span></span>}
+                            <span>Welcome to <span className="font-serif">PrepBond</span></span>
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            {isSignUp ? 'Start your neuro-plasticity training today.' : 'Enter your credentials to access the simulation.'}
+                            Enter your credentials to access the simulation.
                         </p>
                     </div>
                     <form onSubmit={handleAuth} className="space-y-5">
@@ -158,20 +144,9 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme, initial
                             disabled={isLoading}
                             className="w-full py-4 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-bold text-sm hover:opacity-90 transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                         >
-                            {isLoading ? 'Processing...' : (isSignUp ? 'Sign Up Free' : 'Sign In')}
+                            {isLoading ? 'Processing...' : 'Sign In'}
                         </button>
                     </form>
-                    <div className="mt-8 text-center pt-8 border-t border-gray-100 dark:border-white/5">
-                        <p className="text-sm text-gray-500">
-                            {isSignUp ? 'Already a member? ' : <span>New to <span className="font-serif">PrepBond</span>? </span>}
-                            <button
-                                onClick={() => { setIsSignUp(!isSignUp); setMessage(null); }}
-                                className="text-gray-900 dark:text-white font-bold hover:underline"
-                            >
-                                {isSignUp ? 'Log in' : 'Create account'}
-                            </button>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>

@@ -26,10 +26,11 @@ export const Classroom: React.FC = () => {
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            // 1. Fetch Classes
+            // 1. Fetch Classes (only live ones)
             const { data: classesData, error: classesError } = await supabase
                 .from('classes')
                 .select('*')
+                .eq('is_live', true)
                 .order('created_at', { ascending: true });
 
             if (classesError) throw classesError;

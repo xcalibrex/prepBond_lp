@@ -134,12 +134,8 @@ export const AdminPractice: React.FC = () => {
         : tests.filter(t => t.is_live);
 
     return (
-        <div className="p-8 pb-32 animate-fade-in">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold font-serif text-gray-900 dark:text-white mb-2">Practice Management</h1>
-                    <p className="text-gray-500 dark:text-gray-400">Manage worksheets and exams.</p>
-                </div>
+        <div className="pb-32 animate-fade-in">
+            <div className="flex justify-end items-center mb-6">
                 <div className="flex gap-4">
                     <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-full">
                         <button
@@ -239,7 +235,7 @@ export const AdminPractice: React.FC = () => {
             </div>
 
             {/* Create Modal */}
-            {isCreateModalOpen && (
+            {isCreateModalOpen && createPortal(
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsCreateModalOpen(false)}></div>
                     <div className="relative bg-white dark:bg-dark-nav w-full max-w-lg rounded-3xl p-8 shadow-2xl animate-fade-in-up">
@@ -331,7 +327,8 @@ export const AdminPractice: React.FC = () => {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
             {/* Test Editor Overlay */}
             {editingTestId && createPortal(
