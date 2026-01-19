@@ -102,7 +102,7 @@
         !function (f, b, e, v, n, t, s) {
             if (f.fbq) return; n = f.fbq = function () {
                 n.callMethod ?
-                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
             };
             if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
             n.queue = []; t = b.createElement(e); t.async = !0;
@@ -248,7 +248,7 @@
                         </div>
 
                         <form class="space-y-4" x-data="formHandler()"
-                            @submit.prevent="submitForm('https://qngyxbhttcmkrcjvahku.supabase.co/functions/v1/register-ebook-user', 'Cheat Sheet Landing Page', () => { formSubmitted = true; setTimeout(() => window.location.href = 'https://app.prepbond.com.au/auth', 3000) })">
+                            @submit.prevent="submitForm('https://omthentic.app.n8n.cloud/webhook/2d1120b1-6725-4264-ab87-8ffc324b0414', 'Cheat Sheet Landing Page', () => { formSubmitted = true })">
                             <div>
                                 <label
                                     class="text-[10px] font-semibold uppercase tracking-wider text-muted block mb-1.5">Full
@@ -294,17 +294,9 @@
                             </svg>
                         </div>
                         <h3 class="text-2xl font-bold mb-2">You're In! 🎉</h3>
-                        <p class="text-muted mb-4">Account created! Redirecting to login...</p>
+                        <p class="text-muted mb-4">Check your emails, your digital ebook has arrived.</p>
                         <div class="flex items-center justify-center gap-2 text-accent">
-                            <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                </path>
-                            </svg>
-                            <span class="text-sm font-medium">Check your email for login details...</span>
+                            <span class="text-sm font-medium">Please check your inbox (and spam folder)</span>
                         </div>
                     </div>
                 </div>

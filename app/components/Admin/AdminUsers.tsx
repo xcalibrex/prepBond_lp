@@ -31,28 +31,57 @@ export const AdminUsers: React.FC = () => {
         const fetchUsers = async () => {
             setIsLoading(true);
             try {
-                // Fetch profiles with their auth email
-                const { data: profiles, error } = await supabase
+                // Fetch profiles
+                const { data: profiles, error: profilesError } = await supabase
                     .from('profiles')
                     .select('id, full_name, role, updated_at')
                     .order('updated_at', { ascending: false });
 
-                if (error) {
-                    console.error('Error fetching profiles:', error);
+                if (profilesError) {
+                    console.error('Error fetching profiles:', profilesError);
                     setIsLoading(false);
                     return;
                 }
 
+                // Fetch assessment history for scores
+                const { data: scoresData, error: scoresError } = await supabase
+                    .from('assessment_history')
+                    .select('user_id, branch, score');
+
+                if (scoresError) {
+                    console.error('Error fetching scores:', scoresError);
+                }
+
                 // Map profiles to User interface
-                const mappedUsers: User[] = (profiles || []).map(p => ({
-                    id: p.id,
-                    name: p.full_name || 'Unknown User',
-                    email: '', // We'll display the ID for now since email needs auth.users access
-                    role: (p.role as 'student' | 'admin') || 'student',
-                    status: 'active' as const,
-                    joined: new Date(p.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                    scores: { 'Perceiving Emotions': 0, 'Using Emotions': 0, 'Understanding Emotions': 0, 'Managing Emotions': 0 }
-                }));
+                const mappedUsers: User[] = (profiles || []).map(p => {
+                    // Find scores for this user
+                    const userScores = {
+                        'Perceiving Emotions': 0,
+                        'Using Emotions': 0,
+                        'Understanding Emotions': 0,
+                        'Managing Emotions': 0
+                    };
+
+                    if (scoresData) {
+                        scoresData
+                            .filter(s => s.user_id === p.id)
+                            .forEach(s => {
+                                if (userScores.hasOwnProperty(s.branch)) {
+                                    userScores[s.branch] = s.score;
+                                }
+                            });
+                    }
+
+                    return {
+                        id: p.id,
+                        name: p.full_name || 'Unknown User',
+                        email: '', // Email not available in profiles table
+                        role: (p.role as 'student' | 'admin') || 'student',
+                        status: 'active' as const,
+                        joined: new Date(p.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        scores: userScores
+                    };
+                });
 
                 setUsers(mappedUsers);
             } catch (err) {

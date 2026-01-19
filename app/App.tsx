@@ -17,12 +17,16 @@ import { AppTour } from './components/AppTour';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { AdminUsers } from './components/Admin/AdminUsers';
 import { AdminClasses } from './components/Admin/AdminClasses';
+import { AdminPractice } from './components/Admin/AdminPractice';
 import { Ebook } from './components/Ebook';
+import { TestRunner } from './components/TestRunner';
 
+import { TestRunnerWrapper } from './components/TestRunnerWrapper';
 import { NotFound } from './components/NotFound';
 import { UserStats, Branch } from './types';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
+import { Toaster } from 'react-hot-toast';
 
 // Clean baseline for new Med School Aspirants
 const INITIAL_STATS: UserStats = {
@@ -109,11 +113,16 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [showSplash, setShowSplash] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [remoteSyncEnabled, setRemoteSyncEnabled] = useState(true);
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userRole');
+    }
+    return null;
+  });
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (isDark) {
@@ -124,10 +133,16 @@ function App() {
   }, [isDark]);
 
   useEffect(() => {
+    console.log('App mounted');
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
-        setShowSplash(true);
+        // Only show splash if not shown in this session
+        const hasShownSplash = sessionStorage.getItem('splash_shown');
+        if (!hasShownSplash) {
+          setShowSplash(true);
+          sessionStorage.setItem('splash_shown', 'true');
+        }
         checkOnboarding(session);
         loadStatsFromSupabase(session.user.id);
       }
@@ -144,7 +159,7 @@ function App() {
         loadStatsFromSupabase(session.user.id);
       } else {
         setStats(INITIAL_STATS);
-        setShowOnboarding(false);
+        setOnboardingComplete(null);
         setShowSplash(false);
       }
     });
@@ -156,16 +171,63 @@ function App() {
     // Check profile table as source of truth for onboarding
     const { data: profile } = await supabase
       .from('profiles')
-      .select('onboarding_complete')
+      .select('onboarding_complete, role')
       .eq('id', session.user.id)
       .maybeSingle();
 
-    if (!profile || profile.onboarding_complete !== true) {
-      setShowOnboarding(true);
-    } else {
-      setShowOnboarding(false);
-    }
+    // Fallback to metadata if profile fetch fails or role is missing, default to student
+    const role = profile?.role || session.user.user_metadata?.role || 'student';
+
+    // Sync role state to ensure effects run with correct data
+    setUserRole(role);
+    localStorage.setItem('userRole', role);
+
+    // Set state for the redirect effect to use
+    setOnboardingComplete(profile?.onboarding_complete === true);
   };
+
+  // Strict Redirection Logic for Students
+  // Strict Redirection Logic
+  useEffect(() => {
+    // Wait for all Auth/State to be ready
+    if (!session) return;
+
+    // Debug Logging
+    console.log('Redirect Logic Trace:', {
+      role: userRole,
+      complete: onboardingComplete,
+      path: location.pathname,
+      ready: onboardingComplete !== null && userRole !== null
+    });
+
+    if (onboardingComplete === null || userRole === null) return;
+
+    const isOnOnboarding = location.pathname === '/onboarding';
+
+    // 1. If user is auth and student and onboarding incomplete -> redirect to /onboarding
+    if (userRole === 'student' && !onboardingComplete) {
+      if (!isOnOnboarding) {
+        navigate('/onboarding', { replace: true });
+      }
+      return;
+    }
+
+    // 2. If user is auth and student and onboarding complete -> nav to intended route (or dashboard if stuck on onboarding)
+    if (userRole === 'student' && onboardingComplete) {
+      if (isOnOnboarding) {
+        navigate('/home/dashboard', { replace: true });
+      }
+      return;
+    }
+
+    // 3. If user is auth and admin -> nav to users intended route
+    // (Implicitly handled: they won't trigger the above, and routing allows access)
+    // Just ensure they aren't stuck on /onboarding if they somehow got there
+    if (userRole !== 'student' && isOnOnboarding) {
+      navigate(userRole === 'admin' ? '/admin/dashboard' : '/home/dashboard', { replace: true });
+    }
+
+  }, [session, userRole, onboardingComplete, location.pathname, navigate]);
 
   const handleOnboardingComplete = async (startTest: boolean) => {
     // 1. Refresh session to get latest metadata (including password & onboarding_complete: true)
@@ -184,6 +246,9 @@ function App() {
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' });
 
+      // Update state to trigger redirect/access
+      setOnboardingComplete(true);
+
       // 3. Initialize stats and navigate
       saveStats(INITIAL_STATS, refreshedSession);
 
@@ -199,11 +264,6 @@ function App() {
         }
       }
     }
-
-    // Hide onboarding overlay AFTER navigation has started
-    setTimeout(() => {
-      setShowOnboarding(false);
-    }, 100);
   };
 
   const handleTourComplete = async () => {
@@ -236,23 +296,77 @@ function App() {
 
   const loadStatsFromSupabase = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // 1. Fetch existing user_progress (for branch assessments)
+      const { data: progressData, error: progressError } = await supabase
         .from('user_progress')
         .select('data')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) {
-        console.log('App: Supabase stats error', error);
+      // 2. Fetch completed test sessions for practice tests/exams
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('user_test_sessions')
+        .select(`
+          id,
+          score,
+          completed_at,
+          practice_tests (
+            title,
+            type,
+            branch
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false });
+
+      if (progressError) {
+        console.log('App: Supabase stats error', progressError);
         setRemoteSyncEnabled(false);
         loadStatsFromLocal();
-      } else if (data && data.data) {
-        console.log('App: Loaded stats from Supabase', data.data);
-        setStats(data.data as UserStats);
-      } else {
-        console.log('App: No stats found in Supabase');
-        loadStatsFromLocal();
+        return;
       }
+
+      // Start with existing progress data or initial stats
+      let baseStats: UserStats = progressData?.data as UserStats || INITIAL_STATS;
+
+      // 3. Calculate stats from test sessions
+      if (sessions && sessions.length > 0) {
+        // Build history from sessions
+        const sessionHistory = sessions.map((s: any) => ({
+          id: s.id,
+          date: s.completed_at ? new Date(s.completed_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          score: s.score || 0,
+          branch: s.practice_tests?.branch || 'General',
+          type: s.practice_tests?.type || 'exam',
+          title: s.practice_tests?.title || 'Practice Test'
+        }));
+
+        // Calculate consensus alignment (average of all scores)
+        const allScores = sessions.map((s: any) => s.score || 0).filter((s: number) => s > 0);
+        const avgScore = allScores.length > 0
+          ? Math.round(allScores.reduce((sum: number, s: number) => sum + s, 0) / allScores.length)
+          : baseStats.consensusAlignment || 0;
+
+        // Calculate percentile (mock - based on score distribution)
+        const percentile = avgScore >= 80 ? Math.min(95, avgScore + 10)
+          : avgScore >= 60 ? Math.min(80, avgScore + 15)
+            : Math.max(30, avgScore);
+
+        // Merge with base stats
+        baseStats = {
+          ...baseStats,
+          consensusAlignment: avgScore,
+          percentile: percentile,
+          history: [...sessionHistory, ...(baseStats.history || [])].slice(0, 50), // Keep last 50
+          completionCount: sessions.length + (baseStats.completionCount || 0)
+        };
+
+        console.log('App: Calculated stats from sessions', { sessionCount: sessions.length, avgScore, percentile });
+      }
+
+      console.log('App: Loaded stats from Supabase', baseStats);
+      setStats(baseStats);
 
       // Fetch profile for future use (e.g., displaying name/role)
       const { data: profileData } = await supabase
@@ -263,7 +377,9 @@ function App() {
 
       if (profileData) {
         console.log("Profile loaded:", profileData);
-        setUserRole(profileData.role || 'student');
+        const role = profileData.role || 'student';
+        setUserRole(role);
+        localStorage.setItem('userRole', role);
 
         // Trigger tour if not complete and on a home route
         if (!profileData.walkthrough_complete && location.pathname.includes('/home')) {
@@ -271,6 +387,7 @@ function App() {
         }
       } else {
         setUserRole('student');
+        localStorage.removeItem('userRole');
       }
     } catch (err) {
       loadStatsFromLocal();
@@ -394,8 +511,22 @@ function App() {
   };
 
   const handleLogout = async () => {
+    // 1. Clear Supabase Session
     await supabase.auth.signOut();
-    navigate('/home/dashboard');
+
+    // 2. Clear Local State
+    setSession(null);
+    setUserRole(null);
+    setStats(INITIAL_STATS);
+    setOnboardingComplete(null);
+
+    // 3. Clear Storage
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userStats');
+    sessionStorage.removeItem('splash_shown');
+
+    // 4. Force Navigation
+    navigate('/auth', { replace: true });
   };
 
   if (isLoadingAuth) {
@@ -414,16 +545,14 @@ function App() {
       <Routes>
         <Route path="/auth" element={<Auth isDark={isDark} toggleTheme={toggleTheme} />} />
         <Route path="/signup" element={<Auth isDark={isDark} toggleTheme={toggleTheme} initialSignup={true} />} />
+        <Route path="/ebook" element={<Ebook />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );
   }
   if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} isDark={isDark} />;
 
-  // Combine onboarding check with navigation to prevent double render
-  if (showOnboarding && !location.pathname.includes('/assessment')) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
+
 
   if (session && userRole === null) {
     return (
@@ -447,13 +576,25 @@ function App() {
 
   return (
     <>
+      <Toaster position="top-right" />
       {showTour && <AppTour onComplete={handleTourComplete} />}
       <Routes>
         {/* Standalone pages - no Layout wrapper */}
         <Route path="/404" element={<NotFound />} />
         <Route path="/ebook" element={<Ebook />} />
 
+        {/* Dedicated Onboarding Route */}
+        <Route path="/onboarding" element={<Onboarding onComplete={handleOnboardingComplete} />} />
+
         <Route path="/assessment" element={<Assessment onComplete={handleExamComplete} onCancel={() => { navigate('/home/dashboard'); setSelectedBranch(null); }} initialBranch={selectedBranch} />} />
+
+        {/* Test Runner - Standalone */}
+        <Route path="/test/:testId" element={
+          <TestRunnerWrapper
+            onComplete={() => navigate('/home/practice')}
+            onCancel={() => navigate('/home/practice')}
+          />
+        } />
 
         {/* All other routes wrapped in Layout */}
         <Route path="/*" element={
@@ -484,7 +625,9 @@ function App() {
               <Route path="/home/history/:id" element={lastResult ? <Results score={lastResult.score} branch={lastResult.branch} stats={stats} onBack={() => navigate('/home/history')} isDark={isDark} /> : <Navigate to="/home/history" replace />} />
               <Route path="/home/analytics" element={<Analytics stats={stats} isDark={isDark} />} />
               <Route path="/home/history" element={<History stats={stats} />} />
-              <Route path="/home/practice" element={<Practice stats={stats} onRunModule={handleStartModule} />} />
+              <Route path="/home/practice" element={<Practice onStartTest={(testId) => {
+                window.open(`/test/${testId}`, '_blank');
+              }} />} />
               <Route path="/home/classroom" element={<Classroom />} />
               <Route path="/home/tutors" element={<Tutors />} />
               <Route path="/home/profile" element={<Profile user={session?.user} onUpdate={handleUpdateProfile} />} />
@@ -498,6 +641,8 @@ function App() {
                   <Route path="/admin/users/:id" element={<AdminUsers />} />
                   <Route path="/admin/classes" element={<AdminClasses />} />
                   <Route path="/admin/classes/:id" element={<AdminClasses />} />
+                  <Route path="/admin/practice" element={<AdminPractice />} />
+                  <Route path="/admin/practice/:id" element={<AdminPractice />} />
                 </>
               )}
 

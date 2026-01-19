@@ -39,54 +39,12 @@ export const Ebook = () => {
     const [mobileDatesOpen, setMobileDatesOpen] = useState(false);
     const [openApply, setOpenApply] = useState(false);
     const [selectedModule, setSelectedModule] = useState('perceiving');
-    const [formLoading, setFormLoading] = useState(false);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    // Cal.com embed replaces form state
     const timeLeft = useCountdown();
 
-    const handleApply = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setFormLoading(true);
 
-        try {
-            const payload = {
-                name,
-                email,
-                source: 'Ebook Dashboard Apply',
-                timestamp: new Date().toISOString()
-            };
 
-            // Using the n8n webhook provided by the user
-            const response = await fetch('https://omthentic.app.n8n.cloud/webhook/2d1120b1-6725-4264-ab87-8ffc324b0414', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
 
-            if (response.ok) {
-                alert('Application submitted successfully!');
-                setOpenApply(false);
-            } else {
-                throw new Error('Failed to submit');
-            }
-        } catch (error) {
-            console.error('Submission error:', error);
-            alert('Submission failed. This might be due to a CORS policy on the webhook. Please ensure the webhook allows requests from this domain.');
-        } finally {
-            setFormLoading(false);
-        }
-    };
-
-    // Redirect if not authenticated (double check, though App.tsx handles protection)
-    useEffect(() => {
-        const checkAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                navigate('/');
-            }
-        };
-        checkAuth();
-    }, [navigate]);
 
     return (
         <div className="min-h-screen bg-white text-black font-sans selection:bg-blue-100 selection:text-blue-900">
@@ -343,7 +301,7 @@ export const Ebook = () => {
             {openApply && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setOpenApply(false)}></div>
-                    <div className="relative bg-white w-full max-w-md rounded-2xl p-8 shadow-xl animate-fade-in-up">
+                    <div className="relative bg-white w-full max-w-5xl h-[90vh] md:h-auto rounded-2xl p-4 md:p-8 shadow-xl animate-fade-in-up overflow-y-auto">
                         <button onClick={() => setOpenApply(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
@@ -351,35 +309,15 @@ export const Ebook = () => {
                             <h3 className="text-2xl font-bold mb-1 text-black">Apply for Intake</h3>
                             <p className="text-gray-500 text-sm">Start your path to the 99th percentile.</p>
                         </div>
-                        <form className="space-y-4" onSubmit={handleApply}>
-                            <div>
-                                <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block mb-1.5">Full Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black transition-colors"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 block mb-1.5">Email</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black transition-colors"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={formLoading}
-                                className="w-full bg-black text-white py-3 rounded-full font-semibold text-sm hover:bg-gray-800 transition-colors mt-2 disabled:opacity-50"
-                            >
-                                {formLoading ? 'Submitting...' : 'Submit Application'}
-                            </button>
-                        </form>
+                        <div className="w-full h-full overflow-hidden rounded-xl">
+                            <iframe
+                                src="https://cal.com/shanaka-jayakody/30min?embed=true&theme=light"
+                                width="100%"
+                                height="600"
+                                style={{ minHeight: '600px', border: 'none' }}
+                                title="Book a Call"
+                            ></iframe>
+                        </div>
                     </div>
                 </div>
             )}

@@ -23,10 +23,10 @@ const AppLogo = ({ isDark }: { isDark: boolean }) => (
 );
 
 export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme, initialSignup = false }) => {
+    const [isSignUp, setIsSignUp] = useState(initialSignup);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isSignUp, setIsSignUp] = useState(initialSignup);
     const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
 
     const handleAuth = async (e: React.FormEvent) => {
@@ -35,24 +35,23 @@ export const Auth: React.FC<AuthProps> = ({ isDark = false, toggleTheme, initial
         setMessage(null);
 
         try {
-            if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
+            const { error } = isSignUp
+                ? await supabase.auth.signUp({
                     email,
                     password,
                     options: {
-                        data: {
-                            onboarding_complete: false
-                        }
-                    }
-                });
-                if (error) throw error;
-                setMessage({ type: 'success', text: 'Registration successful! Check your email to confirm.' });
-            } else {
-                const { error } = await supabase.auth.signInWithPassword({
+                        emailRedirectTo: `${window.location.origin}/auth/callback`,
+                    },
+                })
+                : await supabase.auth.signInWithPassword({
                     email,
                     password,
                 });
-                if (error) throw error;
+
+            if (error) throw error;
+
+            if (isSignUp) {
+                setMessage({ type: 'success', text: 'Check your email for the confirmation link!' });
             }
         } catch (error: any) {
             setMessage({ type: 'error', text: error.message || 'An error occurred' });
