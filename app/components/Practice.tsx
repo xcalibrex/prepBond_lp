@@ -68,16 +68,25 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
             if (testError) {
                 console.error('Error fetching practice tests:', testError);
             } else if (testData) {
-                const formatted: PracticeTest[] = testData.map((t: any) => ({
-                    id: t.id,
-                    type: t.type,
-                    title: t.title,
-                    description: t.description || '',
-                    branch: t.branch as Branch,
-                    duration: t.time_limit_minutes ? `${t.time_limit_minutes} min` : 'Untimed',
-                    time_limit_minutes: t.time_limit_minutes,
-                    status: sessionsMap[t.id] as any || 'not_started'
-                }));
+                const formatted: PracticeTest[] = testData.map((t: any) => {
+                    // Map DB branch codes to Enum values
+                    let mappedBranch = t.branch;
+                    if (t.branch === 'PERCEIVING') mappedBranch = Branch.Perceiving;
+                    if (t.branch === 'USING') mappedBranch = Branch.Using;
+                    if (t.branch === 'UNDERSTANDING') mappedBranch = Branch.Understanding;
+                    if (t.branch === 'MANAGING') mappedBranch = Branch.Managing;
+
+                    return {
+                        id: t.id,
+                        type: t.type,
+                        title: t.title,
+                        description: t.description || '',
+                        branch: mappedBranch as Branch,
+                        duration: t.time_limit_minutes ? `${t.time_limit_minutes} min` : 'Untimed',
+                        time_limit_minutes: t.time_limit_minutes,
+                        status: sessionsMap[t.id] as any || 'not_started'
+                    };
+                });
                 setTests(formatted);
             }
             setIsLoading(false);

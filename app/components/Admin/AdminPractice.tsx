@@ -22,6 +22,7 @@ export const AdminPractice: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingTestId, setEditingTestId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<'all' | 'live'>('all');
+    const [filterType, setFilterType] = useState<'all' | 'worksheet' | 'exam'>('all');
 
     // New Test State
     const [newTest, setNewTest] = useState<Partial<PracticeTest>>({
@@ -52,10 +53,24 @@ export const AdminPractice: React.FC = () => {
         fetchTests();
     }, []);
 
-    const toggleLive = async (test: PracticeTest) => {
+    const [confirmStatusModal, setConfirmStatusModal] = useState<{ isOpen: boolean; test: PracticeTest | null }>({
+        isOpen: false,
+        test: null
+    });
+
+    const handleStatusClick = (test: PracticeTest) => {
+        setConfirmStatusModal({ isOpen: true, test });
+    };
+
+    const executeToggleLive = async () => {
+        const test = confirmStatusModal.test;
+        if (!test) return;
+
         const newValue = !test.is_live;
+
         // Optimistic update
         setTests(tests.map(t => t.id === test.id ? { ...t, is_live: newValue } : t));
+        setConfirmStatusModal({ isOpen: false, test: null });
 
         const { error } = await supabase
             .from('practice_tests')
@@ -129,13 +144,36 @@ export const AdminPractice: React.FC = () => {
         }
     };
 
-    const filteredTests = filterStatus === 'all'
-        ? tests
-        : tests.filter(t => t.is_live);
+    const filteredTests = tests.filter(test => {
+        const statusMatch = filterStatus === 'all' ? true : test.is_live;
+        const typeMatch = filterType === 'all' ? true : test.type === filterType;
+        return statusMatch && typeMatch;
+    });
 
     return (
         <div className="pb-32 animate-fade-in">
-            <div className="flex justify-end items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-full">
+                    <button
+                        onClick={() => setFilterType('all')}
+                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
+                    >
+                        All
+                    </button>
+                    <button
+                        onClick={() => setFilterType('worksheet')}
+                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'worksheet' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
+                    >
+                        Worksheets
+                    </button>
+                    <button
+                        onClick={() => setFilterType('exam')}
+                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'exam' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
+                    >
+                        Exams
+                    </button>
+                </div>
+
                 <div className="flex gap-4">
                     <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-full">
                         <button
@@ -185,7 +223,7 @@ export const AdminPractice: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <button
-                                            onClick={() => toggleLive(test)}
+                                            onClick={() => handleStatusClick(test)}
                                             className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors
                                             ${test.is_live
                                                     ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
@@ -233,6 +271,40 @@ export const AdminPractice: React.FC = () => {
                     </table>
                 )}
             </div>
+
+            {/* Status Confirmation Modal */}
+            {confirmStatusModal.isOpen && confirmStatusModal.test && createPortal(
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setConfirmStatusModal({ isOpen: false, test: null })}></div>
+                    <div className="relative bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-8 shadow-2xl animate-fade-in-up text-center border border-gray-100 dark:border-white/5">
+                        <h2 className="text-xl font-bold font-serif mb-2 text-gray-900 dark:text-white">
+                            {confirmStatusModal.test.is_live ? 'Unpublish Test?' : 'Publish Test?'}
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 leading-relaxed">
+                            {confirmStatusModal.test.is_live
+                                ? "This will switch the test to DRAFT mode and hide it from all students immediately."
+                                : "This will make the test LIVE and visible to all students immediately."}
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setConfirmStatusModal({ isOpen: false, test: null })}
+                                className="flex-1 py-3 rounded-full font-bold text-xs uppercase tracking-widest border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 dark:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={executeToggleLive}
+                                className={`flex-1 py-3 rounded-full font-bold text-xs uppercase tracking-widest shadow-lg hover:opacity-90 text-white transition-colors
+                                    ${confirmStatusModal.test.is_live ? 'bg-black dark:bg-white dark:text-black' : 'bg-emerald-500'}`}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {/* Create Modal */}
             {isCreateModalOpen && createPortal(

@@ -425,54 +425,25 @@ function App() {
     localStorage.setItem('theme', newMode ? 'dark' : 'light');
   };
 
+
   const handleExamComplete = (newScore: number, branch: Branch) => {
-    const currentBranchScore = stats.scores[branch] || 0;
-    const updatedScore = currentBranchScore === 0 ? newScore : Math.round((currentBranchScore + newScore) / 2);
+    // We now rely on the DB trigger to calculate stats, so we should just refetch.
+    // However, to keep the UI snappy for the immediate result screen, we might want to pass the single result.
+    // The stats object usually updates via remote sync or re-fetch on mount/update.
 
-    const currentLevel = stats.masteryLevels[branch] || 1;
-    const shouldLevelUp = newScore >= 80 && currentLevel < 10;
-    const newLevel = shouldLevelUp ? currentLevel + 1 : currentLevel;
-
-    const allScores = (Object.values({ ...stats.scores, [branch]: updatedScore }) as number[]).filter(s => s > 0);
-    const newAlignment = allScores.length > 0 ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : newScore;
-
-    const newStats: UserStats = {
-      ...stats,
-      scores: { ...stats.scores, [branch]: updatedScore },
-      masteryLevels: { ...stats.masteryLevels, [branch]: newLevel },
-      consensusAlignment: newAlignment,
-      percentile: Math.min(99, Math.round(newAlignment * 1.1)),
-      history: [
-        ...stats.history,
-        {
-          id: Date.now().toString(),
-          date: new Date().toISOString().split('T')[0],
-          score: newScore,
-          branch: branch
-        }
-      ],
-      completionCount: stats.completionCount + 1,
-      weakestBranch: (Object.entries({ ...stats.scores, [branch]: updatedScore }) as [Branch, number][]).reduce((a, b) => a[1] < b[1] ? a : b)[0]
-    };
-
-    saveStats(newStats);
-
-    // Save to assessment_history table
+    // Optimistic update for local UI (optional, but keep it consistent with DB logic if possible)
+    // Actually, distinct from before, let's just trigger a re-fetch of stats to get the DB-calculated averages
     if (session) {
-      supabase.from('assessment_history').insert({
-        user_id: session.user.id,
-        branch: branch,
-        score: newScore,
-        created_at: new Date().toISOString()
-      }).then(({ error }) => {
-        if (error) console.error("History save error:", error);
-      });
+      setTimeout(() => {
+        loadStatsFromSupabase(session.user.id);
+      }, 1000); // Small delay to ensure trigger has run
     }
 
     setLastResult({ score: newScore, branch });
     navigate('/home/history/latest');
     setSelectedBranch(null);
   };
+
 
   const handleStartModule = (branch: Branch) => {
     setSelectedBranch(branch);

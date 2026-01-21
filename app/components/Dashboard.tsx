@@ -365,23 +365,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
 
                     {/* Stat Cards */}
                     <div id="tour-stats" className={`${mobileTab === 'stats' ? 'block' : 'hidden md:block'}`}>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-4">
                             <StatCard
-                                title="Consensus Alignment"
-                                subtitle="MSCEIT Expert Mean"
-                                value={`${stats.consensusAlignment}%`}
+                                title="Profile Alignment"
+                                subtitle="Bond Medical Model"
+                                value={`${stats?.consensusAlignment || 0}%`}
                                 gradientClass="bg-emerald-50 dark:bg-emerald-900/20"
                             />
                             <StatCard
-                                title="Percentile Rank"
-                                subtitle="Top Med Applicants"
-                                value={`${stats.percentile}%`}
+                                title="Focus Area"
+                                subtitle="Lowest Domain"
+                                value={(() => {
+                                    if (!stats?.scores || Object.keys(stats.scores).length === 0) return '-';
+                                    const sorted = Object.entries(stats.scores).sort(([, a], [, b]) => a - b);
+                                    return sorted[0][0].split(' ')[0]; // e.g. "Perceiving"
+                                })()}
                                 gradientClass="bg-amber-100 dark:bg-amber-900/20"
                             />
                             <StatCard
-                                title="Mastery Status"
-                                subtitle="Tiered Curriculum"
-                                value={`Lvl ${stats?.masteryLevels ? Math.max(...(Object.values(stats.masteryLevels) as number[])) : 0}`}
+                                title="Sessions Completed"
+                                subtitle="Total Activity"
+                                value={stats?.completionCount || 0}
                                 gradientClass="bg-violet-50 dark:bg-violet-900/20"
                             />
                         </div>
