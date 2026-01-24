@@ -143,7 +143,7 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
                 </div>
 
                 {/* Branch Pill Tabs */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 w-full md:w-auto pb-2 md:pb-0">
                     <button
                         onClick={() => setBranchFilter('')}
                         className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${branchFilter === ''
@@ -320,10 +320,10 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
 
                         {/* Hero Section with Score */}
                         <div className={`p-8 pb-12 ${selectedItem.score >= 80
-                                ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20'
-                                : selectedItem.score >= 60
-                                    ? 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20'
-                                    : 'bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20'
+                            ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20'
+                            : selectedItem.score >= 60
+                                ? 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20'
+                                : 'bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20'
                             }`}>
                             <div className="flex items-center gap-2 mb-4 mt-4">
                                 <span className={`w-2 h-2 rounded-full ${selectedItem.branch ? getBranchColor(selectedItem.branch) : getTypeColor(selectedItem.type)}`}></span>
@@ -427,16 +427,16 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
                             <div>
                                 <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Your Feedback</h3>
                                 <div className={`p-5 rounded-2xl border ${selectedItem.score >= 80
-                                        ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30'
-                                        : selectedItem.score >= 60
-                                            ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/30'
-                                            : 'bg-rose-50 dark:bg-rose-900/10 border-rose-100 dark:border-rose-900/30'
+                                    ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30'
+                                    : selectedItem.score >= 60
+                                        ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/30'
+                                        : 'bg-rose-50 dark:bg-rose-900/10 border-rose-100 dark:border-rose-900/30'
                                     }`}>
                                     <p className={`text-sm leading-relaxed ${selectedItem.score >= 80
-                                            ? 'text-emerald-800 dark:text-emerald-300'
-                                            : selectedItem.score >= 60
-                                                ? 'text-amber-800 dark:text-amber-300'
-                                                : 'text-rose-800 dark:text-rose-300'
+                                        ? 'text-emerald-800 dark:text-emerald-300'
+                                        : selectedItem.score >= 60
+                                            ? 'text-amber-800 dark:text-amber-300'
+                                            : 'text-rose-800 dark:text-rose-300'
                                         }`}>
                                         {selectedItem.score >= 80
                                             ? "Excellent work! You demonstrated strong emotional intelligence in this assessment. Your ability to read and interpret emotional cues aligns well with expert models. Keep challenging yourself with more complex scenarios."

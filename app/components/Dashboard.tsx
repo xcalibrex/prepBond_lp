@@ -332,7 +332,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
                 {/* Left Column (Main Content Area) - Fixed layout, charts expand to fill */}
-                <div className="lg:col-span-8 flex flex-col gap-5 h-full pb-40 lg:pb-0">
+                <div className="lg:col-span-8 flex flex-col gap-5 h-auto lg:h-full pb-40 lg:pb-0 overflow-y-auto scrollbar-hide">
 
                     {/* 1. Hero Banner - Moved inside left column */}
 
@@ -517,7 +517,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-500">{filteredTasks.length} Tasks</span>
                                     </div>
 
-                                    <div className="flex-1 overflow-y-auto scrollbar-hide -mr-2 pr-2">
+                                    <div className="flex-1 overflow-y-auto scrollbar-hide -mr-2 pr-2 pb-32">
                                         {filteredTasks.length > 0 ? (
                                             filteredTasks.map((task, i) => (
                                                 <TaskItem
@@ -551,7 +551,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                                     </div>
                                 </div>
                             ) : (
-                                <div className="h-full overflow-y-auto scrollbar-hide -mr-2 pr-2">
+                                <div className="h-full overflow-y-auto scrollbar-hide -mr-2 pr-2 pb-32">
                                     <KeyDates />
                                 </div>
                             )}

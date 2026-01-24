@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Collective | PrepBond Academy</title>
+    <meta name="description"
+        content="Meet The Collective. A group of successful candidates and specialists dedicated to transparency in medical admissions.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        primary: '#000000',
+                        secondary: '#FFFFFF',
+                        accent: '#60A5FA',
+                        muted: '#6B7280',
+                        border: '#E5E7EB',
+                        surface: '#F9FAFB',
+                    },
+                    borderRadius: {
+                        'card': '20px',
+                        'pill': '200px',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- AOS (Animate on Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .text-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .countdown-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            height: 800px;
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black 10%, transparent 60%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-hue {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%);
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-primary" x-data="{ openApply: false, mobileMenuOpen: false }">
+
+    <!-- Deadline Banner -->
+    <div class="fixed top-0 left-0 right-0 z-[60] bg-primary text-white py-2.5 px-4" x-data="countdown()"
+        x-init="init()">
+        <div class="flex items-center justify-center gap-4 text-base md:text-lg">
+            <span class="hidden md:inline font-semibold">⏰ Psychometric Test Invites Released</span>
+            <span class="md:hidden font-semibold">⏰ Test Invites Released</span>
+            <div class="flex items-center gap-2 font-bold">
+                <span class="bg-white/20 px-2.5 py-1 rounded text-xs md:text-lg" x-text="days + 'd'">15d</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-xs md:text-lg" x-text="hours + 'h'">09h</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-xs md:text-lg" x-text="minutes + 'm'">52m</span>
+                <span class="bg-white/20 px-2.5 py-1 rounded text-xs md:text-lg hidden sm:inline"
+                    x-text="seconds + 's'">37s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-12 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm h-16 pt-4 pb-2.5 flex items-center">
+        <div class="w-full px-4 md:px-6 flex justify-between items-center max-w-6xl mx-auto">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center gap-2.5">
+                <img src="/media/3.png" class="w-7 h-7 object-contain" alt="PrepBond Logo">
+                <span class="text-xl font-bold font-serif">PrepBond</span>
+            </a>
+
+            <!-- Navigation Links (Desktop) -->
+            <div class="hidden md:flex items-center gap-8">
+
+                <a href="simulation.html" class="text-sm font-semibold hover:text-accent transition-colors">The
+                    Simulation</a>
+                <a href="methodology.html" class="text-sm font-semibold hover:text-accent transition-colors">The
+                    Methodology</a>
+                <a href="about.html" class="text-sm font-semibold text-accent transition-colors">The Collective</a>
+            </div>
+
+            <!-- CTA (Desktop) -->
+            <div class="hidden md:flex items-center gap-4">
+                <a href="https://app.prepbond.com.au/auth" target="_blank"
+                    class="bg-primary text-white px-6 py-2.5 rounded-pill font-bold text-sm hover:bg-gray-800 transition-all shadow-md hover:shadow-lg">
+                    Go to Portal
+                </a>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button @click="mobileMenuOpen = true"
+                class="md:hidden p-2 text-primary hover:text-accent transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-7 h-7">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Side Panel -->
+    <div x-cloak x-show="mobileMenuOpen" class="fixed inset-0 z-[100] md:hidden">
+        <!-- Backdrop -->
+        <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" @click="mobileMenuOpen = false"
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+        <!-- Panel -->
+        <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="translate-x-full"
+            class="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl p-8 flex flex-col">
+
+            <div class="flex justify-between items-center mb-12">
+                <span class="text-xl font-bold font-serif">Menu</span>
+                <button @click="mobileMenuOpen = false" class="p-2 text-muted hover:text-primary transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="flex flex-col gap-8 mb-auto">
+                <a href="index.html" @click="mobileMenuOpen = false"
+                    class="text-2xl font-bold hover:text-accent transition-colors">Home</a>
+
+                <a href="simulation.html" @click="mobileMenuOpen = false"
+                    class="text-2xl font-bold hover:text-accent transition-colors">The Simulation</a>
+                <a href="methodology.html" @click="mobileMenuOpen = false"
+                    class="text-2xl font-bold hover:text-accent transition-colors">The Methodology</a>
+                <a href="about.html" @click="mobileMenuOpen = false"
+                    class="text-2xl font-bold text-accent hover:text-accent transition-colors">The Collective</a>
+            </nav>
+
+            <div class="pt-8 border-t border-border">
+                <a href="https://app.prepbond.com.au/auth" target="_blank"
+                    class="w-full bg-primary text-white py-5 rounded-2xl font-bold text-center hover:bg-gray-800 transition-all shadow-lg block">
+                    Go to Portal
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <main class="relative pt-48 pb-24 overflow-hidden">
+        <!-- Hero Background Elements -->
+        <div class="hero-grid"></div>
+        <div
+            class="absolute left-1/2 top-[300px] -translate-x-1/2 w-[1000px] h-[500px] bg-blue-100/30 blur-[130px] rounded-full pointer-events-none z-0">
+        </div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 md:px-6">
+            <!-- Header -->
+            <div class="mb-20 text-center" data-aos="fade-up">
+
+                <div
+                    class="w-12 h-12 bg-white rounded-2xl shadow-2xl border border-border flex items-center justify-center mx-auto mb-8 transform hover:scale-105 transition-transform duration-300">
+                    <img src="/media/3.png" class="w-7 h-7 object-contain" alt="PrepBond Logo">
+                </div>
+
+                <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
+                    The Academy Collective.
+                </h1>
+                <p class="text-lg md:text-xl text-muted max-w-3xl mx-auto mb-12 leading-relaxed">
+                    "A collective of successful candidates and specialists dedicated to transparency in medical
+                    admissions."
+                </p>
+            </div>
+
+            <!-- Content Section / The Tutors -->
+            <!-- Content Section / The Tutors (Elevated Container) -->
+            <div class="relative mb-24" data-aos="fade-up">
+                <!-- Background Glows -->
+                <div
+                    class="absolute -left-48 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-100/50 blur-[130px] rounded-full pointer-events-none z-0">
+                </div>
+                <div
+                    class="absolute -right-48 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-100/50 blur-[130px] rounded-full pointer-events-none z-0">
+                </div>
+
+                <div
+                    class="relative rounded-[40px] overflow-hidden shadow-2xl border border-border bg-white p-6 md:p-8 z-10">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="relative group">
+                            <div
+                                class="absolute -inset-1 bg-gradient-to-r from-accent to-blue-600 rounded-[32px] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200">
+                            </div>
+                            <div class="relative">
+                                <img src="/media/shanaka-about.jpg" alt="Shanaka Jayakody"
+                                    class="w-full h-auto rounded-[28px] shadow-2xl">
+                                <div
+                                    class="absolute bottom-6 left-6 right-6 p-6 bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl">
+                                    <h3 class="text-xl font-bold text-black mb-1">Shanaka Jayakody</h3>
+                                    <p class="text-accent text-[10px] font-bold uppercase tracking-widest">Head Coach &
+                                        Co-Founder
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <h2 class="text-3xl font-bold leading-tight">We've been exactly where you are sitting.</h2>
+                            <p class="text-lg text-gray-700 leading-relaxed">
+                                Our tutors aren't just academics; they are students who have navigated the same
+                                high-stakes
+                                simulations, faced the same 'Consensus Scoring' variables, and successfully earned their
+                                place
+                                in the Bond Medicine program.
+                            </p>
+                            <div class="p-6 bg-surface rounded-2xl border border-border italic text-gray-600 mb-8">
+                                "Our simulations are designed to be difficult, because the reality is difficult. We’re
+                                here to
+                                help you bridge that gap."
+                            </div>
+                            <div class="flex">
+                                <a href="#book-call"
+                                    class="inline-flex items-center justify-center bg-primary text-white px-8 py-4 rounded-pill font-bold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-h-[60px] hidden md:inline-flex">
+                                    Request a Strategy Session
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team / CTA -->
+
+            <!-- Cal.com Booking Embed -->
+            <section id="book-call" class="mb-16 max-w-5xl mx-auto px-4 md:px-6" data-aos="fade-up">
+                <div class="text-center mb-8">
+                    <p class="text-lg text-muted max-w-xl mx-auto">Schedule a free 30-minute consultation to discuss
+                        your
+                        Bond Medicine application strategy.</p>
+                </div>
+                <div class="bg-white rounded-[20px] border border-gray-200 overflow-hidden shadow-sm">
+                    <iframe src="https://cal.com/shanaka-jayakody/30min?embed=true&theme=light" width="100%"
+                        height="700" frameborder="0" style="min-height: 700px;"></iframe>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 border-t border-border pt-12 pb-[48px] px-4">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-2.5">
+                <img src="/media/3.png" class="w-6 h-6 object-contain opacity-50" alt="PrepBond Logo">
+                <span class="text-lg font-bold font-serif text-muted">PrepBond Academy</span>
+            </div>
+
+            <div class="text-center md:text-right max-w-xl">
+                <p class="text-[11px] leading-relaxed text-muted uppercase tracking-widest font-semibold mb-2">
+                    Independent Preparation Academy <span class="mx-2 text-gray-300">|</span> <a href="faq.html"
+                        class="hover:text-primary transition-colors">FAQ</a></p>
+                <p class="text-[10px] leading-relaxed text-muted/60 italic">
+                    PrepBond is an independent preparation academy. We are not affiliated with, endorsed by, or
+                    partnered with Bond University. We are a team of tutors providing simulated tools to help you
+                    perform your best.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Footer spacing -->
+    <div class="h-24"></div>
+
+    <!-- Fixed Bottom Banner - Free Cheat Sheet Promo (Black with White Button) -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-black py-3 px-4">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
+            <span class="text-sm md:text-base font-medium text-white text-center">🎁 <span class="font-bold">The Bond
+                    Medicine Prep Blueprint</span></span>
+            <a href="cheat-sheet.html"
+                class="bg-white text-black px-5 py-2 rounded-[20px] font-semibold text-sm hover:bg-gray-100 transition-colors whitespace-nowrap">
+                Claim Now
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function countdown() {
+            return {
+                days: '00',
+                hours: '00',
+                minutes: '00',
+                seconds: '00',
+                init() {
+                    this.updateCountdown();
+                    setInterval(() => this.updateCountdown(), 1000);
+                },
+                updateCountdown() {
+                    // QTAC deadline: February 10, 2026, 4:00 PM QLD time (UTC+10)
+                    const deadline = new Date('2026-02-10T16:00:00+10:00');
+                    const now = new Date();
+                    const diff = deadline - now;
+                    if (diff > 0) {
+                        this.days = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                        this.hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                        this.minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                        this.seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+                    } else {
+                        this.days = '00';
+                        this.hours = '00';
+                        this.minutes = '00';
+                        this.seconds = '00';
+                    }
+                }
+            }
+        }
+        AOS.init({ duration: 500, once: true, offset: 30 });
+    </script>
+</body>
+
+</html>
