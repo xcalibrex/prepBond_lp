@@ -107,7 +107,9 @@ const Calendar = ({ isDark, currentMonth, tasks, selectedDate, onSelectDate, onM
                                     ? 'bg-blue-500 text-white shadow-md scale-110'
                                     : isToday
                                         ? 'bg-black dark:bg-white text-white dark:text-black shadow-md'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}
+                                        : isBeforeToday
+                                            ? 'text-gray-300 dark:text-gray-700 pointer-events-none'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}
                             `}>
                                 {d}
                             </span>
@@ -182,12 +184,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
 
     // Static Key Dates (should match KeyDates.tsx)
     const keyDates: Task[] = useMemo(() => [
-        { id: 'kd-1', title: 'Info Session', description: 'Zoom · 5:00pm QLD', due_date: '2025-01-08', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
-        { id: 'kd-2', title: 'QTAC Closes', description: '11:45pm QLD · CRITICAL', due_date: '2025-01-22', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
-        { id: 'kd-3', title: 'Documents Due', description: '4:30pm QLD', due_date: '2025-01-29', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
-        { id: 'kd-4', title: 'Test Invites', description: 'Email to selected applicants', due_date: '2025-02-10', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
-        { id: 'kd-5', title: 'Interviews', description: '~2 hours online', due_date: '2025-03-10', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
-        { id: 'kd-6', title: 'Offers Released', description: '8:30am QLD', due_date: '2025-03-26', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
+        { id: 'kd-1', title: 'Info Session', description: 'Zoom · 5:00pm QLD', due_date: '2026-01-08', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
+        { id: 'kd-2', title: 'QTAC Closes', description: '11:45pm QLD · CRITICAL', due_date: '2026-01-22', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
+        { id: 'kd-3', title: 'Documents Due', description: '4:30pm QLD', due_date: '2026-01-29', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
+        { id: 'kd-4', title: 'Test Invites', description: 'Email to selected applicants', due_date: '2026-02-10', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
+        { id: 'kd-5', title: 'Interviews', description: '~2 hours online', due_date: '2026-03-10', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
+        { id: 'kd-6', title: 'Offers Released', description: '8:30am QLD', due_date: '2026-03-26', type: 'key_date', user_id: '', is_public: true, created_at: '', updated_at: '' },
     ], []);
 
     // Fetch Tasks for Current Month
@@ -552,7 +554,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                                 </div>
                             ) : (
                                 <div className="h-full overflow-y-auto scrollbar-hide -mr-2 pr-2 pb-32">
-                                    <KeyDates />
+                                    <KeyDates keyDates={keyDates} />
                                 </div>
                             )}
 

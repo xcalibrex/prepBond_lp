@@ -15,7 +15,9 @@ const AutoSaveInput: React.FC<{
     className?: string;
     placeholder?: string;
     isTextArea?: boolean;
-}> = ({ value, onSave, className, placeholder, isTextArea }) => {
+    autoFocus?: boolean;
+    onKeyDown?: (e: React.KeyboardEvent) => void;
+}> = ({ value, onSave, className, placeholder, isTextArea, autoFocus, onKeyDown }) => {
     const [localValue, setLocalValue] = useState(value);
 
     // Sync only when prop changes significantly (e.g. switching questions)
@@ -38,6 +40,8 @@ const AutoSaveInput: React.FC<{
                 onChange={(e) => setLocalValue(e.target.value)}
                 onBlur={handleBlur}
                 placeholder={placeholder}
+                autoFocus={autoFocus}
+                onKeyDown={onKeyDown}
             />
         );
     }
@@ -48,6 +52,8 @@ const AutoSaveInput: React.FC<{
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
+            autoFocus={autoFocus}
+            onKeyDown={onKeyDown}
         />
     );
 };
@@ -60,6 +66,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
     // Modal State
     const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
     const [newSectionTitle, setNewSectionTitle] = useState('');
+    const [focusedOptionId, setFocusedOptionId] = useState<string | null>(null);
 
     // helper to sort
     const sortHierarchy = (data: any[]) => {
@@ -128,7 +135,10 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                     .sort((a: any, b: any) => a.order_index - b.order_index)
             })).sort((a: any, b: any) => a.order_index - b.order_index);
 
-            setSections(processedSections);
+            setSections(processedSections.map((s: any) => ({
+                ...s,
+                branch: s.branch ? DB_TO_BRANCH[s.branch] : null
+            })));
         }
         setIsLoading(false);
     };
@@ -150,10 +160,27 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                 [Branch.Managing]: 'MANAGING'
             };
             updates.branch = BRANCH_TO_DB[updates.branch];
+            updates.branch = BRANCH_TO_DB[updates.branch];
         }
 
         await supabase.from('practice_tests').update(updates).eq('id', testId);
     };
+
+    // Helper for branch mapping (used in sections too)
+    const BRANCH_TO_DB: Record<string, string> = {
+        [Branch.Perceiving]: 'PERCEIVING',
+        [Branch.Using]: 'USING',
+        [Branch.Understanding]: 'UNDERSTANDING',
+        [Branch.Managing]: 'MANAGING'
+    };
+
+    const DB_TO_BRANCH: Record<string, Branch> = {
+        'PERCEIVING': Branch.Perceiving,
+        'USING': Branch.Using,
+        'UNDERSTANDING': Branch.Understanding,
+        'MANAGING': Branch.Managing
+    };
+
 
     // --- Section Handlers ---
     const handleAddSection = async (e: React.FormEvent) => {
@@ -190,7 +217,13 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         setSections(sections.map(s => s.id === sectionId ? { ...s, ...updates } : s));
 
         // DB
-        await supabase.from('test_sections').update(updates).eq('id', sectionId);
+        // Check for branch update to map to DB value
+        const dbUpdates = { ...updates };
+        if (updates.branch) {
+            (dbUpdates as any).branch = BRANCH_TO_DB[updates.branch];
+        }
+
+        await supabase.from('test_sections').update(dbUpdates).eq('id', sectionId);
     };
 
     const deleteSection = async (sectionId: string) => {
@@ -214,7 +247,8 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
             question_text: 'New Question',
             type: 'MCQ' as const, // Explicit literal type
             order_index: (sections[sectionIndex].questions || []).length, // append to end
-            options: [] // important for UI
+            options: [], // important for UI
+            explanation: '' // New field
         };
 
         // Optimistic Update
@@ -229,7 +263,8 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                 section_id: sectionId,
                 question_text: 'New Question',
                 type: 'MCQ',
-                order_index: newQuestion.order_index
+                order_index: newQuestion.order_index,
+                explanation: ''
             }]);
 
         if (error) console.error('Add question failed', error);
@@ -362,7 +397,8 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                     test_id: testId,
                     title: section.title,
                     instructions: section.instructions || '',
-                    order_index: section.order_index
+                    order_index: section.order_index,
+                    branch: section.branch ? BRANCH_TO_DB[section.branch] : null
                 });
 
                 // Upsert Questions
@@ -374,7 +410,8 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                         type: q.type,
                         order_index: q.order_index,
                         scenario_context: q.scenario_context,
-                        scenario_image_url: q.scenario_image_url
+                        scenario_image_url: q.scenario_image_url,
+                        explanation: (q as any).explanation
                     });
 
                     // Upsert Options
@@ -427,27 +464,80 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         setSections(newSections);
 
         await supabase.from('question_options').insert([newOption]);
+        setFocusedOptionId(optimisticId);
     };
 
     const updateOption = async (sectionId: string, questionId: string, optionId: string, updates: any) => {
-        // Optimistic
-        const newSections = sections.map(s => {
-            if (s.id !== sectionId) return s;
-            return {
-                ...s,
-                questions: s.questions.map((q: any) => {
-                    if (q.id !== questionId) return q;
-                    return {
-                        ...q,
-                        options: q.options.map((o: any) =>
-                            o.id === optionId ? { ...o, ...updates } : o
-                        )
-                    };
-                })
-            };
-        });
-        setSections(newSections);
+        // 1. Calculate new sections state
+        let sectionsToSet = sections;
 
+        // Improve UX: Auto-scoring logic
+        if (updates.value === '2') {
+            // Find indices
+            const sIdx = sections.findIndex(s => s.id === sectionId);
+            if (sIdx === -1) return; // Should not happen
+
+            const qIdx = sections[sIdx].questions.findIndex((q: any) => q.id === questionId);
+            if (qIdx === -1) return;
+
+            const options = sections[sIdx].questions[qIdx].options || [];
+            const optIndex = options.findIndex((o: any) => o.id === optionId);
+
+            // Create updated options array
+            const updatedOptions = options.map((opt: any, idx: number) => {
+                // If it's the target option, apply the update (value: '2')
+                if (opt.id === optionId) return { ...opt, ...updates };
+
+                // Logic: Neighbors get '1', everyone else gets '0'
+                let newValue = '0';
+                if (idx === optIndex - 1 || idx === optIndex + 1) {
+                    newValue = '1';
+                }
+
+                return { ...opt, value: newValue };
+            });
+
+            // Apply to section state
+            sectionsToSet = sections.map((s, si) => {
+                if (si !== sIdx) return s;
+                return {
+                    ...s,
+                    questions: s.questions.map((q: any, qi: number) => {
+                        if (qi !== qIdx) return q;
+                        return { ...q, options: updatedOptions };
+                    })
+                };
+            });
+
+            // Fire DB updates for all modified options
+            updatedOptions.forEach((opt: any) => {
+                // We'll await the main one at the end, but others can fire-and-forget
+                if (opt.id === optionId) return;
+                // Only update if changed? optimizing db calls
+                // For now, simpler to just ensure consistency
+                supabase.from('question_options').update({ value: opt.value }).eq('id', opt.id).then();
+            });
+
+        } else {
+            // Standard single update
+            sectionsToSet = sections.map(s => {
+                if (s.id !== sectionId) return s;
+                return {
+                    ...s,
+                    questions: s.questions.map((q: any) => {
+                        if (q.id !== questionId) return q;
+                        return {
+                            ...q,
+                            options: q.options.map((o: any) =>
+                                o.id === optionId ? { ...o, ...updates } : o
+                            )
+                        };
+                    })
+                };
+            });
+        }
+
+        setSections(sectionsToSet);
         await supabase.from('question_options').update(updates).eq('id', optionId);
     };
 
@@ -529,6 +619,20 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                 {sIdx + 1}
                                             </span>
                                             <h3 className="font-bold text-lg">{section.title}</h3>
+
+                                            {/* Branch Selector */}
+                                            <div className="flex items-center gap-2 ml-4">
+                                                <select
+                                                    value={section.branch || ''}
+                                                    onChange={(e) => updateSection(section.id, { branch: e.target.value as Branch })}
+                                                    className="bg-gray-100 dark:bg-white/5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-500 border-none focus:ring-1 focus:ring-black cursor-pointer hover:bg-gray-200 dark:hover:bg-white/10"
+                                                >
+                                                    <option value="">No Branch</option>
+                                                    {Object.values(Branch).map(b => (
+                                                        <option key={b} value={b}>{b}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                         <button onClick={() => deleteSection(section.id)} className="text-red-400 hover:text-red-500 text-xs font-bold uppercase">
                                             Delete Section
@@ -582,6 +686,18 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                             />
                                                         )}
 
+                                                        {/* Explanation field for all question types */}
+                                                        <div className="mt-2">
+                                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 px-1">Explanation (Post-Answer Context)</label>
+                                                            <AutoSaveInput
+                                                                isTextArea
+                                                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium h-20 resize-none placeholder-gray-400"
+                                                                placeholder="Explain why the answer is correct..."
+                                                                value={(q as any).explanation || ''}
+                                                                onSave={(val) => updateQuestion(section.id, q.id, { explanation: val })}
+                                                            />
+                                                        </div>
+
                                                         {/* Options */}
                                                         <div className="space-y-2 mt-2">
                                                             {(q.options || []).map((opt: any) => (
@@ -603,14 +719,30 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                                         className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-medium placeholder-gray-400"
                                                                         value={opt.label}
                                                                         onSave={(val) => updateOption(section.id, q.id, opt.id, { label: val })}
+                                                                        autoFocus={focusedOptionId === opt.id}
+                                                                        onKeyDown={(e) => {
+                                                                            if (e.key === 'Enter' && e.shiftKey) {
+                                                                                e.preventDefault();
+                                                                                addOption(section.id, q.id);
+                                                                            }
+                                                                        }}
                                                                     />
                                                                     <AutoSaveInput
                                                                         className="w-20 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-center font-bold text-gray-500"
                                                                         placeholder="Value"
                                                                         value={opt.value}
-                                                                        onSave={(val) => updateOption(section.id, q.id, opt.id, { value: val })}
+                                                                        onSave={(val) => {
+                                                                            let cleanVal = val;
+                                                                            const num = parseInt(val);
+                                                                            if (!isNaN(num) && num > 2) cleanVal = '2';
+                                                                            updateOption(section.id, q.id, opt.id, { value: cleanVal });
+                                                                        }}
                                                                     />
-                                                                    <button onClick={() => deleteOption(section.id, q.id, opt.id)} className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                                                                    <button onClick={() => deleteOption(section.id, q.id, opt.id)} className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2">
+                                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                        </svg>
+                                                                    </button>
                                                                 </div>
                                                             ))}
                                                             <button

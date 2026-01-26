@@ -237,6 +237,7 @@ export interface ITestSection {
   instructions: string;
   order_index: number;
   questions: IQuestion[];
+  branch?: Branch | null;
 }
 
 export enum Branch {

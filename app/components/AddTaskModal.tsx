@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { DS } from '../design-system';
 import { TaskType } from '../types';
 
@@ -14,6 +15,12 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onS
     const [description, setDescription] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [type, setType] = useState<TaskType>('user_created');
+
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     if (!isOpen) return null;
 
@@ -33,8 +40,10 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onS
         onClose();
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+    if (!mounted) return null;
+
+    const modalContent = (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-in fade-in duration-200">
             <div className={`bg-white dark:bg-dark-nav border border-gray-100 dark:border-white/10 w-full max-w-md ${DS.radius.card} p-6 shadow-2xl scale-100 animate-in zoom-in-95 duration-200`}>
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add New Task</h2>
@@ -59,7 +68,7 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onS
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
+                        <div className="hidden">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
                             <select
                                 value={type}
@@ -115,4 +124,6 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onS
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 };

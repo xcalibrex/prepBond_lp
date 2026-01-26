@@ -133,7 +133,7 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
     return (
         <div className="flex flex-col h-full animate-fade-in-up">
             {/* Header & Tabs */}
-            <div className="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
+            <div className="flex flex-col md:flex-row justify-start items-center mb-6 gap-4">
                 <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-full">
                     <button
                         onClick={() => setActiveTab('worksheets')}
