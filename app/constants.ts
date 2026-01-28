@@ -1,6 +1,14 @@
 
 import { Branch, Question, QuestionType, TrainingModule } from './types';
 
+export const GENERIC_TEST_IDS = {
+  GENERAL: '00000000-0000-0000-0000-000000000001',
+  [Branch.Perceiving]: '00000000-0000-0000-0000-000000000002',
+  [Branch.Using]: '00000000-0000-0000-0000-000000000003',
+  [Branch.Understanding]: '00000000-0000-0000-0000-000000000004',
+  [Branch.Managing]: '00000000-0000-0000-0000-000000000005',
+};
+
 export const MOCK_QUESTIONS: Question[] = [
   {
     id: 'q1',

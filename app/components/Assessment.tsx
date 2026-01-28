@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { generateAssessment } from '../services/geminiService';
-import { MOCK_QUESTIONS } from '../constants';
+import { MOCK_QUESTIONS, GENERIC_TEST_IDS } from '../constants';
 import { AssessmentState, Branch } from '../types';
+import { supabase } from '../services/supabase';
 
 interface AssessmentProps {
   onComplete: (score: number, branch: Branch) => void;
@@ -23,9 +24,42 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  const [completionStats, setCompletionStats] = useState<{ score: number, branch: Branch } | null>(null);
+
   const startAssessment = async (branch?: Branch) => {
     setIsLoading(true);
     const targetBranch = branch || state.currentBranch;
+
+    // Create Supabase Session immediately
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Determine Test ID
+        const testId = targetBranch && GENERIC_TEST_IDS[targetBranch]
+          ? GENERIC_TEST_IDS[targetBranch]
+          : GENERIC_TEST_IDS.GENERAL;
+
+        const { data: session, error } = await supabase
+          .from('user_test_sessions')
+          .insert({
+            user_id: user.id,
+            test_id: testId,
+            status: 'in_progress',
+            started_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (session) {
+          setSessionId(session.id);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to init session", err);
+    }
+
     const aiQuestions = await generateAssessment(targetBranch || undefined);
     const questions = aiQuestions.length > 0 ? aiQuestions : MOCK_QUESTIONS;
 
@@ -36,11 +70,13 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       currentIndex: 0,
       answers: {},
       isComplete: false,
+      isReviewing: false,
     });
+    setCompletionStats(null);
     setIsLoading(false);
   };
 
-  const handleAnswer = () => {
+  const handleAnswer = async () => {
     if (!selectedOption) return;
 
     const currentQ = state.questions[state.currentIndex];
@@ -62,8 +98,35 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       const maxScore = state.questions.length;
       const finalPercentage = Math.round((totalScore / maxScore) * 100);
 
-      onComplete(finalPercentage, state.questions[0].branch);
+      // Save Completion to Supabase
+      if (sessionId) {
+        await supabase
+          .from('user_test_sessions')
+          .update({
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            total_score: finalPercentage,
+            score: finalPercentage
+          })
+          .eq('id', sessionId);
+      }
+
+      setCompletionStats({ score: finalPercentage, branch: state.questions[0].branch });
       setState(prev => ({ ...prev, isActive: false, isComplete: true }));
+      // Do NOT call onComplete yet. User sees Summary first.
+    }
+  };
+
+  const startReview = () => {
+    setState(prev => ({ ...prev, isReviewing: true, currentIndex: 0 }));
+    setSelectedOption(null); // Clear selection for UI interaction if needed (though read-only)
+  };
+
+  const handleFinish = () => {
+    if (completionStats) {
+      onComplete(completionStats.score, completionStats.branch);
+    } else {
+      onCancel?.();
     }
   };
 
@@ -120,6 +183,132 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
     );
   }
 
+  // --- Summary View (Completion) ---
+  if (state.isComplete && !state.isReviewing && completionStats) {
+    const score = completionStats.score;
+    const branch = completionStats.branch;
+
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-12 flex flex-col items-center animate-fade-in-up">
+        <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-6">{branch}</span>
+
+        <div className="relative w-48 h-48 mb-8">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-gray-200 dark:text-gray-800" />
+            <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="transparent" strokeDasharray={440} strokeDashoffset={440 - (440 * score) / 100} strokeLinecap="round" className={`transition-all duration-1000 ease-out ${score >= 90 ? 'text-emerald-500' : score >= 70 ? 'text-black dark:text-white' : 'text-blue-500'}`} />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter leading-none">{score}%</span>
+          </div>
+        </div>
+
+        <p className="text-center text-gray-600 dark:text-gray-300 font-medium leading-relaxed max-w-sm mb-12">
+          {score >= 90 ? "Exceptional. You demonstrated superior consensus accuracy." : score >= 75 ? "Strong performance. Your calibration is well-aligned." : "Competent. Continue to refine your micro-expression analysis."}
+        </p>
+
+        <div className="flex flex-col gap-4 w-full max-w-xs">
+          <button onClick={startReview} className="w-full bg-white dark:bg-black text-black dark:text-white border border-gray-200 dark:border-gray-800 py-3.5 rounded-[200px] font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/10 transition-all shadow-sm">
+            Review Answers
+          </button>
+          <button onClick={handleFinish} className="w-full bg-black dark:bg-white text-white dark:text-black py-3.5 rounded-[200px] font-bold text-sm hover:opacity-90 transition-all shadow-md">
+            Finish
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Review Mode ---
+  if (state.isReviewing) {
+    const currentQ = state.questions[state.currentIndex];
+    // Note: We need to properly track which answer was SELECTED by the user.
+    // Ideally we stored this in state.answers or a separate selection map. 
+    // state.answers maps questionId -> score. It doesn't store the OPTION ID.
+    // Limit: In the current simpler implementation, we only stored the score. 
+    // To show "Your Choice", we need the option ID.
+    // Currently `state.answers` is `Record<string, number>`.
+    // We might not be able to highlight "Your Choice" exactly unless we stored it.
+    // BUT, we can show the scores for all options, so the user can infer or we just show the optimal.
+    // IMPROVEMENT: Let's assume for now we just show the optimal and explanations.
+    // IF we need "Your Answer", we would need to refactor `state.answers` to store `{ score: number, optionId: string }`.
+    // Let's proceed with showing scores for all options + explanation.
+
+    return (
+      <div className="w-full max-w-3xl mx-auto px-6 py-8 h-full flex flex-col relative animate-fade-in">
+        {/* Review Header */}
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/5">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Review Mode</h3>
+          <div className="text-sm font-medium text-gray-500">{state.currentIndex + 1} / {state.questions.length}</div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto pb-20">
+          <div className="mb-6">
+            <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-500 text-[10px] font-bold uppercase tracking-wider rounded-md mb-4">
+              {currentQ.branch}
+            </span>
+            {currentQ.imageUrl && (
+              <div className="mb-6 rounded-[24px] overflow-hidden shadow-sm max-h-60 w-full object-cover">
+                <img src={currentQ.imageUrl} alt="Stimulus" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
+              {currentQ.scenario}
+            </h3>
+          </div>
+
+          <div className="space-y-3 mb-8">
+            {currentQ.options.map((opt) => (
+              <div key={opt.id} className="flex justify-between items-center p-4 rounded-[16px] bg-white dark:bg-white/5 border border-gray-100 dark:border-gray-800">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{opt.text}</span>
+                <span className={`text-xs font-bold px-2 py-1 rounded-full ${opt.score === 1 ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-gray-100 text-gray-500 dark:bg-gray-800'}`}>
+                  {/* Show score as percentage or decimal */}
+                  {Math.round(opt.score * 100)}% Match
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Explanation Block */}
+          {currentQ.explanation && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-[24px] border border-blue-100 dark:border-blue-900/30">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-blue-500 mb-2">Expert Analysis</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                {currentQ.explanation}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Footer */}
+        <div className="fixed bottom-6 left-0 right-0 px-6 flex justify-center gap-4 max-w-3xl mx-auto z-10">
+          <button
+            onClick={() => setState(prev => ({ ...prev, currentIndex: Math.max(0, prev.currentIndex - 1) }))}
+            disabled={state.currentIndex === 0}
+            className="px-6 py-3 rounded-full bg-white dark:bg-black border border-gray-200 dark:border-gray-700 font-bold text-sm disabled:opacity-50 shadow-sm"
+          >
+            Previous
+          </button>
+          {state.currentIndex < state.questions.length - 1 ? (
+            <button
+              onClick={() => setState(prev => ({ ...prev, currentIndex: prev.currentIndex + 1 }))}
+              className="px-6 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-sm shadow-lg"
+            >
+              Next Question
+            </button>
+          ) : (
+            <button
+              onClick={handleFinish}
+              className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-sm shadow-lg hover:scale-105 transition-transform"
+            >
+              Finish Review
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- Active Assessment ---
   const currentQ = state.questions[state.currentIndex];
   const progress = ((state.currentIndex) / state.questions.length) * 100;
 

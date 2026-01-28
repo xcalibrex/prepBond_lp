@@ -37,12 +37,32 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
             setIsLoading(true);
             const { data: { user } } = await supabase.auth.getUser();
 
+            // Check if user is admin
+            let isAdmin = false;
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.role === 'admin') {
+                    isAdmin = true;
+                }
+            }
+
             // Fetch Tests
-            const { data: testData, error: testError } = await supabase
+            let query = supabase
                 .from('practice_tests')
                 .select('*')
-                .eq('is_live', true)
                 .order('created_at', { ascending: true });
+
+            // Only filter by is_live if not admin
+            if (!isAdmin) {
+                query = query.eq('is_live', true);
+            }
+
+            const { data: testData, error: testError } = await query;
 
             // Fetch My Sessions to map status
             let sessionsMap: Record<string, string> = {};

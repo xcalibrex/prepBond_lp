@@ -274,6 +274,7 @@ export interface AssessmentState {
   currentIndex: number;
   answers: Record<string, number>; // questionId -> score obtained
   isComplete: boolean;
+  isReviewing?: boolean;
 }
 
 export interface HistoryItem {

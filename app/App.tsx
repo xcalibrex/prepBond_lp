@@ -333,11 +333,21 @@ function App() {
       // 3. Calculate stats from test sessions
       if (sessions && sessions.length > 0) {
         // Build history from sessions
+        // Helper to map DB branch to Enum
+        const mapDbBranchToEnum = (dbBranch: string): Branch | string => {
+          if (dbBranch === 'PERCEIVING') return Branch.Perceiving;
+          if (dbBranch === 'USING') return Branch.Using;
+          if (dbBranch === 'UNDERSTANDING') return Branch.Understanding;
+          if (dbBranch === 'MANAGING') return Branch.Managing;
+          return dbBranch || 'General';
+        };
+
+        // Build history from sessions
         const sessionHistory = sessions.map((s: any) => ({
           id: s.id,
           date: s.completed_at ? new Date(s.completed_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
           score: s.score || 0,
-          branch: s.practice_tests?.branch || 'General',
+          branch: mapDbBranchToEnum(s.practice_tests?.branch) as Branch,
           type: s.practice_tests?.type || 'exam',
           title: s.practice_tests?.title || 'Practice Test'
         }));

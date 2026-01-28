@@ -18,10 +18,10 @@ interface TestSessionHistory {
 }
 
 const BRANCH_META: Record<string, { color: string; textColor: string }> = {
-    'Perceiving': { color: 'bg-blue-500', textColor: 'text-blue-500' },
-    'Using': { color: 'bg-purple-500', textColor: 'text-purple-500' },
-    'Understanding': { color: 'bg-amber-500', textColor: 'text-amber-500' },
-    'Managing': { color: 'bg-emerald-500', textColor: 'text-emerald-500' },
+    [Branch.Perceiving]: { color: 'bg-blue-500', textColor: 'text-blue-500' },
+    [Branch.Using]: { color: 'bg-purple-500', textColor: 'text-purple-500' },
+    [Branch.Understanding]: { color: 'bg-amber-500', textColor: 'text-amber-500' },
+    [Branch.Managing]: { color: 'bg-emerald-500', textColor: 'text-emerald-500' },
 };
 
 export const History: React.FC<HistoryProps> = ({ stats }) => {
@@ -55,14 +55,30 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
 
             if (error) throw error;
 
+            // Helper to map DB branch to Enum (Same logic as App.tsx to be safe, or just trust the raw string if we didn't normalize in App.tsx - wait, History fetches its OWN data independently from App.tsx stats!)
+            // CRITICAL: History.tsx fetches its own data on mount (lines 40-54).
+            // It does NOT use `stats.history` passed in props?
+            // Line 27: `export const History: React.FC<HistoryProps> = ({ stats }) => {`
+            // Line 78: `fetchHistory();`
+            // It ignores `stats` prop and refetches!
+            // So `App.tsx` normalization doesn't affect `History.tsx`'s internal state unless I update `fetchHistory` mapping too.
+
+            const mapDbBranchToEnum = (dbBranch: string): string => {
+                if (dbBranch === 'PERCEIVING') return Branch.Perceiving;
+                if (dbBranch === 'USING') return Branch.Using;
+                if (dbBranch === 'UNDERSTANDING') return Branch.Understanding;
+                if (dbBranch === 'MANAGING') return Branch.Managing;
+                return dbBranch;
+            };
+
             // Map practice test sessions
             const testSessions: TestSessionHistory[] = (sessions || []).map((s: any) => ({
                 id: s.id,
                 date: s.completed_at ? new Date(s.completed_at).toLocaleDateString() : 'Unknown',
                 title: s.practice_tests?.title || 'Practice Test',
                 score: s.score || 0,
-                type: s.practice_tests?.type || 'exam',
-                branch: s.practice_tests?.branch || undefined
+                type: s.practice_tests?.type || 'exam', // Default to exam if type missing? Or match DB.
+                branch: mapDbBranchToEnum(s.practice_tests?.branch)
             }));
 
             setAllHistory(testSessions);
@@ -153,7 +169,7 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
                     >
                         All
                     </button>
-                    {['Perceiving', 'Using', 'Understanding', 'Managing'].map((branch) => {
+                    {[Branch.Perceiving, Branch.Using, Branch.Understanding, Branch.Managing].map((branch) => {
                         const meta = BRANCH_META[branch];
                         const isActive = branchFilter === branch;
                         return (
@@ -166,7 +182,7 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
                                     }`}
                             >
                                 <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : meta.color}`}></span>
-                                {branch}
+                                {branch.replace(' Emotions', '')}
                             </button>
                         );
                     })}
