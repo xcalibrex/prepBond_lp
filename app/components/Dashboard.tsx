@@ -367,7 +367,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
 
                     {/* Stat Cards */}
                     <div id="tour-stats" className={`${mobileTab === 'stats' ? 'block' : 'hidden md:block'}`}>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                             <StatCard
                                 title="Profile Alignment"
                                 subtitle="Bond Medical Model"
