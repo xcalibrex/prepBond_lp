@@ -34,15 +34,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats, isDark = false }) =
 
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in-up">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-serif italic mb-2">
-          Analytics & Insights
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Visualize your emotional intelligence profile and track your progress.
-        </p>
-      </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
