@@ -32,13 +32,14 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
 
     // Results State
     const [showResults, setShowResults] = useState(false);
-    const [resultsPhase, setResultsPhase] = useState<'score' | 'insights' | 'reflection' | 'feedback'>('score');
+    const [resultsPhase, setResultsPhase] = useState<'score' | 'insights' | 'review' | 'reflection' | 'feedback'>('score');
     const [selectedReflection, setSelectedReflection] = useState<number | null>(null);
     const [finalScore, setFinalScore] = useState<number>(0);
     const [earnedPoints, setEarnedPoints] = useState<number>(0);
     const [maxPointsPossible, setMaxPointsPossible] = useState<number>(0);
+    const [reviewQuestionIndex, setReviewQuestionIndex] = useState(0);
 
-    const [answerKeys, setAnswerKeys] = useState<Record<string, Record<string, number>>>({}); // qId -> { optId -> points }
+    const [answerKeys, setAnswerKeys] = useState<Record<string, Record<string, number | Record<string, number>>>>({}); // qId -> { optId -> points or { val -> points } }
 
     // Initial Load: Fetch Test Data & Create Session
     useEffect(() => {
@@ -84,6 +85,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                             scenario_context, 
                             scenario_image_url, 
                             question_text,
+                            explanation,
                             question_options (id, label, value, order_index),
                             answer_keys (question_id, question_option_id, correct_answer, points)
                         )
@@ -235,12 +237,20 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
             let totalPoints = 0;
             let maxPoints = 0;
 
-            sections.forEach(section => {
-                const pointsPerQuestion = getSectionMaxPoints(section.title);
+            // Debug logging
+            console.log('=== SCORING DEBUG ===');
+            console.log('Answer Keys:', answerKeys);
+            console.log('User Responses:', responses);
 
+            sections.forEach(section => {
                 section.questions.forEach(q => {
                     const response = responses[q.id];
                     const questionKeys = answerKeys[q.id];
+
+                    console.log(`Question ${q.id} (${q.type}):`, { response, questionKeys });
+
+                    // Each question is worth 1 point max
+                    maxPoints += 1;
 
                     if (response && questionKeys) {
                         if (q.type === 'LIKERT_GRID' && typeof response === 'object') {
@@ -250,23 +260,31 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                                 if (rowKeys && typeof rowKeys === 'object') {
                                     const points = (rowKeys as any)[val as string];
                                     if (points) {
+                                        console.log(`  Likert Row ${optId}: val=${val}, points=${points}`);
                                         totalPoints += points;
                                     }
                                 }
                             });
                         } else if (typeof response === 'string') {
-                            // MCQ / SCENARIO
+                            // MCQ / SCENARIO - check if response matches any answer key
                             const points = questionKeys[response];
+                            console.log(`  MCQ/Scenario: response=${response}, points=${points}`);
                             if (typeof points === 'number') {
                                 totalPoints += points;
                             }
                         }
+                    } else {
+                        console.log(`  No response or no answer keys for this question`);
                     }
-                    maxPoints += pointsPerQuestion;
                 });
             });
 
+            console.log(`Total Points: ${totalPoints}, Max Points: ${maxPoints}`);
+
             const calculatedScore = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0;
+            console.log(`Final Score: ${calculatedScore}%`);
+            console.log('=== END SCORING DEBUG ===');
+
             setFinalScore(calculatedScore);
             setEarnedPoints(totalPoints);
             setMaxPointsPossible(maxPoints);
@@ -449,13 +467,184 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                             </p>
                         </div>
 
-                        <div className="text-center">
+                        <div className="flex flex-col gap-4 items-center">
+                            <button
+                                onClick={() => { setReviewQuestionIndex(0); setResultsPhase('review'); }}
+                                className="px-12 py-5 bg-white dark:bg-black text-black dark:text-white border border-gray-200 dark:border-white/20 rounded-full font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 active:scale-[0.95] transition-all"
+                            >
+                                Review Answers
+                            </button>
                             <button
                                 onClick={() => setResultsPhase('reflection')}
                                 className="px-12 py-5 bg-black dark:bg-white text-white dark:text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
                             >
                                 Continue to Reflection
                             </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Review Phase - Show all questions with answers and explanations
+        if (resultsPhase === 'review') {
+            // Flatten all questions for review navigation
+            const allQuestions = sections.flatMap((s: any) =>
+                s.questions.map((q: any) => ({ ...q, sectionTitle: s.title }))
+            );
+            const currentReviewQuestion = allQuestions[reviewQuestionIndex];
+            const userResponse = currentReviewQuestion ? responses[currentReviewQuestion.id] : null;
+            const questionKeys = currentReviewQuestion ? answerKeys[currentReviewQuestion.id] : null;
+
+            // Find which option is the correct one (highest points)
+            let correctOptionId: string | null = null;
+            let maxPoints = 0;
+            if (questionKeys && currentReviewQuestion?.type !== 'LIKERT_GRID') {
+                Object.entries(questionKeys).forEach(([optId, pts]) => {
+                    if (typeof pts === 'number' && pts > maxPoints) {
+                        maxPoints = pts;
+                        correctOptionId = optId;
+                    }
+                });
+            }
+
+            return (
+                <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col p-6">
+                    <div className="w-full max-w-3xl mx-auto flex-1 animate-fade-in-up">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/10">
+                            <div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-white/50 mb-1 block">Review Mode</span>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{currentReviewQuestion?.sectionTitle}</h2>
+                            </div>
+                            <div className="text-sm font-bold text-gray-500 bg-gray-100 dark:bg-white/10 px-4 py-2 rounded-full">
+                                {reviewQuestionIndex + 1} / {allQuestions.length}
+                            </div>
+                        </div>
+
+                        {currentReviewQuestion && (
+                            <div className="space-y-6">
+                                {/* Question Context */}
+                                {currentReviewQuestion.scenario_context && (
+                                    <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{currentReviewQuestion.scenario_context}</p>
+                                    </div>
+                                )}
+
+                                {/* Question Image */}
+                                {currentReviewQuestion.scenario_image_url && (
+                                    <div className="rounded-2xl overflow-hidden max-h-48">
+                                        <img src={currentReviewQuestion.scenario_image_url} alt="Question stimulus" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
+
+                                {/* Question Text */}
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                                    {currentReviewQuestion.question_text}
+                                </h3>
+
+                                {/* Options with feedback */}
+                                <div className="space-y-3">
+                                    {currentReviewQuestion.options?.map((opt: any) => {
+                                        const isUserChoice = currentReviewQuestion.type === 'LIKERT_GRID'
+                                            ? false  // Likert handled differently
+                                            : userResponse === opt.id;
+                                        const isCorrect = opt.id === correctOptionId;
+                                        const optPoints = questionKeys && typeof questionKeys[opt.id] === 'number'
+                                            ? questionKeys[opt.id] as number
+                                            : 0;
+
+                                        return (
+                                            <div
+                                                key={opt.id}
+                                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${isUserChoice && isCorrect
+                                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+                                                    : isUserChoice && !isCorrect
+                                                        ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800'
+                                                        : isCorrect
+                                                            ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30'
+                                                            : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    {/* Indicator */}
+                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isUserChoice && isCorrect
+                                                        ? 'bg-emerald-500 text-white'
+                                                        : isUserChoice && !isCorrect
+                                                            ? 'bg-rose-500 text-white'
+                                                            : isCorrect
+                                                                ? 'bg-emerald-200 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-200'
+                                                                : 'bg-gray-200 dark:bg-white/10'
+                                                        }`}>
+                                                        {isCorrect && (
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        )}
+                                                        {isUserChoice && !isCorrect && (
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        )}
+                                                    </div>
+                                                    <span className={`text-sm font-medium ${isUserChoice || isCorrect ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
+                                                        }`}>
+                                                        {opt.label}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    {isUserChoice && (
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Your Answer</span>
+                                                    )}
+                                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${optPoints > 0
+                                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                                                        }`}>
+                                                        {optPoints} pts
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Explanation */}
+                                {currentReviewQuestion.explanation && (
+                                    <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30 mt-6">
+                                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Expert Explanation</h4>
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                            {currentReviewQuestion.explanation}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Navigation */}
+                        <div className="flex justify-between items-center mt-10 pt-6 border-t border-gray-100 dark:border-white/10">
+                            <button
+                                onClick={() => setReviewQuestionIndex(prev => Math.max(0, prev - 1))}
+                                disabled={reviewQuestionIndex === 0}
+                                className="px-6 py-3 rounded-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-white/20 transition-all"
+                            >
+                                Previous
+                            </button>
+
+                            {reviewQuestionIndex < allQuestions.length - 1 ? (
+                                <button
+                                    onClick={() => setReviewQuestionIndex(prev => prev + 1)}
+                                    className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
+                                >
+                                    Next Question
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => setResultsPhase('reflection')}
+                                    className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
+                                >
+                                    Finish Review
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

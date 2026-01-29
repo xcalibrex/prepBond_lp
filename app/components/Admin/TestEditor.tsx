@@ -67,6 +67,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
     const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
     const [newSectionTitle, setNewSectionTitle] = useState('');
     const [focusedOptionId, setFocusedOptionId] = useState<string | null>(null);
+    const [invalidQuestionIds, setInvalidQuestionIds] = useState<string[]>([]);
 
     // helper to sort
     const sortHierarchy = (data: any[]) => {
@@ -244,7 +245,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         const newQuestion = {
             id: optimisticId,
             section_id: sectionId,
-            question_text: 'New Question',
+            question_text: '',
             type: 'MCQ' as const, // Explicit literal type
             order_index: (sections[sectionIndex].questions || []).length, // append to end
             options: [], // important for UI
@@ -261,7 +262,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
             .insert([{
                 id: optimisticId,
                 section_id: sectionId,
-                question_text: 'New Question',
+                question_text: '',
                 type: 'MCQ',
                 order_index: newQuestion.order_index,
                 explanation: ''
@@ -315,6 +316,9 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         });
         setSections(newSections);
 
+        // Clear invalid highlight when answer is selected
+        setInvalidQuestionIds(prev => prev.filter(id => id !== questionId));
+
         // 2. Logic & DB Update
         await updateAnswerKeys(sectionId, questionId, optionId, sections);
     };
@@ -323,51 +327,17 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         const section = currentSections.find(s => s.id === sectionId);
         const question = section?.questions.find((q: any) => q.id === questionId);
 
-        if (!question) return;
+        if (!question || !primaryOptionId) return;
 
         // Clear existing keys for this question
         await supabase.from('answer_keys').delete().eq('question_id', questionId);
 
-        const keysToInsert = [];
-
-        if (question.type === 'LIKERT_GRID') {
-            // Logic: 2 pts for correct, 1 pt for adjacent
-            const primaryOption = question.options.find((o: any) => o.id === primaryOptionId);
-            if (!primaryOption) return;
-
-            const primaryVal = parseInt(primaryOption.value);
-
-            // Primary Key (2 pts)
-            keysToInsert.push({
-                question_id: questionId,
-                question_option_id: primaryOptionId,
-                points: 2
-            });
-
-            // Adjacent Keys (1 pt)
-            if (!isNaN(primaryVal)) {
-                const lowerVal = primaryVal - 1;
-                const upperVal = primaryVal + 1;
-
-                question.options.forEach((opt: any) => {
-                    const val = parseInt(opt.value);
-                    if (val === lowerVal || val === upperVal) {
-                        keysToInsert.push({
-                            question_id: questionId,
-                            question_option_id: opt.id,
-                            points: 1
-                        });
-                    }
-                });
-            }
-        } else {
-            // Default MCQ / Scenario Logic (2 pts for now, standard)
-            keysToInsert.push({
-                question_id: questionId,
-                question_option_id: primaryOptionId,
-                points: 2
-            });
-        }
+        // Simply save the selected correct answer with 1 point
+        const keysToInsert = [{
+            question_id: questionId,
+            question_option_id: primaryOptionId,
+            points: 1
+        }];
 
         if (keysToInsert.length > 0) {
             const { error } = await supabase.from('answer_keys').insert(keysToInsert);
@@ -376,6 +346,30 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
     };
 
     const handleSaveTest = async () => {
+        // Validate all questions have correct answers selected
+        const questionsWithoutAnswers: string[] = [];
+        sections.forEach(section => {
+            section.questions.forEach((q: any) => {
+                if (q.type !== 'LIKERT_GRID' && !q.correct_option_id && q.options?.length > 0) {
+                    questionsWithoutAnswers.push(q.id);
+                }
+            });
+        });
+
+        if (questionsWithoutAnswers.length > 0) {
+            setInvalidQuestionIds(questionsWithoutAnswers);
+            toast.error(`${questionsWithoutAnswers.length} question(s) are missing correct answers`, { position: 'top-center' });
+            // Scroll to first invalid question
+            setTimeout(() => {
+                const firstInvalidEl = document.getElementById(`question-${questionsWithoutAnswers[0]}`);
+                if (firstInvalidEl) {
+                    firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+            return;
+        }
+
+        setInvalidQuestionIds([]);
         const loadingId = toast.loading("Saving test...", { position: 'top-center' });
         try {
             // 1. Upsert Test Meta
@@ -642,7 +636,14 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                     <div className="space-y-6">
                                         {/* Questions Loop */}
                                         {(section.questions || []).map((q: any, qIdx: number) => (
-                                            <div key={q.id} className="pl-6 border-l-2 border-gray-100 dark:border-white/5 animate-fade-in">
+                                            <div
+                                                key={q.id}
+                                                id={`question-${q.id}`}
+                                                className={`pl-6 border-l-2 animate-fade-in transition-colors ${invalidQuestionIds.includes(q.id)
+                                                    ? 'border-red-500 bg-red-50 dark:bg-red-900/10 rounded-r-xl -ml-0.5 pl-6'
+                                                    : 'border-gray-100 dark:border-white/5'
+                                                    }`}
+                                            >
                                                 <div className="flex gap-4 mb-4">
                                                     <span className="text-xs font-bold text-gray-400 mt-2">Q{qIdx + 1}</span>
                                                     <div className="flex-1 space-y-3">
@@ -659,6 +660,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                             </select>
                                                             <AutoSaveInput
                                                                 className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold placeholder-gray-400"
+                                                                placeholder="New Question"
                                                                 value={q.question_text}
                                                                 onSave={(val) => updateQuestion(section.id, q.id, { question_text: val })}
                                                             />
@@ -727,17 +729,13 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                                             }
                                                                         }}
                                                                     />
-                                                                    <AutoSaveInput
-                                                                        className="w-20 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-center font-bold text-gray-500"
-                                                                        placeholder="Value"
-                                                                        value={opt.value}
-                                                                        onSave={(val) => {
-                                                                            let cleanVal = val;
-                                                                            const num = parseInt(val);
-                                                                            if (!isNaN(num) && num > 2) cleanVal = '2';
-                                                                            updateOption(section.id, q.id, opt.id, { value: cleanVal });
-                                                                        }}
-                                                                    />
+                                                                    {/* Score indicator - auto shows 1 pt when correct */}
+                                                                    <span className={`w-14 text-center text-xs font-bold py-2 px-2 rounded-xl ${q.correct_option_id === opt.id
+                                                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                                        : 'bg-gray-100 dark:bg-white/5 text-gray-400'
+                                                                        }`}>
+                                                                        {q.correct_option_id === opt.id ? '1 pt' : '0 pt'}
+                                                                    </span>
                                                                     <button onClick={() => deleteOption(section.id, q.id, opt.id)} className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2">
                                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
