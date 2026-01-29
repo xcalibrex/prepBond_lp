@@ -5,6 +5,7 @@ import { QuestionRenderer } from './QuestionTypes/QuestionRenderer';
 
 interface TestRunnerProps {
     testId: string;
+    reviewSessionId?: string | null;
     onComplete: (score: number) => void;
     onCancel: () => void;
 }
@@ -18,7 +19,7 @@ const REFLECTION_SCALE = [
     { label: 'Very Confident', icon: '✨', value: 5, feedback: "Excellent! You seem to have strong emotional intelligence intuition. Let's continue building on that foundation." }
 ];
 
-export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCancel }) => {
+export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId, onComplete, onCancel }) => {
     const [sections, setSections] = useState<ITestSection[]>([]);
     const [loading, setLoading] = useState(true);
     const [sessionId, setSessionId] = useState<string | null>(null);
@@ -50,8 +51,32 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) throw new Error("No user");
 
+                // --- SESSION LOGIC ---
                 let currentSessionId = sessionId;
-                if (!currentSessionId) {
+
+                // A. Review Mode: Load existing session
+                if (reviewSessionId) {
+                    currentSessionId = reviewSessionId;
+                    setSessionId(reviewSessionId);
+
+                    // Fetch session metadata (score, status, etc.)
+                    const { data: sessionData, error: sessionFetchError } = await supabase
+                        .from('user_test_sessions')
+                        .select('*')
+                        .eq('id', reviewSessionId)
+                        .single();
+
+                    if (sessionFetchError) throw sessionFetchError;
+
+                    // Hydrate State from Session Data
+                    if (sessionData) {
+                        setFinalScore(sessionData.score || 0);
+                        // setTestTitle... (loaded below)
+                    }
+
+                }
+                // B. New Session: Create if not exists
+                else if (!currentSessionId) {
                     const { data: sessionData, error: sessionError } = await supabase
                         .from('user_test_sessions')
                         .insert({ user_id: user.id, test_id: testId, status: 'in_progress' })
@@ -107,43 +132,169 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                 // Likert: qId -> { [optId]: { [val]: points } }
 
                 const keys: any = {};
+                let formattedSections: any[] = [];
 
-                const formattedSections = sectionData.map((s: any) => ({
-                    ...s,
-                    questions: s.questions
-                        .sort((a: any, b: any) => a.order_index - b.order_index)
-                        .map((q: any) => {
-                            // Extract Key
-                            if (q.answer_keys && q.answer_keys.length > 0) {
-                                keys[q.id] = keys[q.id] || {}; // Initialize
+                if (sectionData && sectionData.length > 0) {
+                    formattedSections = sectionData.map((s: any) => ({
+                        ...s,
+                        questions: s.questions
+                            .sort((a: any, b: any) => a.order_index - b.order_index)
+                            .map((q: any) => {
+                                // Extract Key
+                                if (q.answer_keys && q.answer_keys.length > 0) {
+                                    keys[q.id] = keys[q.id] || {}; // Initialize
 
-                                q.answer_keys.forEach((k: any) => {
-                                    if (q.type === 'LIKERT_GRID') {
-                                        // Nested Map for Likert: OptionID -> CorrectAnswer -> Points
-                                        if (k.question_option_id && k.correct_answer) {
-                                            if (!keys[q.id][k.question_option_id]) {
-                                                keys[q.id][k.question_option_id] = {};
+                                    q.answer_keys.forEach((k: any) => {
+                                        if (q.type === 'LIKERT_GRID') {
+                                            // Nested Map for Likert: OptionID -> CorrectAnswer -> Points
+                                            if (k.question_option_id && k.correct_answer) {
+                                                if (!keys[q.id][k.question_option_id]) {
+                                                    keys[q.id][k.question_option_id] = {};
+                                                }
+                                                keys[q.id][k.question_option_id][k.correct_answer] = k.points;
                                             }
-                                            keys[q.id][k.question_option_id][k.correct_answer] = k.points;
+                                        } else {
+                                            // Standard Map for MCQ: OptionID -> Points
+                                            if (k.question_option_id) {
+                                                keys[q.id][k.question_option_id] = k.points;
+                                            }
                                         }
-                                    } else {
-                                        // Standard Map for MCQ: OptionID -> Points
-                                        if (k.question_option_id) {
-                                            keys[q.id][k.question_option_id] = k.points;
-                                        }
+                                    });
+                                }
+
+                                return {
+                                    ...q,
+                                    options: q.question_options.sort((a: any, b: any) => a.order_index - b.order_index)
+                                };
+                            })
+                    }));
+                } else if (sessionId) {
+                    // Check if we have session_data from the earlier fetch (we need to access it)
+                    // But we didn't store the full sessionData object in a scope accessible here?
+                    // We did: `const { data: sessionData ... }` inside `if(reviewSessionId)` block above.
+                    // But that var is scoped to that block!
+                    // We need to re-fetch or hoist the variable.
+
+                    // Quick fix: Fetch session_data here if sections are empty.
+                    // Or better: rely on the fact that if reviewSessionId is set, we can fetch it.
+
+                    if (reviewSessionId) {
+                        const { data: legacySession } = await supabase
+                            .from('user_test_sessions')
+                            .select('session_data')
+                            .eq('id', reviewSessionId)
+                            .single();
+
+                        const legacyQuestions = legacySession?.session_data?.questions;
+
+                        if (legacyQuestions && Array.isArray(legacyQuestions)) {
+                            // Map Legacy Questions to TestRunner Format
+                            const mappedQuestions = legacyQuestions.map((q: any, idx: number) => {
+                                const qId = q.id || `legacy-${idx}`;
+
+                                // Map Keys
+                                keys[qId] = {};
+                                q.options.forEach((opt: any) => {
+                                    if (opt.score > 0) {
+                                        keys[qId][opt.id] = opt.score; // Assume max 1 point usually, or fractional
                                     }
                                 });
-                            }
 
-                            return {
-                                ...q,
-                                options: q.question_options.sort((a: any, b: any) => a.order_index - b.order_index)
-                            };
-                        })
-                }));
+                                return {
+                                    id: qId,
+                                    section_id: 'legacy-section',
+                                    type: 'MCQ', // Treat all as MCQ for rendering simplicity
+                                    scenario_context: q.branch, // Use branch as context tag
+                                    scenario_image_url: q.imageUrl,
+                                    question_text: q.scenario,
+                                    explanation: q.explanation,
+                                    order_index: idx,
+                                    options: q.options.map((opt: any, optIdx: number) => ({
+                                        id: opt.id,
+                                        label: opt.text,
+                                        value: opt.id,
+                                        order_index: optIdx
+                                    }))
+                                };
+                            });
+
+                            formattedSections = [{
+                                id: 'legacy-section',
+                                title: 'Review Session',
+                                instructions: 'Review your past answers.',
+                                order_index: 0,
+                                questions: mappedQuestions
+                            }];
+                        }
+                    }
+                }
 
                 setSections(formattedSections);
                 setAnswerKeys(keys);
+
+                // --- HYDRATE RESPONSES FOR REVIEW ---
+                if (reviewSessionId) {
+                    const { data: userResponses, error: responsesError } = await supabase
+                        .from('user_responses')
+                        .select('*')
+                        .eq('session_id', reviewSessionId);
+
+                    if (!responsesError && userResponses) {
+                        const hydratedResponses: Record<string, any> = {};
+
+                        // Need to group Likert responses by QuestionID
+                        // And map MCQ to OptionID (if available) or Value
+
+                        userResponses.forEach((r: any) => {
+                            // Find the question type from loaded sections
+                            let qType = 'MCQ'; // Default
+                            let relevantQ: any = null;
+
+                            // Inefficient search but safe
+                            for (const s of formattedSections) {
+                                const found = s.questions.find((q: any) => q.id === r.question_id);
+                                if (found) {
+                                    qType = found.type;
+                                    relevantQ = found;
+                                    break;
+                                }
+                            }
+
+                            if (relevantQ) {
+                                if (qType === 'LIKERT_GRID') {
+                                    // Structure: { [optId]: val }
+                                    if (!hydratedResponses[r.question_id]) hydratedResponses[r.question_id] = {};
+                                    if (r.question_option_id) {
+                                        hydratedResponses[r.question_id][r.question_option_id] = r.response_value;
+                                    }
+                                } else {
+                                    // Standard MCQ
+                                    // TestRunner expects `responses[qId]` to be the Selected Option ID (usually)
+                                    // OR the value?
+                                    // `handleAnswer` takes `val`. For MCQ, `QuestionRenderer` calls it with `option.id`.
+                                    // So we should restore `question_option_id`.
+                                    if (r.question_option_id) {
+                                        hydratedResponses[r.question_id] = r.question_option_id;
+                                    }
+                                }
+                            }
+                        });
+
+                        setResponses(hydratedResponses);
+
+                        // Jump to Review Mode
+                        setShowResults(true);
+                        setResultsPhase('review');
+                        setReviewQuestionIndex(0); // Start at first question
+
+                        // Also hydrate score/points if possible (re-calculate or trust DB?)
+                        // We set `finalScore` earlier. 
+                        // We might want `earnedPoints` too.
+                        // Ideally we re-run generic scoring or just trust the Review Mode renderer to calculate points dynamically per question.
+                        // The Review Mode renderer logic (L553) uses `answerKeys` and `userResponse`.
+                        // So `responses` state is sufficient!
+                    }
+                }
 
             } catch (err) {
                 console.error("Test init error", err);
@@ -513,9 +664,20 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                     <div className="w-full max-w-3xl mx-auto flex-1 animate-fade-in-up">
                         {/* Header */}
                         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/10">
-                            <div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-white/50 mb-1 block">Review Mode</span>
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{currentReviewQuestion?.sectionTitle}</h2>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => onCancel()}
+                                    className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 transition-colors"
+                                    title="Back to Dashboard"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                </button>
+                                <div>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-white/50 mb-1 block">Review Mode</span>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{currentReviewQuestion?.sectionTitle}</h2>
+                                </div>
                             </div>
                             <div className="text-sm font-bold text-gray-500 bg-gray-100 dark:bg-white/10 px-4 py-2 rounded-full">
                                 {reviewQuestionIndex + 1} / {allQuestions.length}
@@ -533,7 +695,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
 
                                 {/* Question Image */}
                                 {currentReviewQuestion.scenario_image_url && (
-                                    <div className="rounded-2xl overflow-hidden max-h-48">
+                                    <div className="rounded-2xl overflow-hidden max-w-[240px] mx-auto">
                                         <img src={currentReviewQuestion.scenario_image_url} alt="Question stimulus" className="w-full h-full object-cover" />
                                     </div>
                                 )}
@@ -587,7 +749,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                                                             </svg>
                                                         )}
                                                     </div>
-                                                    <span className={`text-sm font-medium ${isUserChoice || isCorrect ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
+                                                    <span className={`text-sm font-medium capitalize ${isUserChoice || isCorrect ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
                                                         }`}>
                                                         {opt.label}
                                                     </span>
@@ -595,6 +757,9 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                                                 <div className="flex items-center gap-2">
                                                     {isUserChoice && (
                                                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Your Answer</span>
+                                                    )}
+                                                    {isCorrect && (
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">Correct Answer</span>
                                                     )}
                                                     <span className={`text-xs font-bold px-2 py-1 rounded-full ${optPoints > 0
                                                         ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
@@ -639,7 +804,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, onComplete, onCa
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => setResultsPhase('reflection')}
+                                    onClick={() => reviewSessionId ? setResultsPhase('insights') : setResultsPhase('reflection')}
                                     className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
                                 >
                                     Finish Review

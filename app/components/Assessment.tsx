@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateAssessment } from '../services/geminiService';
 import { MOCK_QUESTIONS, GENERIC_TEST_IDS } from '../constants';
 import { AssessmentState, Branch } from '../types';
@@ -10,7 +10,12 @@ interface AssessmentProps {
   initialBranch?: Branch | null;
 }
 
+import { useSearchParams } from 'react-router-dom';
+
 export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, initialBranch }) => {
+  const [searchParams] = useSearchParams();
+  const reviewSessionId = searchParams.get('review');
+
   const [state, setState] = useState<AssessmentState>({
     isActive: false,
     currentBranch: initialBranch || null,
@@ -18,11 +23,54 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
     currentIndex: 0,
     answers: {},
     isComplete: false,
+    isReviewing: !!reviewSessionId, // Start in review mode if ID present
   });
+
+  // Load Review Session if ID is present
+  useEffect(() => {
+    const loadReviewSession = async () => {
+      if (!reviewSessionId) return;
+
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('user_test_sessions')
+          .select('session_data')
+          .eq('id', reviewSessionId)
+          .single();
+
+        if (data && data.session_data) {
+          const sessionData = data.session_data as any; // Cast as needed
+          if (sessionData.questions) {
+            setState(prev => ({
+              ...prev,
+              questions: sessionData.questions,
+              answers: sessionData.answers || {},
+              isActive: true,
+              isReviewing: true,
+              isComplete: true // Treat as complete
+            }));
+            return;
+          }
+        }
+
+        // If we get here, data is missing or invalid
+        setReviewError(true);
+      } catch (err) {
+        console.error("Failed to load review session", err);
+        setReviewError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadReviewSession();
+  }, [reviewSessionId]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [reviewError, setReviewError] = useState(false);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
 
@@ -32,7 +80,11 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
     setIsLoading(true);
     const targetBranch = branch || state.currentBranch;
 
-    // Create Supabase Session immediately
+    // 1. Generate Questions First
+    const aiQuestions = await generateAssessment(targetBranch || undefined);
+    const questions = aiQuestions.length > 0 ? aiQuestions : MOCK_QUESTIONS;
+
+    // 2. Create Supabase Session with Questions
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -47,7 +99,8 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
             user_id: user.id,
             test_id: testId,
             status: 'in_progress',
-            started_at: new Date().toISOString()
+            started_at: new Date().toISOString(),
+            session_data: { questions }
           })
           .select()
           .single();
@@ -59,9 +112,6 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
     } catch (err) {
       console.error("Failed to init session", err);
     }
-
-    const aiQuestions = await generateAssessment(targetBranch || undefined);
-    const questions = aiQuestions.length > 0 ? aiQuestions : MOCK_QUESTIONS;
 
     setState({
       isActive: true,
@@ -106,7 +156,11 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
             status: 'completed',
             completed_at: new Date().toISOString(),
             total_score: finalPercentage,
-            score: finalPercentage
+            score: finalPercentage,
+            session_data: {
+              questions: state.questions,
+              answers: nextAnswers
+            }
           })
           .eq('id', sessionId);
       }
@@ -137,6 +191,29 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       setState(prev => ({ ...prev, isActive: false, isComplete: false, questions: [] }));
     }
     setShowExitConfirm(false);
+  }
+
+  // --- Error View ---
+  if (reviewError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[50vh] text-center px-6 animate-fade-in">
+        <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6">
+          <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Review Unavailable</h3>
+        <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-8">
+          Detailed review data is not available for this session. It may have been completed before the review feature was enabled.
+        </p>
+        <button
+          onClick={() => onCancel?.()}
+          className="px-8 py-3 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-bold text-sm hover:opacity-90 transition-all shadow-md"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
   }
 
   // Pre-Assessment Screen

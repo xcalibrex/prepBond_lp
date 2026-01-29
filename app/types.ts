@@ -157,6 +157,7 @@ export interface Database {
           started_at: string
           completed_at: string | null
           total_score: number
+          session_data?: any
         }
         Insert: {
           id?: string
@@ -166,6 +167,7 @@ export interface Database {
           started_at?: string
           completed_at?: string | null
           total_score?: number
+          session_data?: any
         }
         Update: {
           id?: string
@@ -175,6 +177,7 @@ export interface Database {
           started_at?: string
           completed_at?: string | null
           total_score?: number
+          session_data?: any
         }
       }
       user_responses: {
