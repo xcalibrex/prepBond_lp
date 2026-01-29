@@ -237,7 +237,18 @@ export const Assessment: React.FC<AssessmentProps> = ({ onComplete, onCancel, in
       <div className="w-full max-w-3xl mx-auto px-6 py-8 h-full flex flex-col relative animate-fade-in">
         {/* Review Header */}
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/5">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Review Mode</h3>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onCancel?.()}
+              className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 transition-colors"
+              title="Back to Dashboard"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Review Mode</h3>
+          </div>
           <div className="text-sm font-medium text-gray-500">{state.currentIndex + 1} / {state.questions.length}</div>
         </div>
 
