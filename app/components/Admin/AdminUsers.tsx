@@ -25,6 +25,7 @@ export const AdminUsers: React.FC = () => {
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [newUser, setNewUser] = useState({ name: '', email: '', role: 'student' });
     const [isLoading, setIsLoading] = useState(true);
+    const [isInviting, setIsInviting] = useState(false);
 
     // Fetch users from Supabase
     useEffect(() => {
@@ -113,7 +114,7 @@ export const AdminUsers: React.FC = () => {
 
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
+        setIsInviting(true);
 
         try {
             // 1. Invite user via Supabase Edge Function
@@ -138,7 +139,7 @@ export const AdminUsers: React.FC = () => {
             console.error('Invite failed:', err);
             alert(`Failed to invite user: ${err.message || 'Unknown error'}`);
         } finally {
-            setIsLoading(false);
+            setIsInviting(false);
         }
     };
 
@@ -393,8 +394,8 @@ export const AdminUsers: React.FC = () => {
 
                         <div className="flex gap-4 mt-10">
                             <button type="button" onClick={() => setShowInviteModal(false)} className="flex-1 py-4 rounded-[200px] border border-gray-200 dark:border-gray-700 font-black text-[10px] uppercase tracking-widest text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Cancel</button>
-                            <button type="submit" disabled={isLoading} className="flex-1 py-4 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:pointer-events-none">
-                                {isLoading ? (
+                            <button type="submit" disabled={isInviting} className="flex-1 py-4 rounded-[200px] bg-black dark:bg-white text-white dark:text-black font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:pointer-events-none">
+                                {isInviting ? (
                                     <>
                                         <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
