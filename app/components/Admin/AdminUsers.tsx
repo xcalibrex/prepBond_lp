@@ -116,21 +116,12 @@ export const AdminUsers: React.FC = () => {
         setIsLoading(true);
 
         try {
-            // 1. Invite user via Supabase Auth
-            // Note: This requires the Service Role Key or handled via a secure Edge Function.
-            // For now, we use the client-side attempt, but standard anon keys can't do this.
-            // Recommendation to user: Create an Edge Function for "invite-user" to handle this securely.
-
-            const { error: inviteError } = await supabase.auth.signInWithOtp({
-                email: newUser.email,
-                options: {
-                    data: {
-                        full_name: newUser.name,
-                        role: newUser.role,
-                        onboarding_complete: false
-                    },
-                    shouldCreateUser: true,
-                    emailRedirectTo: `${window.location.origin}/app/`
+            // 1. Invite user via Supabase Edge Function
+            const { error: inviteError } = await supabase.functions.invoke('invite-user', {
+                body: {
+                    email: newUser.email,
+                    full_name: newUser.name,
+                    role: newUser.role
                 }
             });
 

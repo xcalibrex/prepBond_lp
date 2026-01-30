@@ -107,6 +107,19 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
                         status: sessionsMap[t.id] as any || 'not_started'
                     };
                 });
+
+                // Sort: Uncompleted first, then by creation date (already sorted by query, so just stable sort or re-sort)
+                // Actually, just need to partition: not_started/in_progress vs completed
+                formatted.sort((a, b) => {
+                    const isCompletedA = a.status === 'completed';
+                    const isCompletedB = b.status === 'completed';
+
+                    if (isCompletedA && !isCompletedB) return 1;
+                    if (!isCompletedA && isCompletedB) return -1;
+
+                    return 0; // Keep original order (created_at) for same status group
+                });
+
                 setTests(formatted);
             }
             setIsLoading(false);
@@ -124,12 +137,13 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
     const renderWorksheetCard = (test: PracticeTest) => {
         // Fallback for branch meta if data is inconsistent
         const meta = test.branch ? BRANCH_META[test.branch] : { color: 'bg-gray-400', textColor: 'text-gray-500', label: 'Unknown' };
+        const isCompleted = test.status === 'completed';
 
         return (
             <div
                 key={test.id}
                 onClick={() => setSelectedTest(test)}
-                className="group relative bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg cursor-pointer hover:-translate-y-1"
+                className={`group relative bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg cursor-pointer hover:-translate-y-1 ${isCompleted ? 'opacity-60 grayscale-[0.5]' : ''}`}
             >
                 <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${meta.color}`}></div>
                 <div className="pl-3">
@@ -142,7 +156,7 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
                     <div className="mt-3 pt-3 border-t border-gray-50 dark:border-white/5 flex justify-between items-center">
                         <span className="text-[10px] font-bold text-gray-400">{test.duration}</span>
                         <span className={`text-[10px] font-bold ${test.status === 'in_progress' ? 'text-blue-500' : meta.textColor}`}>
-                            {test.status === 'in_progress' ? 'Resume →' : 'Start →'}
+                            {test.status === 'in_progress' ? 'Resume →' : (isCompleted ? 'Review →' : 'Start →')}
                         </span>
                     </div>
                 </div>

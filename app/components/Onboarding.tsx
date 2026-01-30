@@ -50,8 +50,8 @@ const EMOTIONAL_SCALE = [
 ];
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-    // Phases: 'password' -> 'profile' -> 'welcome' -> 'intro' -> 'walkthrough' -> 'confidence' -> 'validation' -> 'launch' -> 'complete'
-    const [phase, setPhase] = useState<'password' | 'profile' | 'welcome' | 'intro' | 'walkthrough' | 'confidence' | 'validation' | 'launch' | 'complete'>('password');
+    // Phases: 'password' -> 'profile' -> 'welcome' -> 'intro' -> 'walkthrough' -> 'confidence' -> 'validation' -> 'complete'
+    const [phase, setPhase] = useState<'password' | 'profile' | 'welcome' | 'intro' | 'walkthrough' | 'confidence' | 'validation' | 'complete'>('password');
     const [walkthroughStep, setWalkthroughStep] = useState(0);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -72,7 +72,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         }
         else if (phase === 'confidence') setPhase('walkthrough');
         else if (phase === 'validation') setPhase('confidence');
-        else if (phase === 'launch') setPhase('validation');
     };
 
     // Intelligent Initial State
@@ -479,51 +478,17 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         {selected?.encouragement}
                     </p>
                     <button
-                        onClick={() => setPhase('launch')}
+                        onClick={() => handleFinalizeOnboarding(false)}
                         className="px-12 py-5 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-gray-200 active:scale-[0.95] transition-all"
                     >
-                        Continue
+                        Go to Dashboard
                     </button>
                 </div>
             </div>
         );
     }
 
-    if (phase === 'launch') {
-        return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#0a0a0a_0%,_#000_100%)]">
-                <button onClick={handleBack} className="absolute top-10 left-10 flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
-                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Back</span>
-                </button>
-                <div className="w-full max-w-2xl text-center animate-fade-in-up">
-                    <div className="mb-10 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
-                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span className="text-[10px] font-black tracking-widest text-white/60">MOCK TEST READY</span>
-                    </div>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif italic text-white tracking-tight leading-tight">Ready to start?</h2>
-                    <p className="text-xl text-gray-400 font-light leading-relaxed mb-12">
-                        Let's start with a diagnostic test to gauge your current scores across the 4 branches. This will identify your greatest opportunities for growth instantly.
-                    </p>
 
-                    <div className="flex flex-col items-center gap-6">
-                        <button
-                            onClick={() => handleFinalizeOnboarding(true)}
-                            className="w-full md:w-auto px-16 py-5 bg-white text-black rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all"
-                        >
-                            Let's Go
-                        </button>
-                        <button
-                            onClick={() => handleFinalizeOnboarding(false)}
-                            className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors py-2"
-                        >
-                            Skip for now
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]">
