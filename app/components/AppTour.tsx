@@ -139,24 +139,68 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
 
     if (!isVisible || !targetRect) return null;
 
+    const getClipPath = () => {
+        if (!targetRect) return 'none';
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const r = 12; // Radius
+        const pad = 8; // Padding
+
+        const x = targetRect.left - pad;
+        const y = targetRect.top - pad;
+        const w = targetRect.width + (pad * 2);
+        const h = targetRect.height + (pad * 2);
+
+        // Path: Outer rectangle (clockwise) + Inner rounded rectangle (counter-clockwise)
+        return `path('M 0 0 L ${windowWidth} 0 L ${windowWidth} ${windowHeight} L 0 ${windowHeight} Z M ${x + r} ${y} L ${x} ${y + r} L ${x} ${y + h - r} L ${x + r} ${y + h} L ${x + w - r} ${y + h} L ${x + w} ${y + h - r} L ${x + w} ${y + r} L ${x + w - r} ${y} Z')`;
+        // Note: The simple L (Line) approximation for corners is visually "cut", 
+        // but for true rounded corners we need arcs. 
+        // Let's use Q (Quadratic Bezier) or A (Arc). A is better but syntax is verbose.
+        // Actually, for a 12px cut, the L-L-L approach above is chamfered, not rounded.
+        // Let's do true arcs.
+        // Inner Rect (Counter-Clockwise):
+        // Start Top-Left (after corner): M x+r, y
+        // Top Edge: L x+w-r, y
+        // Top-Right Corner: A r r 0 0 0 x+w, y+r  (sweep-flag 0 means counter-clockwise)
+        // Right Edge: L x+w, y+h-r
+        // Bottom-Right Corner: A r r 0 0 0 x+w-r, y+h
+        // Bottom Edge: L x+r, y+h
+        // Bottom-Left Corner: A r r 0 0 0 x, y+h-r
+        // Left Edge: L x, y+r
+        // Top-Left Corner: A r r 0 0 0 x+r, y
+        // Close: Z
+    };
+
+    // Revised helper for true arcs
+    const getClipPathWithArcs = () => {
+        if (!targetRect) return 'none';
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const r = 12;
+        const pad = 8;
+
+        const x = targetRect.left - pad;
+        const y = targetRect.top - pad;
+        const w = targetRect.width + (pad * 2);
+        const h = targetRect.height + (pad * 2);
+
+        // Check if dimensions are valid for radius
+        const safeR = Math.min(r, w / 2, h / 2);
+
+        return `path('M 0 0 L ${windowWidth} 0 L ${windowWidth} ${windowHeight} L 0 ${windowHeight} Z M ${x + safeR} ${y} L ${x} ${y + safeR} A ${safeR} ${safeR} 0 0 0 ${x + safeR} ${y} Z M ${x + safeR} ${y} L ${x + w - safeR} ${y} A ${safeR} ${safeR} 0 0 0 ${x + w} ${y + safeR} L ${x + w} ${y + h - safeR} A ${safeR} ${safeR} 0 0 0 ${x + w - safeR} ${y + h} L ${x + safeR} ${y + h} A ${safeR} ${safeR} 0 0 0 ${x} ${y + h - safeR} L ${x} ${y + safeR} A ${safeR} ${safeR} 0 0 0 ${x + safeR} ${y} Z')`;
+        // Simplification: The browser might support 'rect(...)' inside clip-path? No, path() is standard.
+        // Let's just write the string directly in the render with formatted logic.
+    }
+
     return (
         <div className="fixed inset-0 z-[100] pointer-events-none">
             {/* Backdrop with holes */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-all duration-500 pointer-events-auto"
                 style={{
-                    clipPath: `polygon(
-                        0% 0%,
-                        0% 100%,
-                        ${targetRect.left - 8}px 100%,
-                        ${targetRect.left - 8}px ${targetRect.top - 8}px,
-                        ${targetRect.right + 8}px ${targetRect.top - 8}px,
-                        ${targetRect.right + 8}px ${targetRect.bottom + 8}px,
-                        ${targetRect.left - 8}px ${targetRect.bottom + 8}px,
-                        ${targetRect.left - 8}px 100%,
-                        100% 100%,
-                        100% 0%
-                    )`
+                    clipPath: `path('M 0 0 L ${window.innerWidth} 0 L ${window.innerWidth} ${window.innerHeight} L 0 ${window.innerHeight} Z M ${targetRect.left - 8 + 12} ${targetRect.top - 8} L ${targetRect.right + 8 - 12} ${targetRect.top - 8} A 12 12 0 0 0 ${targetRect.right + 8} ${targetRect.top - 8 + 12} L ${targetRect.right + 8} ${targetRect.bottom + 8 - 12} A 12 12 0 0 0 ${targetRect.right + 8 - 12} ${targetRect.bottom + 8} L ${targetRect.left - 8 + 12} ${targetRect.bottom + 8} A 12 12 0 0 0 ${targetRect.left - 8} ${targetRect.bottom + 8 - 12} L ${targetRect.left - 8} ${targetRect.top - 8 + 12} A 12 12 0 0 0 ${targetRect.left - 8 + 12} ${targetRect.top - 8} Z')`
                 }}
             />
 
