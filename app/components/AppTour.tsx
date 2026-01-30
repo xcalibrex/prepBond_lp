@@ -137,9 +137,7 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
         return "";
     }, [step.position]);
 
-    if (!isVisible || !targetRect) return null;
-
-    // Generate clip-path with cut-out
+    // Generate clip-path with cut-out (must be before early return for hooks rules)
     const clipPath = useMemo(() => {
         if (!targetRect) return 'none';
 
@@ -168,6 +166,8 @@ export const AppTour: React.FC<AppTourProps> = ({ onComplete }) => {
 
         return `path('M 0 0 L ${windowWidth} 0 L ${windowWidth} ${windowHeight} L 0 ${windowHeight} Z M ${x} ${y + r} L ${x} ${y + h - r} A ${r} ${r} 0 0 0 ${x + r} ${y + h} L ${x + w - r} ${y + h} A ${r} ${r} 0 0 0 ${x + w} ${y + h - r} L ${x + w} ${y + r} A ${r} ${r} 0 0 0 ${x + w - r} ${y} L ${x + r} ${y} A ${r} ${r} 0 0 0 ${x} ${y + r} Z')`;
     }, [targetRect]);
+
+    if (!isVisible || !targetRect) return null;
 
     return (
         <div className="fixed inset-0 z-[100] pointer-events-none">
