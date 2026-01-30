@@ -98,11 +98,17 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             // But if they have a name AND we can verify they've been here before, 
             // we might want to skip.
 
+            // We removed the logic that auto-skips the password step if a name is present.
+            // Invited users have a name set but still need to set a password.
+            // If they already have a password and are just re-onboarding (unlikely for student flow),
+            // they can just set a new one or we assume the flow is correct for new users.
+            /*
             if (fullName && phase === 'password') {
                 setPhase('profile'); // For now, let them see profile to confirm, or jump to welcome.
                 // Actually, let's be aggressive: if name is set, skip to welcome.
                 setPhase('welcome');
             }
+            */
         };
         initializeOnboarding();
     }, []);
