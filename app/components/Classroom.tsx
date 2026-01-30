@@ -169,6 +169,33 @@ export const Classroom: React.FC = () => {
         );
     }
 
+    const getEmbedUrl = (url: string) => {
+        if (!url) return '';
+
+        // YouTube
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            // Already embed?
+            if (url.includes('/embed/')) return url;
+
+            // Convert watch to embed
+            const videoId = url.includes('v=')
+                ? url.split('v=')[1]?.split('&')[0]
+                : url.split('/').pop();
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+
+        // Vimeo
+        if (url.includes('vimeo.com')) {
+            // Already player?
+            if (url.includes('player.vimeo.com')) return url;
+
+            const videoId = url.split('/').pop();
+            return `https://player.vimeo.com/video/${videoId}`;
+        }
+
+        return url;
+    };
+
     return (
         <div className="flex flex-col md:flex-row h-[calc(100vh-140px)] gap-6 animate-fade-in-up">
             {/* Left Sidebar: Class List */}
@@ -245,7 +272,7 @@ export const Classroom: React.FC = () => {
                     <>
                         <div className="relative aspect-video w-full bg-black">
                             <iframe
-                                src={selectedClass.video_url}
+                                src={getEmbedUrl(selectedClass.video_url)}
                                 title={selectedClass.title}
                                 className="absolute inset-0 w-full h-full"
                                 frameBorder="0"

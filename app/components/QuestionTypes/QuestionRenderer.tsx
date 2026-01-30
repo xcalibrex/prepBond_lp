@@ -2,27 +2,58 @@ import React from 'react';
 import { IQuestion } from '../../types';
 import { MultipleChoice } from './MultipleChoice';
 import { LikertGrid } from './LikertGrid';
+import { EmotionOrder } from './EmotionOrder';
+import { SlidingScale } from './SlidingScale';
 
 interface Props {
     question: IQuestion;
-    // We use a generic answers object to handle both single value (MCQ) and map (Likert)
     currentAnswer: any;
     onAnswer: (val: any) => void;
 }
 
-export const QuestionRenderer: React.FC<Props> = ({ question, currentAnswer, onAnswer }) => {
+// Helper for video embedding
+const VideoPlayer: React.FC<{ url: string }> = ({ url }) => {
+    const getEmbedUrl = (inputUrl: string) => {
+        if (inputUrl.includes('youtube.com') || inputUrl.includes('youtu.be')) {
+            const videoId = inputUrl.includes('v=')
+                ? inputUrl.split('v=')[1]?.split('&')[0]
+                : inputUrl.split('/').pop();
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+        if (inputUrl.includes('vimeo.com')) {
+            const videoId = inputUrl.split('/').pop();
+            return `https://player.vimeo.com/video/${videoId}`;
+        }
+        return inputUrl; // Fallback or direct MP4
+    };
 
-    // Scenario Wrapper (Section Context)
-    // If context present, show it above question
-    // Note: In TestRunner, we might want to show Scenario once for a block of questions. 
-    // For now, adhering to schema where each question has context or referencing a parent section.
-    // The DB schema question.scenario_context allows unique context per question OR shared.
+    const embedUrl = getEmbedUrl(url);
+    const isDirectFile = url.endsWith('.mp4') || url.endsWith('.webm');
+
+    return (
+        <div className="mb-6 rounded-2xl overflow-hidden shadow-lg bg-black aspect-video">
+            {isDirectFile ? (
+                <video src={url} controls className="w-full h-full" />
+            ) : (
+                <iframe
+                    src={embedUrl}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                />
+            )}
+        </div>
+    );
+};
+
+export const QuestionRenderer: React.FC<Props> = ({ question, currentAnswer, onAnswer }) => {
 
     const wrapperClass = "my-4";
 
     const content = () => {
         switch (question.type) {
-            case 'MCQ': // Fallthrough for simple scenario MCQs
+            case 'MCQ':
             case 'SCENARIO':
                 return (
                     <MultipleChoice
@@ -30,6 +61,17 @@ export const QuestionRenderer: React.FC<Props> = ({ question, currentAnswer, onA
                         selectedAnswer={currentAnswer as string}
                         onAnswer={onAnswer}
                     />
+                );
+            case 'VIDEO':
+                return (
+                    <div>
+                        {question.video_url && <VideoPlayer url={question.video_url} />}
+                        <MultipleChoice
+                            question={question}
+                            selectedAnswer={currentAnswer as string}
+                            onAnswer={onAnswer}
+                        />
+                    </div>
                 );
             case 'LIKERT_GRID':
                 return (
@@ -40,6 +82,22 @@ export const QuestionRenderer: React.FC<Props> = ({ question, currentAnswer, onA
                             const prev = currentAnswer || {};
                             onAnswer({ ...prev, [rowId]: val });
                         }}
+                    />
+                );
+            case 'EMOTION_ORDER':
+                return (
+                    <EmotionOrder
+                        question={question}
+                        currentAnswer={currentAnswer} // Expects string[] of IDs
+                        onAnswer={onAnswer}
+                    />
+                );
+            case 'SLIDING_SCALE':
+                return (
+                    <SlidingScale
+                        question={question}
+                        currentAnswer={currentAnswer}
+                        onAnswer={onAnswer}
                     />
                 );
             default:

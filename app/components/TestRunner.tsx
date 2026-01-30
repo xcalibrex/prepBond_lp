@@ -40,7 +40,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
     const [maxPointsPossible, setMaxPointsPossible] = useState<number>(0);
     const [reviewQuestionIndex, setReviewQuestionIndex] = useState(0);
 
-    const [answerKeys, setAnswerKeys] = useState<Record<string, Record<string, number | Record<string, number>>>>({}); // qId -> { optId -> points or { val -> points } }
+    const [answerKeys, setAnswerKeys] = useState<Record<string, any>>({}); // qId -> { optId -> points or { val -> points } }
 
     // Initial Load: Fetch Test Data & Create Session
     useEffect(() => {
@@ -108,7 +108,11 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                             section_id, 
                             type, 
                             scenario_context, 
-                            scenario_image_url, 
+                            scenario_image_url,
+                            video_url,
+                            correct_order,
+                            scale_min,
+                            scale_max,
                             question_text,
                             explanation,
                             question_options (id, label, value, order_index),
@@ -157,6 +161,10 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                                             // Standard Map for MCQ: OptionID -> Points
                                             if (k.question_option_id) {
                                                 keys[q.id][k.question_option_id] = k.points;
+                                            } else if (k.correct_answer) {
+                                                // Handle Sliding Scale / Other types without option_id
+                                                keys[q.id]['correct_value'] = k.correct_answer;
+                                                keys[q.id]['points'] = k.points;
                                             }
                                         }
                                     });
@@ -267,12 +275,16 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                                     if (r.question_option_id) {
                                         hydratedResponses[r.question_id][r.question_option_id] = r.response_value;
                                     }
+                                } else if (qType === 'EMOTION_ORDER') {
+                                    try {
+                                        hydratedResponses[r.question_id] = JSON.parse(r.response_value);
+                                    } catch (e) {
+                                        hydratedResponses[r.question_id] = [];
+                                    }
+                                } else if (qType === 'SLIDING_SCALE') {
+                                    hydratedResponses[r.question_id] = parseFloat(r.response_value);
                                 } else {
-                                    // Standard MCQ
-                                    // TestRunner expects `responses[qId]` to be the Selected Option ID (usually)
-                                    // OR the value?
-                                    // `handleAnswer` takes `val`. For MCQ, `QuestionRenderer` calls it with `option.id`.
-                                    // So we should restore `question_option_id`.
+                                    // Standard MCQ / VIDEO
                                     if (r.question_option_id) {
                                         hydratedResponses[r.question_id] = r.question_option_id;
                                     }
@@ -286,16 +298,8 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                         setShowResults(true);
                         setResultsPhase('review');
                         setReviewQuestionIndex(0); // Start at first question
-
-                        // Also hydrate score/points if possible (re-calculate or trust DB?)
-                        // We set `finalScore` earlier. 
-                        // We might want `earnedPoints` too.
-                        // Ideally we re-run generic scoring or just trust the Review Mode renderer to calculate points dynamically per question.
-                        // The Review Mode renderer logic (L553) uses `answerKeys` and `userResponse`.
-                        // So `responses` state is sufficient!
                     }
                 }
-
             } catch (err) {
                 console.error("Test init error", err);
                 alert("Failed to load test. Please try again.");
@@ -352,6 +356,18 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                 response_value: val,
             }));
             await supabase.from('user_responses').insert(entries);
+        } else if (question.type === 'EMOTION_ORDER') {
+            await supabase.from('user_responses').insert({
+                session_id: sessionId,
+                question_id: question.id,
+                response_value: JSON.stringify(responseVal) // Store array as JSON string
+            });
+        } else if (question.type === 'SLIDING_SCALE') {
+            await supabase.from('user_responses').insert({
+                session_id: sessionId,
+                question_id: question.id,
+                response_value: String(responseVal)
+            });
         } else {
             const selectedOpt = question.options.find(o => o.id === responseVal);
             await supabase.from('user_responses').insert({
@@ -417,11 +433,29 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                                 }
                             });
                         } else if (typeof response === 'string') {
-                            // MCQ / SCENARIO - check if response matches any answer key
+                            // MCQ / SCENARIO / VIDEO - check if response matches any answer key
                             const points = questionKeys[response];
                             console.log(`  MCQ/Scenario: response=${response}, points=${points}`);
                             if (typeof points === 'number') {
                                 totalPoints += points;
+                            }
+                        } else if (q.type === 'SLIDING_SCALE' && typeof response === 'number') {
+                            // Compare with correct_value
+                            // We stored it in answerKeys[q.id]['correct_value'] (string)
+                            // and points in answerKeys[q.id]['points']
+                            const correctVal = parseFloat(questionKeys['correct_value'] as string);
+                            const maxPts = questionKeys['points'] as number || 1;
+
+                            if (response === correctVal) {
+                                totalPoints += maxPts;
+                            }
+                        } else if (q.type === 'EMOTION_ORDER' && Array.isArray(response)) {
+                            // Compare order with correct_order (on question object)
+                            // q.correct_order is array of IDs (string[])
+                            const correctOrder = q.correct_order;
+                            if (correctOrder && Array.isArray(correctOrder)) {
+                                const isCorrect = JSON.stringify(response) === JSON.stringify(correctOrder);
+                                if (isCorrect) totalPoints += 1; // Default 1 pt for correct sequence
                             }
                         }
                     } else {
@@ -697,6 +731,67 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                                 {currentReviewQuestion.scenario_image_url && (
                                     <div className="rounded-2xl overflow-hidden max-w-[240px] mx-auto">
                                         <img src={currentReviewQuestion.scenario_image_url} alt="Question stimulus" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
+
+                                {/* Video Question Support */}
+                                {currentReviewQuestion.type === 'VIDEO' && currentReviewQuestion.video_url && (
+                                    <div className="rounded-2xl overflow-hidden shadow-lg bg-black aspect-video max-w-lg mx-auto">
+                                        {/* Simple render - ideally reuse VideoPlayer but we didn't export it. 
+                                            We'll just duplicate simple iframe logic or show link if lazy. 
+                                            Let's do simple iframe for now. */}
+                                        <iframe
+                                            src={currentReviewQuestion.video_url.includes('embed') ? currentReviewQuestion.video_url : currentReviewQuestion.video_url.replace('watch?v=', 'embed/')}
+                                            className="w-full h-full" allowFullScreen
+                                        />
+                                    </div>
+                                )}
+
+                                {currentReviewQuestion.type === 'SLIDING_SCALE' && (
+                                    <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 text-center">
+                                        <div className="mb-2 text-xs font-bold uppercase tracking-widest text-gray-400">Your Answer</div>
+                                        <div className="text-4xl font-black mb-4">{userResponse}</div>
+
+                                        <div className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-500">Correct Answer</div>
+                                        <div className="text-4xl font-black text-emerald-600 dark:text-emerald-400">
+                                            {questionKeys ? questionKeys['correct_value'] : 'N/A'}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {currentReviewQuestion.type === 'EMOTION_ORDER' && (
+                                    <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                                        <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Sequence Comparison</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <h4 className="text-center font-bold mb-2 text-sm">Your Order</h4>
+                                                <div className="space-y-2">
+                                                    {(userResponse || []).map((id: string, idx: number) => {
+                                                        const opt = currentReviewQuestion.options.find((o: any) => o.id === id);
+                                                        return (
+                                                            <div key={idx} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-2 rounded-lg text-xs font-medium flex gap-2">
+                                                                <span className="font-bold text-gray-400">{idx + 1}</span>
+                                                                {opt?.label || 'Unknown'}
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-center font-bold mb-2 text-sm text-emerald-500">Correct Order</h4>
+                                                <div className="space-y-2">
+                                                    {(currentReviewQuestion.correct_order || []).map((id: string, idx: number) => {
+                                                        const opt = currentReviewQuestion.options.find((o: any) => o.id === id);
+                                                        return (
+                                                            <div key={idx} className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-2 rounded-lg text-xs font-medium flex gap-2">
+                                                                <span className="font-bold text-emerald-400">{idx + 1}</span>
+                                                                {opt?.label || 'Unknown'}
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
 

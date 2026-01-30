@@ -198,6 +198,23 @@ export const AdminClasses: React.FC = () => {
         }
     };
 
+    const getEmbedUrl = (url: string) => {
+        if (!url) return '';
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            if (url.includes('/embed/')) return url;
+            const videoId = url.includes('v=')
+                ? url.split('v=')[1]?.split('&')[0]
+                : url.split('/').pop();
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+        if (url.includes('vimeo.com')) {
+            if (url.includes('player.vimeo.com')) return url;
+            const videoId = url.split('/').pop();
+            return `https://player.vimeo.com/video/${videoId}`;
+        }
+        return url;
+    };
+
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -206,6 +223,9 @@ export const AdminClasses: React.FC = () => {
             alert('Please fill in all required fields, including selecting a Module.');
             return;
         }
+
+        // Auto-convert to embed URL
+        const finalVideoUrl = getEmbedUrl(newClass.video_url);
 
         let error;
 
@@ -218,7 +238,7 @@ export const AdminClasses: React.FC = () => {
                     description: newClass.description,
                     branch: newClass.branch,
                     duration: newClass.duration,
-                    video_url: newClass.video_url,
+                    video_url: finalVideoUrl,
                     module_id: newClass.selectedModuleId,
                     is_live: newClass.is_live
                 })
@@ -233,7 +253,7 @@ export const AdminClasses: React.FC = () => {
                     description: newClass.description,
                     branch: newClass.branch,
                     duration: newClass.duration,
-                    video_url: newClass.video_url,
+                    video_url: finalVideoUrl,
                     module_id: newClass.selectedModuleId,
                     is_live: newClass.is_live
                 }]);

@@ -68,9 +68,13 @@ export interface Database {
         Row: {
           id: string
           section_id: string
-          type: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO'
+          type: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO' | 'VIDEO' | 'EMOTION_ORDER' | 'SLIDING_SCALE'
           scenario_context: string | null
           scenario_image_url: string | null
+          video_url: string | null
+          correct_order: string[] | null
+          scale_min: number | null
+          scale_max: number | null
           question_text: string
           order_index: number
           created_at: string
@@ -78,9 +82,13 @@ export interface Database {
         Insert: {
           id?: string
           section_id: string
-          type: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO'
+          type: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO' | 'VIDEO' | 'EMOTION_ORDER' | 'SLIDING_SCALE'
           scenario_context?: string | null
           scenario_image_url?: string | null
+          video_url?: string | null
+          correct_order?: string[] | null
+          scale_min?: number | null
+          scale_max?: number | null
           question_text: string
           order_index: number
           created_at?: string
@@ -88,9 +96,13 @@ export interface Database {
         Update: {
           id?: string
           section_id?: string
-          type?: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO'
+          type?: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO' | 'VIDEO' | 'EMOTION_ORDER' | 'SLIDING_SCALE'
           scenario_context?: string | null
           scenario_image_url?: string | null
+          video_url?: string | null
+          correct_order?: string[] | null
+          scale_min?: number | null
+          scale_max?: number | null
           question_text?: string
           order_index?: number
           created_at?: string
@@ -225,12 +237,16 @@ export interface IQuestionOption {
 export interface IQuestion {
   id: string;
   section_id: string;
-  type: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO';
+  type: 'MCQ' | 'LIKERT_GRID' | 'SCENARIO' | 'VIDEO' | 'EMOTION_ORDER' | 'SLIDING_SCALE';
   scenario_context?: string;
   scenario_image_url?: string;
+  video_url?: string;
   question_text: string;
   order_index: number;
   options: IQuestionOption[];
+  correct_order?: string[]; // Array of option IDs
+  scale_min?: number;
+  scale_max?: number;
 }
 
 export interface ITestSection {

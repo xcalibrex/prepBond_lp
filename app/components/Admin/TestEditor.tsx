@@ -657,6 +657,9 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                                 <option value="MCQ">Multiple Choice</option>
                                                                 <option value="LIKERT_GRID">Likert Grid</option>
                                                                 <option value="SCENARIO">Scenario</option>
+                                                                <option value="VIDEO">Video Question</option>
+                                                                <option value="EMOTION_ORDER">Emotion Ordering</option>
+                                                                <option value="SLIDING_SCALE">Sliding Scale (1-5)</option>
                                                             </select>
                                                             <AutoSaveInput
                                                                 className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold placeholder-gray-400"
@@ -688,6 +691,23 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                             />
                                                         )}
 
+                                                        {q.type === 'VIDEO' && (
+                                                            <div className="space-y-2">
+                                                                <AutoSaveInput
+                                                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-medium placeholder-gray-400"
+                                                                    placeholder="Video URL (YouTube/Vimeo/MP4)"
+                                                                    value={(q as any).video_url || ''}
+                                                                    onSave={(val) => updateQuestion(section.id, q.id, { video_url: val })}
+                                                                />
+                                                                {/* Optional Video Preview */}
+                                                                {(q as any).video_url && (
+                                                                    <div className="text-xs text-gray-400 bg-gray-100 dark:bg-white/5 p-2 rounded-lg">
+                                                                        Video will be embedded below question text
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
                                                         {/* Explanation field for all question types */}
                                                         <div className="mt-2">
                                                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 px-1">Explanation (Post-Answer Context)</label>
@@ -700,56 +720,201 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                             />
                                                         </div>
 
-                                                        {/* Options */}
-                                                        <div className="space-y-2 mt-2">
-                                                            {(q.options || []).map((opt: any) => (
-                                                                <div key={opt.id} className="flex items-center gap-2 animate-fade-in group">
-                                                                    {/* Radio for Correct Answer */}
-                                                                    <div
-                                                                        onClick={() => setCorrectAnswer(section.id, q.id, opt.id)}
-                                                                        className={`w-4 h-4 rounded-full border cursor-pointer flex items-center justify-center transition-colors
-                                                                            ${(q.correct_option_id === opt.id)
-                                                                                ? 'bg-emerald-500 border-emerald-500'
-                                                                                : 'border-gray-300 hover:border-emerald-400'}`}
-                                                                        title="Mark as correct answer"
-                                                                    >
-                                                                        {(q.correct_option_id === opt.id) && (
-                                                                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                                                        )}
+                                                        {/* --- SLIDING SCALE EDITOR --- */}
+                                                        {q.type === 'SLIDING_SCALE' && (
+                                                            <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 mt-2">
+                                                                <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Scale Configuration</h4>
+                                                                <div className="grid grid-cols-3 gap-4">
+                                                                    <div>
+                                                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Min Value</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-bold"
+                                                                            value={(q as any).scale_min || 1}
+                                                                            onChange={(e) => updateQuestion(section.id, q.id, { scale_min: parseInt(e.target.value) })}
+                                                                        />
                                                                     </div>
-                                                                    <AutoSaveInput
-                                                                        className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-medium placeholder-gray-400"
-                                                                        value={opt.label}
-                                                                        onSave={(val) => updateOption(section.id, q.id, opt.id, { label: val })}
-                                                                        autoFocus={focusedOptionId === opt.id}
-                                                                        onKeyDown={(e) => {
-                                                                            if (e.key === 'Enter' && e.shiftKey) {
-                                                                                e.preventDefault();
-                                                                                addOption(section.id, q.id);
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                    {/* Score indicator - auto shows 1 pt when correct */}
-                                                                    <span className={`w-14 text-center text-xs font-bold py-2 px-2 rounded-xl ${q.correct_option_id === opt.id
-                                                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                                                                        : 'bg-gray-100 dark:bg-white/5 text-gray-400'
-                                                                        }`}>
-                                                                        {q.correct_option_id === opt.id ? '1 pt' : '0 pt'}
-                                                                    </span>
-                                                                    <button onClick={() => deleteOption(section.id, q.id, opt.id)} className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2">
-                                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                        </svg>
+                                                                    <div>
+                                                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Max Value</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs font-bold"
+                                                                            value={(q as any).scale_max || 5}
+                                                                            onChange={(e) => updateQuestion(section.id, q.id, { scale_max: parseInt(e.target.value) })}
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-[10px] font-bold text-emerald-500 mb-1">Correct Answer</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            className="w-full bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-900/30 rounded-lg px-3 py-2 text-xs font-bold text-emerald-600"
+                                                                            min={(q as any).scale_min || 1}
+                                                                            max={(q as any).scale_max || 5}
+                                                                            value={(q as any).correct_option_id || ''} // Reusing correct_option_id field for simple value in this case? Or answer_keys? We should store it properly.
+                                                                            // Actually, TestEditor uses `correct_option_id` for UI state. We probably need a dedicated field or map it.
+                                                                            // For now, let's store it as the 'correct_answer' in DB.
+                                                                            // BUT `updateQuestion` updates `questions` table columns. `correct_option_id` is derived.
+                                                                            // Let's use `answer_keys` logic.
+                                                                            // We need to trigger `updateAnswerKeys` with a "dummy" option ID or direct value.
+                                                                            // Since schema says answer_keys links to option_id... Sliding scale doesn't have options?
+                                                                            // Wait, answer_keys has `correct_answer` string column. We can use that! 
+                                                                            // BUT `TestEditor` assumes logic based on `correct_option_id`.
+                                                                            // Let's simplify: Store correct value in a designated field or refactor `setCorrectAnswer` to handle raw values.
+                                                                            // Implementing `handleScaleAnswerChange` locally.
+                                                                            onChange={async (e) => {
+                                                                                const val = e.target.value;
+                                                                                // Update UI state (optimistic)
+                                                                                // We'll store it in `correct_option_id` property temporarily just for UI consistency if needed, 
+                                                                                // but better to add a property like `correct_value` to the question object in memory.
+                                                                                updateQuestion(section.id, q.id, { correct_value: val });
+
+                                                                                // Save to answer_keys
+                                                                                // We need checks: delete old keys, insert new key with null option_id and correct_answer = val
+                                                                                await supabase.from('answer_keys').delete().eq('question_id', q.id);
+                                                                                await supabase.from('answer_keys').insert({
+                                                                                    question_id: q.id,
+                                                                                    correct_answer: val,
+                                                                                    points: 1,
+                                                                                    question_option_id: null
+                                                                                });
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* --- EMOTION ORDER EDITOR --- */}
+                                                        {q.type === 'EMOTION_ORDER' && (
+                                                            <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 mt-2">
+                                                                <div className="flex justify-between items-center mb-3">
+                                                                    <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500">Correct Sequence (Top to Bottom)</h4>
+                                                                    <span className="text-[10px] text-gray-400">Students will see these shuffled</span>
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    {(q.options || []).map((opt: any, idx: number) => (
+                                                                        <div key={opt.id} className="flex items-center gap-2">
+                                                                            <span className="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                                                                                {idx + 1}
+                                                                            </span>
+                                                                            <AutoSaveInput
+                                                                                className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-medium"
+                                                                                value={opt.label}
+                                                                                placeholder={`Emotion ${idx + 1}`}
+                                                                                onSave={(val) => updateOption(section.id, q.id, opt.id, { label: val })}
+                                                                            />
+                                                                            <div className="flex flex-col gap-0.5">
+                                                                                <button
+                                                                                    disabled={idx === 0}
+                                                                                    onClick={() => {
+                                                                                        // Swap logic would be complex with DB order_index.
+                                                                                        // Easier: Just swap labels? No, IDs matter for tracking.
+                                                                                        // Implementing swap:
+                                                                                        const prevOpt = q.options[idx - 1];
+                                                                                        updateOption(section.id, q.id, opt.id, { order_index: prevOpt.order_index });
+                                                                                        updateOption(section.id, q.id, prevOpt.id, { order_index: opt.order_index });
+                                                                                        // Requires checking full section update logic which we have.
+                                                                                    }}
+                                                                                    className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded disabled:opacity-30"
+                                                                                >
+                                                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                                                                                </button>
+                                                                                <button
+                                                                                    disabled={idx === (q.options?.length || 0) - 1}
+                                                                                    onClick={() => {
+                                                                                        const nextOpt = q.options[idx + 1];
+                                                                                        updateOption(section.id, q.id, opt.id, { order_index: nextOpt.order_index });
+                                                                                        updateOption(section.id, q.id, nextOpt.id, { order_index: opt.order_index });
+                                                                                    }}
+                                                                                    className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded disabled:opacity-30"
+                                                                                >
+                                                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                                                </button>
+                                                                            </div>
+                                                                            <button onClick={() => deleteOption(section.id, q.id, opt.id)} className="text-gray-300 hover:text-red-400 p-2">✕</button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <button
+                                                                        onClick={() => addOption(section.id, q.id)}
+                                                                        className="text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-600 mt-2"
+                                                                    >
+                                                                        + Add Item
                                                                     </button>
                                                                 </div>
-                                                            ))}
-                                                            <button
-                                                                onClick={() => addOption(section.id, q.id)}
-                                                                className="text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-600 mt-1"
-                                                            >
-                                                                + Add Option
-                                                            </button>
-                                                        </div>
+
+                                                                {/* Save correct order logic */}
+                                                                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-white/5">
+                                                                    <div className="text-[10px] text-gray-400 mb-2">
+                                                                        Current Order will be saved as Correct Sequence.
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            const orderedIds = q.options.map((o: any) => o.id);
+                                                                            await supabase.from('questions').update({ correct_order: orderedIds }).eq('id', q.id);
+                                                                            updateQuestion(section.id, q.id, { correct_order: orderedIds });
+                                                                            toast.success('Sequence saved!');
+                                                                        }}
+                                                                        className="w-full py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg text-[10px] font-bold uppercase tracking-widest"
+                                                                    >
+                                                                        Save Sequence
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Standard Options (Hide for special types) */}
+                                                        {!['SLIDING_SCALE', 'EMOTION_ORDER'].includes(q.type) && (
+                                                            <div className="space-y-2 mt-2">
+                                                                {(q.options || []).map((opt: any) => (
+                                                                    <div key={opt.id} className="flex items-center gap-2 animate-fade-in group">
+                                                                        {/* Radio for Correct Answer */}
+                                                                        <div
+                                                                            onClick={() => setCorrectAnswer(section.id, q.id, opt.id)}
+                                                                            className={`w-4 h-4 rounded-full border cursor-pointer flex items-center justify-center transition-colors
+                                                                                ${(q.correct_option_id === opt.id)
+                                                                                    ? 'bg-emerald-500 border-emerald-500'
+                                                                                    : 'border-gray-300 hover:border-emerald-400'}`}
+                                                                            title="Mark as correct answer"
+                                                                        >
+                                                                            {(q.correct_option_id === opt.id) && (
+                                                                                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                                                            )}
+                                                                        </div>
+                                                                        <AutoSaveInput
+                                                                            className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-medium placeholder-gray-400"
+                                                                            value={opt.label}
+                                                                            onSave={(val) => updateOption(section.id, q.id, opt.id, { label: val })}
+                                                                            autoFocus={focusedOptionId === opt.id}
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'Enter' && e.shiftKey) {
+                                                                                    e.preventDefault();
+                                                                                    addOption(section.id, q.id);
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                        {/* Score indicator - auto shows 1 pt when correct */}
+                                                                        <span className={`w-14 text-center text-xs font-bold py-2 px-2 rounded-xl ${q.correct_option_id === opt.id
+                                                                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                                            : 'bg-gray-100 dark:bg-white/5 text-gray-400'
+                                                                            }`}>
+                                                                            {q.correct_option_id === opt.id ? '1 pt' : '0 pt'}
+                                                                        </span>
+                                                                        <button onClick={() => deleteOption(section.id, q.id, opt.id)} className="text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2">
+                                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+                                                                <button
+                                                                    onClick={() => addOption(section.id, q.id)}
+                                                                    className="text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-600 mt-1"
+                                                                >
+                                                                    + Add Option
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
