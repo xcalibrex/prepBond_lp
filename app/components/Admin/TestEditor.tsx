@@ -135,6 +135,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                         ...q,
                         // Attach correct_option_id from answer_keys if it exists
                         correct_option_id: q.answer_keys?.[0]?.question_option_id || null,
+                        correct_answer: q.correct_answer || q.answer_keys?.[0]?.correct_answer || null,
                         options: (q.question_options || [])
                             .sort((a: any, b: any) => a.order_index - b.order_index)
                     }))
@@ -350,12 +351,31 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         }
     };
 
+    const updateSlidingScaleKey = async (sectionId: string, questionId: string, correctVal: string | number) => {
+        if (!correctVal) return;
+
+        // Clear existing
+        await supabase.from('answer_keys').delete().eq('question_id', questionId);
+
+        // Insert new
+        await supabase.from('answer_keys').insert({
+            question_id: questionId,
+            question_option_id: null,
+            correct_answer: String(correctVal),
+            points: 1
+        });
+    }
+
+
     const handleSaveTest = async () => {
         // Validate all questions have correct answers selected
         const questionsWithoutAnswers: string[] = [];
         sections.forEach(section => {
             section.questions.forEach((q: any) => {
-                if (q.type !== 'LIKERT_GRID' && !q.correct_option_id && q.options?.length > 0) {
+                const isExempt = q.type === 'LIKERT_GRID' || q.type === 'EMOTION_ORDER' || (q.type === 'SLIDING_SCALE' && q.correct_answer);
+                if (!isExempt && !q.correct_option_id && q.options?.length > 0) {
+                    questionsWithoutAnswers.push(q.id);
+                } else if (q.type === 'SLIDING_SCALE' && !q.correct_answer) {
                     questionsWithoutAnswers.push(q.id);
                 }
             });
@@ -410,7 +430,10 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                         order_index: q.order_index,
                         scenario_context: q.scenario_context,
                         scenario_image_url: q.scenario_image_url,
-                        explanation: (q as any).explanation
+
+                        explanation: (q as any).explanation,
+                        correct_order: (q as any).correct_order,
+                        correct_answer: (q as any).correct_answer
                     });
 
                     // Upsert Options
@@ -429,6 +452,8 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                     // Only if a correct option is visually selected in UI state OR it's a Likert Grid
                     if ((q as any).correct_option_id || q.type === 'LIKERT_GRID') {
                         await updateAnswerKeys(section.id, q.id, (q as any).correct_option_id, sections);
+                    } else if (q.type === 'SLIDING_SCALE' && (q as any).correct_answer) {
+                        await updateSlidingScaleKey(section.id, q.id, (q as any).correct_answer);
                     }
                 }
             }
@@ -459,7 +484,18 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         const newSections = [...sections];
         // Ensure options array exists
         if (!newSections[sIdx].questions[qIdx].options) newSections[sIdx].questions[qIdx].options = [];
-        newSections[sIdx].questions[qIdx].options.push(newOption);
+        const optionsList = newSections[sIdx].questions[qIdx].options;
+        optionsList.push(newOption);
+
+        // Auto-sync correct order if EMOTION_ORDER
+        if (newSections[sIdx].questions[qIdx].type === 'EMOTION_ORDER') {
+            const orderedIds = optionsList.map((o: any) => o.id);
+            // Async update DB
+            supabase.from('questions').update({ correct_order: orderedIds }).eq('id', questionId).then();
+            // Update local
+            newSections[sIdx].questions[qIdx].correct_order = orderedIds;
+        }
+
         setSections(newSections);
 
         await supabase.from('question_options').insert([newOption]);
@@ -529,7 +565,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                             ...q,
                             options: q.options.map((o: any) =>
                                 o.id === optionId ? { ...o, ...updates } : o
-                            )
+                            ).sort((a: any, b: any) => a.order_index - b.order_index)
                         };
                     })
                 };
@@ -540,6 +576,57 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         await supabase.from('question_options').update(updates).eq('id', optionId);
     };
 
+    const moveOption = async (sectionId: string, questionId: string, index: number, direction: number) => {
+        const sIdx = sections.findIndex(s => s.id === sectionId);
+        if (sIdx === -1) return;
+        const qIdx = sections[sIdx].questions.findIndex((q: any) => q.id === questionId);
+        if (qIdx === -1) return;
+
+        const allOptions = [...(sections[sIdx].questions[qIdx].options || [])];
+        if (index + direction < 0 || index + direction >= allOptions.length) return;
+
+        const optA = allOptions[index];
+        const optB = allOptions[index + direction];
+
+        // Swap order indices
+        const tempOrder = optA.order_index;
+        optA.order_index = optB.order_index;
+        optB.order_index = tempOrder;
+
+        // Re-sort
+        allOptions.sort((a, b) => a.order_index - b.order_index);
+
+        // Optimistic Update
+        const newSections = sections.map((s, si) => {
+            if (si !== sIdx) return s;
+            return {
+                ...s,
+                questions: s.questions.map((q: any, qi: number) => {
+                    if (qi !== qIdx) return q;
+
+                    // Sync correct order if type is EMOTION_ORDER
+                    const correctOrder = q.type === 'EMOTION_ORDER'
+                        ? allOptions.map(o => o.id)
+                        : q.correct_order;
+
+                    if (q.type === 'EMOTION_ORDER') {
+                        supabase.from('questions').update({ correct_order: correctOrder }).eq('id', q.id).then();
+                    }
+
+                    return { ...q, options: allOptions, correct_order: correctOrder };
+                })
+            };
+        });
+
+        setSections(newSections);
+
+        // Update DB options
+        await Promise.all([
+            supabase.from('question_options').update({ order_index: optA.order_index }).eq('id', optA.id),
+            supabase.from('question_options').update({ order_index: optB.order_index }).eq('id', optB.id)
+        ]);
+    };
+
     const deleteOption = async (sectionId: string, questionId: string, optionId: string) => {
         // Optimistic
         const newSections = sections.map(s => {
@@ -548,9 +635,20 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                 ...s,
                 questions: s.questions.map((q: any) => {
                     if (q.id !== questionId) return q;
+
+                    const newOptions = q.options.filter((o: any) => o.id !== optionId);
+
+                    // Sync correct order if EMOTION_ORDER
+                    let newCorrectOrder = q.correct_order;
+                    if (q.type === 'EMOTION_ORDER') {
+                        newCorrectOrder = newOptions.map((o: any) => o.id);
+                        supabase.from('questions').update({ correct_order: newCorrectOrder }).eq('id', q.id).then();
+                    }
+
                     return {
                         ...q,
-                        options: q.options.filter((o: any) => o.id !== optionId)
+                        options: newOptions,
+                        correct_order: newCorrectOrder
                     };
                 })
             };
@@ -867,35 +965,10 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                                             className="w-full bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-900/30 rounded-lg px-3 py-2 text-xs font-bold text-emerald-600"
                                                                             min={(q as any).scale_min || 1}
                                                                             max={(q as any).scale_max || 5}
-                                                                            value={(q as any).correct_option_id || ''} // Reusing correct_option_id field for simple value in this case? Or answer_keys? We should store it properly.
-                                                                            // Actually, TestEditor uses `correct_option_id` for UI state. We probably need a dedicated field or map it.
-                                                                            // For now, let's store it as the 'correct_answer' in DB.
-                                                                            // BUT `updateQuestion` updates `questions` table columns. `correct_option_id` is derived.
-                                                                            // Let's use `answer_keys` logic.
-                                                                            // We need to trigger `updateAnswerKeys` with a "dummy" option ID or direct value.
-                                                                            // Since schema says answer_keys links to option_id... Sliding scale doesn't have options?
-                                                                            // Wait, answer_keys has `correct_answer` string column. We can use that! 
-                                                                            // BUT `TestEditor` assumes logic based on `correct_option_id`.
-                                                                            // Let's simplify: Store correct value in a designated field or refactor `setCorrectAnswer` to handle raw values.
-                                                                            // Implementing `handleScaleAnswerChange` locally.
-                                                                            onChange={async (e) => {
-                                                                                const val = e.target.value;
-                                                                                // Update UI state (optimistic)
-                                                                                // We'll store it in `correct_option_id` property temporarily just for UI consistency if needed, 
-                                                                                // but better to add a property like `correct_value` to the question object in memory.
-                                                                                updateQuestion(section.id, q.id, { correct_value: val });
-
-                                                                                // Save to answer_keys
-                                                                                // We need checks: delete old keys, insert new key with null option_id and correct_answer = val
-                                                                                await supabase.from('answer_keys').delete().eq('question_id', q.id);
-                                                                                await supabase.from('answer_keys').insert({
-                                                                                    question_id: q.id,
-                                                                                    correct_answer: val,
-                                                                                    points: 1,
-                                                                                    question_option_id: null
-                                                                                });
-                                                                            }}
+                                                                            value={(q as any).correct_answer || ''}
+                                                                            onChange={(e) => updateQuestion(section.id, q.id, { correct_answer: e.target.value })}
                                                                         />
+
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -924,26 +997,14 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                                             <div className="flex flex-col gap-0.5">
                                                                                 <button
                                                                                     disabled={idx === 0}
-                                                                                    onClick={() => {
-                                                                                        // Swap logic would be complex with DB order_index.
-                                                                                        // Easier: Just swap labels? No, IDs matter for tracking.
-                                                                                        // Implementing swap:
-                                                                                        const prevOpt = q.options[idx - 1];
-                                                                                        updateOption(section.id, q.id, opt.id, { order_index: prevOpt.order_index });
-                                                                                        updateOption(section.id, q.id, prevOpt.id, { order_index: opt.order_index });
-                                                                                        // Requires checking full section update logic which we have.
-                                                                                    }}
+                                                                                    onClick={() => moveOption(section.id, q.id, idx, -1)}
                                                                                     className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded disabled:opacity-30"
                                                                                 >
                                                                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
                                                                                 </button>
                                                                                 <button
                                                                                     disabled={idx === (q.options?.length || 0) - 1}
-                                                                                    onClick={() => {
-                                                                                        const nextOpt = q.options[idx + 1];
-                                                                                        updateOption(section.id, q.id, opt.id, { order_index: nextOpt.order_index });
-                                                                                        updateOption(section.id, q.id, nextOpt.id, { order_index: opt.order_index });
-                                                                                    }}
+                                                                                    onClick={() => moveOption(section.id, q.id, idx, 1)}
                                                                                     className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded disabled:opacity-30"
                                                                                 >
                                                                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -960,23 +1021,6 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                                     </button>
                                                                 </div>
 
-                                                                {/* Save correct order logic */}
-                                                                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-white/5">
-                                                                    <div className="text-[10px] text-gray-400 mb-2">
-                                                                        Current Order will be saved as Correct Sequence.
-                                                                    </div>
-                                                                    <button
-                                                                        onClick={async () => {
-                                                                            const orderedIds = q.options.map((o: any) => o.id);
-                                                                            await supabase.from('questions').update({ correct_order: orderedIds }).eq('id', q.id);
-                                                                            updateQuestion(section.id, q.id, { correct_order: orderedIds });
-                                                                            toast.success('Sequence saved!');
-                                                                        }}
-                                                                        className="w-full py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg text-[10px] font-bold uppercase tracking-widest"
-                                                                    >
-                                                                        Save Sequence
-                                                                    </button>
-                                                                </div>
                                                             </div>
                                                         )}
 

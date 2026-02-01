@@ -130,6 +130,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         try {
             const { error: updateError } = await supabase.auth.updateUser({ password });
             if (updateError) throw updateError;
+
+            // Status is now automatically updated to 'active' by a Database Trigger on auth.users
+
             setPhase('profile');
         } catch (err: any) {
             setError(err.message || "Failed to set password.");
@@ -162,6 +165,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             if (user) {
                 const { error: profileError } = await supabase.from('profiles').update({
                     full_name: fullName,
+                    status: 'active',
                     updated_at: new Date().toISOString()
                 }).eq('id', user.id);
                 if (profileError) throw profileError;
