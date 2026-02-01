@@ -168,22 +168,48 @@ function App() {
   }, []);
 
   const checkOnboarding = async (session: Session) => {
-    // Check profile table as source of truth for onboarding
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarding_complete, role')
-      .eq('id', session.user.id)
-      .maybeSingle();
+    try {
+      // Check profile table as source of truth for onboarding
+      // Use a timeout to prevent infinite hanging
+      const fetchProfile = supabase
+        .from('profiles')
+        .select('onboarding_complete, role, status')
+        .eq('id', session.user.id)
+        .maybeSingle();
 
-    // Fallback to metadata if profile fetch fails or role is missing, default to student
-    const role = profile?.role || session.user.user_metadata?.role || 'student';
+      const timeoutPromise = new Promise<{ data: null; error: any }>((_, reject) =>
+        setTimeout(() => reject(new Error('Profile fetch timed out')), 5000)
+      );
 
-    // Sync role state to ensure effects run with correct data
-    setUserRole(role);
-    localStorage.setItem('userRole', role);
+      const { data: profile, error } = await Promise.race([fetchProfile, timeoutPromise]) as any;
 
-    // Set state for the redirect effect to use
-    setOnboardingComplete(profile?.onboarding_complete === true);
+      if (error) {
+        console.warn('App: Profile fetch warning', error);
+      }
+
+      // Check strict inactive status
+      if (profile?.status === 'inactive') {
+        console.log('User is inactive, logging out');
+        await handleLogout();
+        return;
+      }
+
+      // Fallback to metadata if profile fetch fails or role is missing, default to student
+      const role = profile?.role || session.user.user_metadata?.role || 'student';
+
+      // Sync role state to ensure effects run with correct data
+      setUserRole(role);
+      localStorage.setItem('userRole', role);
+
+      // Set state for the redirect effect to use
+      setOnboardingComplete(profile?.onboarding_complete === true);
+    } catch (err) {
+      console.error('App: checkOnboarding failed', err);
+      // Emergency fallback to prevent infinite loading
+      const fallbackRole = session.user.user_metadata?.role || 'student';
+      setUserRole(fallbackRole);
+      setOnboardingComplete(false); // Safer default
+    }
   };
 
   // Strict Redirection Logic for Students

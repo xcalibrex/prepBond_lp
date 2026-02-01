@@ -26,7 +26,17 @@ serve(async (req) => {
         );
 
         // Parse request body
-        const { email, full_name, role } = await req.json();
+        const { email: requestEmail, full_name, role, user_id } = await req.json();
+
+        let email = requestEmail;
+
+        if (!email && user_id) {
+            const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(user_id);
+            if (userError || !userData?.user) {
+                throw new Error('User not found');
+            }
+            email = userData.user.email;
+        }
 
         if (!email) {
             throw new Error('Email is required');
@@ -39,11 +49,30 @@ serve(async (req) => {
                 role: role || 'student',
                 onboarding_complete: false,
             },
-            // You can specify a redirect URL if needed, e.g., for password setup
-            // redirectTo: 'https://your-app.com/update-password',
         });
 
         if (error) throw error;
+
+        // Atomically create profile
+        if (data.user) {
+            const { error: profileError } = await supabaseAdmin
+                .from('profiles')
+                .upsert({
+                    id: data.user.id,
+                    full_name: full_name,
+                    role: role || 'student',
+                    status: 'invited',
+                    // updated_at will be handled by default or trigger if set, but explicit is fine
+                    updated_at: new Date().toISOString()
+                });
+
+            if (profileError) {
+                console.error('Profile creation failed:', profileError);
+                // Optionally delete the user from Auth if profile fails to maintain strict atomicity
+                // await supabaseAdmin.auth.admin.deleteUser(data.user.id);
+                throw new Error(`Failed to create user profile: ${profileError.message}`);
+            }
+        }
 
         return new Response(JSON.stringify(data), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },

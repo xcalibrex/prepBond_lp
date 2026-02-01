@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { supabase } from '../../services/supabase';
 import { Branch } from '../../types';
@@ -23,6 +24,18 @@ export const AdminPractice: React.FC = () => {
     const [editingTestId, setEditingTestId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<'all' | 'live'>('all');
     const [filterType, setFilterType] = useState<'all' | 'worksheet' | 'exam'>('all');
+
+    // URL Param Logic
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    useEffect(() => {
+        const isEditor = searchParams.get('editor') === 'true';
+        const uid = searchParams.get('uid');
+
+        if (isEditor && uid) {
+            setEditingTestId(uid);
+        }
+    }, [searchParams]);
 
     // New Test State
     const [newTest, setNewTest] = useState<Partial<PracticeTest>>({
@@ -246,7 +259,7 @@ export const AdminPractice: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
-                                            onClick={() => setEditingTestId(test.id)}
+                                            onClick={() => setSearchParams({ editor: 'true', uid: test.id })}
                                             className="text-blue-500 hover:text-blue-700 font-bold text-xs mr-4"
                                         >
                                             EDIT CONTENT
@@ -406,7 +419,10 @@ export const AdminPractice: React.FC = () => {
             {editingTestId && createPortal(
                 <TestEditor
                     testId={editingTestId}
-                    onClose={() => setEditingTestId(null)}
+                    onClose={() => {
+                        setEditingTestId(null);
+                        setSearchParams({});
+                    }}
                 />,
                 document.body
             )}

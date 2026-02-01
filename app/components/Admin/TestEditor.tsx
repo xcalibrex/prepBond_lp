@@ -69,6 +69,11 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
     const [focusedOptionId, setFocusedOptionId] = useState<string | null>(null);
     const [invalidQuestionIds, setInvalidQuestionIds] = useState<string[]>([]);
 
+    // Bulk Upload State
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+    const [bulkUploadText, setBulkUploadText] = useState('');
+    const [isParsing, setIsParsing] = useState(false);
+
     // helper to sort
     const sortHierarchy = (data: any[]) => {
         return data.map((s: any) => ({
@@ -555,6 +560,112 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
         await supabase.from('question_options').delete().eq('id', optionId);
     };
 
+    // --- Bulk Upload Handler ---
+    const handleBulkUpload = async () => {
+        if (!bulkUploadText.trim()) return;
+        setIsParsing(true);
+        const toastId = toast.loading("Magic parsing in progress...");
+
+        try {
+            const { data, error } = await supabase.functions.invoke('parse-questions', {
+                body: { rawText: bulkUploadText }
+            });
+
+            if (error) throw error;
+            if (!data?.questions || !Array.isArray(data.questions)) throw new Error("Invalid response from AI");
+
+            const parsedQuestions = data.questions;
+
+            // Add to the FIRST section by default, or create one if none exist
+            let targetSectionId = sections[0]?.id;
+
+            if (!targetSectionId) {
+                // Create a default section
+                const newSectionId = crypto.randomUUID();
+                const newSection = {
+                    id: newSectionId,
+                    test_id: testId,
+                    title: 'Section 1',
+                    instructions: '',
+                    order_index: 0,
+                    questions: []
+                };
+
+                // Optimistic update for section
+                setSections([newSection]);
+                await supabase.from('test_sections').insert([newSection]);
+                targetSectionId = newSectionId;
+            }
+
+            // Map parsed questions to our internal structure
+            // We need to fetch the current section index again as state might have updated
+            setSections(prevSections => {
+                const sIdx = prevSections.findIndex(s => s.id === targetSectionId);
+                if (sIdx === -1) return prevSections;
+
+                const section = prevSections[sIdx];
+                let currentOrderIndex = (section.questions || []).length;
+
+                const newQuestions = parsedQuestions.map((q: any) => {
+                    const qId = crypto.randomUUID();
+
+                    // Prepare Options
+                    const options = (q.options || []).map((opt: any, idx: number) => ({
+                        id: crypto.randomUUID(),
+                        question_id: qId,
+                        label: opt.label,
+                        value: opt.value,
+                        order_index: idx
+                    }));
+
+                    // Determine correct option ID
+                    let correctOptionId = null;
+                    if (q.correct_option_label) {
+                        const found = options.find((o: any) => o.label === q.correct_option_label);
+                        if (found) correctOptionId = found.id;
+                    }
+
+                    return {
+                        id: qId,
+                        section_id: targetSectionId,
+                        question_text: q.question_text || 'Untitled Question',
+                        type: q.type || 'MCQ',
+                        order_index: currentOrderIndex++,
+                        scenario_context: q.scenario_context || null,
+                        explanation: q.explanation || '',
+                        options: options,
+                        correct_option_id: correctOptionId,
+                        isNew: true // Marker for processing
+                    };
+                });
+
+                const updatedSection = {
+                    ...section,
+                    questions: [...section.questions, ...newQuestions]
+                };
+
+                const newSectionsList = [...prevSections];
+                newSectionsList[sIdx] = updatedSection;
+                return newSectionsList;
+            });
+
+            // Note: We are updating local state optimistically. 
+            // The user must hit "Save" to commit these 50 rows to DB.
+            // This allows review.
+
+            toast.success(`Parsed ${parsedQuestions.length} questions! Review and Save.`, { id: toastId });
+            setIsBulkUploadOpen(false);
+            setBulkUploadText('');
+
+        } catch (e: any) {
+            console.error(e);
+            const msg = e.context?.message || e.message || "Unknown error";
+            toast.error(`Parsing failed: ${msg}`, { id: toastId });
+        } finally {
+            setIsParsing(false);
+        }
+    };
+
 
     return (
         <div className="fixed inset-0 z-[150] bg-gray-50 dark:bg-dark-bg flex flex-col">
@@ -583,6 +694,12 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                     />
                 </div>
                 <div className="flex gap-3">
+                    <button
+                        onClick={() => setIsBulkUploadOpen(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
+                    >
+                        <span>🪄 Import</span>
+                    </button>
                     <button
                         onClick={handleSaveTest}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
@@ -971,6 +1088,47 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Bulk Upload Modal */}
+            {isBulkUploadOpen && (
+                <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-8 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-900 w-full max-w-4xl h-[80vh] rounded-3xl p-8 flex flex-col shadow-2xl animate-scale-in">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-2xl font-bold">🪄 Magic Bulk Import</h3>
+                                <p className="text-gray-500 text-sm mt-1">Paste raw text questions (e.g. from Word/PDF). AI will parse them.</p>
+                            </div>
+                            <button onClick={() => setIsBulkUploadOpen(false)} className="text-gray-400 hover:text-black dark:hover:text-white">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <textarea
+                            className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 font-mono text-sm resize-none focus:ring-2 focus:ring-purple-500 outline-none"
+                            placeholder={"Paste your questions here...\n\nExample:\n1. What is the powerhouse of the cell?\nA. Nucleus\nB. Mitochondria\nC. Ribosome\nAnswer: B\nExplanation: Mitochondria generate most of the cell's supply of adenosine triphosphate."}
+                            value={bulkUploadText}
+                            onChange={(e) => setBulkUploadText(e.target.value)}
+                        />
+
+                        <div className="mt-6 flex justify-end gap-4">
+                            <button
+                                onClick={() => setIsBulkUploadOpen(false)}
+                                className="px-6 py-3 font-bold text-gray-400 hover:text-gray-600"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleBulkUpload}
+                                disabled={isParsing || !bulkUploadText.trim()}
+                                className={`px-8 py-3 rounded-xl font-bold text-white uppercase tracking-widest transition-all ${isParsing ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 hover:shadow-lg hover:scale-105 active:scale-95'
+                                    }`}
+                            >
+                                {isParsing ? '✨ Parsing...' : '✨ Magic Parse'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

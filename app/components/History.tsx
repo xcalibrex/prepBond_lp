@@ -39,6 +39,10 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
     const fetchHistory = useCallback(async () => {
         setIsLoading(true);
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) return;
+
             // Fetch practice test sessions with test type and branch
             const { data: sessions, error } = await supabase
                 .from('user_test_sessions')
@@ -54,6 +58,7 @@ export const History: React.FC<HistoryProps> = ({ stats }) => {
                         branch
                     )
                 `)
+                .eq('user_id', user.id) // Strict filter for current user
                 .eq('status', 'completed')
                 .order('completed_at', { ascending: false });
 
