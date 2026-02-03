@@ -426,6 +426,33 @@ function App() {
           ? Math.round(allScores.reduce((sum: number, s: number) => sum + s, 0) / allScores.length)
           : baseStats.consensusAlignment || 0;
 
+        // Calculate Branch Scores
+        const branchScores: Record<string, number[]> = {
+          [Branch.Perceiving]: [],
+          [Branch.Using]: [],
+          [Branch.Understanding]: [],
+          [Branch.Managing]: [],
+        };
+
+        sessions.forEach((s: any) => {
+          const branch = mapDbBranchToEnum(s.practice_tests?.branch);
+          if (s.score > 0 && branch) {
+            // Handle both Enum and string matching just in case
+            if (Object.values(Branch).includes(branch as Branch)) {
+              branchScores[branch as string].push(s.score);
+            }
+          }
+        });
+
+        const newScores = { ...baseStats.scores };
+        Object.keys(branchScores).forEach(key => {
+          const scores = branchScores[key];
+          if (scores.length > 0) {
+            const average = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+            newScores[key as Branch] = average;
+          }
+        });
+
         // Calculate percentile (mock - based on score distribution)
         const percentile = avgScore >= 80 ? Math.min(95, avgScore + 10)
           : avgScore >= 60 ? Math.min(80, avgScore + 15)
@@ -434,13 +461,14 @@ function App() {
         // Merge with base stats
         baseStats = {
           ...baseStats,
+          scores: newScores,
           consensusAlignment: avgScore,
           percentile: percentile,
           history: [...sessionHistory, ...(baseStats.history || [])].slice(0, 50), // Keep last 50
           completionCount: sessions.length + (baseStats.completionCount || 0)
         };
 
-        console.log('App: Calculated stats from sessions', { sessionCount: sessions.length, avgScore, percentile });
+        console.log('App: Calculated stats from sessions', { sessionCount: sessions.length, avgScore, scores: newScores });
       }
 
       console.log('App: Loaded stats from Supabase', baseStats);
