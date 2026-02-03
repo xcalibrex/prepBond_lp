@@ -122,7 +122,22 @@ function App() {
     }
     return null;
   });
-  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
+  // Tracking latest session ID to prevent race conditions
+  const lastSessionIdRef = React.useRef<string | null>(null);
+
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('onboardingComplete');
+      return cached === 'true' ? true : cached === 'false' ? false : null;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (onboardingComplete !== null) {
+      localStorage.setItem('onboardingComplete', String(onboardingComplete));
+    }
+  }, [onboardingComplete]);
 
   useEffect(() => {
     if (isDark) {
@@ -137,6 +152,7 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
+        lastSessionIdRef.current = session.access_token;
         // Only show splash if not shown in this session
         const hasShownSplash = sessionStorage.getItem('splash_shown');
         if (!hasShownSplash) {
@@ -152,14 +168,17 @@ function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       if (session) {
+        lastSessionIdRef.current = session.access_token;
         if (event === 'SIGNED_IN') {
           // Do nothing on sign in event to prevent splash on tab switch
         }
         checkOnboarding(session);
         loadStatsFromSupabase(session.user.id);
       } else {
+        lastSessionIdRef.current = null;
         setStats(INITIAL_STATS);
         setOnboardingComplete(null);
+        localStorage.removeItem('onboardingComplete');
         setShowSplash(false);
       }
     });
@@ -167,48 +186,70 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkOnboarding = async (session: Session) => {
+  const checkOnboarding = async (currentSession: Session) => {
+    const sessionIdAtStart = currentSession.access_token;
+
     try {
+      // 1. Immediate hint from session metadata (if available)
+      const metadata = currentSession.user.user_metadata;
+      if (userRole === null && metadata?.role) {
+        setUserRole(metadata.role);
+        localStorage.setItem('userRole', metadata.role);
+      }
+
       // Check profile table as source of truth for onboarding
-      // Use a timeout to prevent infinite hanging
       const fetchProfile = supabase
         .from('profiles')
         .select('onboarding_complete, role, status')
-        .eq('id', session.user.id)
+        .eq('id', currentSession.user.id)
         .maybeSingle();
 
       const timeoutPromise = new Promise<{ data: null; error: any }>((_, reject) =>
-        setTimeout(() => reject(new Error('Profile fetch timed out')), 5000)
+        setTimeout(() => reject(new Error('Profile fetch timed out')), 8000)
       );
 
       const { data: profile, error } = await Promise.race([fetchProfile, timeoutPromise]) as any;
 
+      if (lastSessionIdRef.current !== sessionIdAtStart) return;
+
       if (error) {
         console.warn('App: Profile fetch warning', error);
+        // On error, if we have metadata, trust it for the role
+        if (userRole === null && metadata?.role) {
+          setUserRole(metadata.role);
+          localStorage.setItem('userRole', metadata.role);
+        }
+        // stay in null state for onboardingComplete to prevent redirects
+        return;
       }
 
-      // Check strict inactive status
       if (profile?.status === 'inactive') {
-        console.log('User is inactive, logging out');
         await handleLogout();
         return;
       }
 
-      // Fallback to metadata if profile fetch fails or role is missing, default to student
-      const role = profile?.role || session.user.user_metadata?.role || 'student';
+      // Determine Role - DO NOT default to 'student' IF we are still loading or have conflicting info
+      const definitiveRole = profile?.role || metadata?.role;
+      if (definitiveRole) {
+        setUserRole(definitiveRole);
+        localStorage.setItem('userRole', definitiveRole);
+      } else if (profile === null && !metadata?.role) {
+        // Only if we searched and found NOTHING (no profile, no metadata), then default to student
+        setUserRole('student');
+        localStorage.setItem('userRole', 'student');
+      }
 
-      // Sync role state to ensure effects run with correct data
-      setUserRole(role);
-      localStorage.setItem('userRole', role);
-
-      // Set state for the redirect effect to use
-      setOnboardingComplete(profile?.onboarding_complete === true);
+      // Determine Onboarding Status
+      if (profile) {
+        setOnboardingComplete(profile.onboarding_complete === true);
+      } else if (metadata?.onboarding_complete !== undefined) {
+        setOnboardingComplete(metadata.onboarding_complete === true);
+      } else if (profile === null && !metadata?.role) {
+        // Only if brand new (no profile, no metadata), then false
+        setOnboardingComplete(false);
+      }
     } catch (err) {
       console.error('App: checkOnboarding failed', err);
-      // Emergency fallback to prevent infinite loading
-      const fallbackRole = session.user.user_metadata?.role || 'student';
-      setUserRole(fallbackRole);
-      setOnboardingComplete(false); // Safer default
     }
   };
 
@@ -229,10 +270,11 @@ function App() {
     if (onboardingComplete === null || userRole === null) return;
 
     const isOnOnboarding = location.pathname === '/onboarding';
+    const isOnTest = location.pathname.startsWith('/test/');
 
     // 1. If user is auth and student and onboarding incomplete -> redirect to /onboarding
     if (userRole === 'student' && !onboardingComplete) {
-      if (!isOnOnboarding) {
+      if (!isOnOnboarding && !isOnTest) {
         navigate('/onboarding', { replace: true });
       }
       return;
@@ -412,18 +454,11 @@ function App() {
         .maybeSingle();
 
       if (profileData) {
-        console.log("Profile loaded:", profileData);
-        const role = profileData.role || 'student';
-        setUserRole(role);
-        localStorage.setItem('userRole', role);
-
+        console.log("Profile details loaded for UI purposes");
         // Trigger tour if not complete and on a home route
         if (!profileData.walkthrough_complete && location.pathname.includes('/home')) {
           setShowTour(true);
         }
-      } else {
-        setUserRole('student');
-        localStorage.removeItem('userRole');
       }
     } catch (err) {
       loadStatsFromLocal();

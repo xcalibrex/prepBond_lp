@@ -22,7 +22,7 @@ const StatCard = ({ title, subtitle, value, gradientClass }: { title: string, su
     <div className={`p-6 rounded-[24px] ${gradientClass} flex flex-col justify-between h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border border-transparent dark:border-white/5`}>
         <div>
             <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">{title}</p>
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{value}</h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white break-words">{value}</h3>
         </div>
         <div className="mt-4 pt-4 border-t border-black/5 dark:border-white/5">
             <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
             )}
 
             {/* Mobile Sub-tabs Navigation */}
-            <div className="md:hidden flex p-1 bg-gray-100 dark:bg-white/5 rounded-[24px] w-full sticky top-0 z-20 backdrop-blur-md">
+            <div className="md:hidden flex flex-wrap p-1 bg-gray-100 dark:bg-white/5 rounded-[24px] w-full sticky top-0 z-20 backdrop-blur-md">
                 <button
                     onClick={() => setMobileTab('stats')}
                     className={`flex-1 py-3 text-xs font-bold rounded-[24px] transition-all ${mobileTab === 'stats' ? 'bg-white dark:bg-white/10 text-black dark:text-white shadow-sm' : 'text-gray-500'}`}
@@ -339,18 +339,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, user, isDark = fals
                     {/* 1. Hero Banner - Moved inside left column */}
 
                     {/* 1.5. Hero Banner - Updated Content */}
-                    <div id="tour-banner" className={`rounded-[24px] bg-[#001833] dark:bg-dark-nav py-7 px-8 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-sm shrink-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
-                        <div className="relative z-10 max-w-md">
-                            <div className="flex items-center gap-3 mb-2 md:mb-4">
+                    <div id="tour-banner" className={`rounded-[24px] bg-[#001833] dark:bg-dark-nav py-6 px-6 md:py-7 md:px-8 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-sm shrink-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}>
+                        <div className="relative z-10 max-w-md text-center md:text-left">
+                            <div className="flex items-center justify-center md:justify-start gap-3 mb-2 md:mb-4">
                                 <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center shadow-sm text-blue-400 backdrop-blur-sm border border-blue-400/20">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                 </div>
                                 <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Next Module</span>
                             </div>
-                            <h2 className="text-2xl font-bold text-white leading-tight mb-2">
+                            <h2 className="text-xl md:text-2xl font-bold text-white leading-tight mb-2">
                                 Understanding Emotions
                             </h2>
-                            <button onClick={onStartPractice} className="mt-6 px-6 py-2.5 bg-white text-[#001833] text-sm font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg active:scale-95 flex items-center gap-2">
+                            <button onClick={onStartPractice} className="mt-4 md:mt-6 px-6 py-2.5 bg-white text-[#001833] text-sm font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg active:scale-95 flex items-center gap-2 mx-auto md:mx-0">
                                 Start Session
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             </button>

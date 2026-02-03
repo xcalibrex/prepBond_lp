@@ -168,7 +168,7 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
         <div className="flex flex-col h-full animate-fade-in-up">
             {/* Header & Tabs */}
             <div className="flex flex-col md:flex-row justify-start items-center mb-6 gap-4">
-                <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-full">
+                <div className="flex flex-wrap p-1 bg-gray-100 dark:bg-white/5 rounded-2xl md:rounded-full">
                     <button
                         onClick={() => setActiveTab('worksheets')}
                         className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'worksheets'
@@ -192,13 +192,13 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
 
             {/* Content Area */}
             {activeTab === 'worksheets' ? (
-                <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
+                <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4 custom-scrollbar">
                     <div className="flex gap-6 h-full min-w-max">
                         {Object.values(Branch).map((branch) => {
                             const branchTests = getWorksheetsByBranch(branch);
                             const meta = BRANCH_META[branch];
                             return (
-                                <div key={branch} className="w-80 flex flex-col h-full">
+                                <div key={branch} className="w-80 flex flex-col h-full shrink-0">
                                     <div className={`p-4 rounded-t-2xl bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-3`}>
                                         <div className={`w-3 h-3 rounded-full ${meta.color}`}></div>
                                         <h3 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider">{meta.label}</h3>

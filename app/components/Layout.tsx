@@ -127,13 +127,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
     const getDynamicHeaderTitle = () => {
         if (activeTab === 'dashboard') {
             return (
-                <h1 className="text-[36px] font-serif font-bold text-black dark:text-white leading-tight">
+                <h1 className="text-2xl md:text-3xl lg:text-[36px] font-serif font-bold text-black dark:text-white leading-tight truncate px-1">
                     Welcome back, <span className="text-gray-400">{user?.user_metadata?.full_name || 'Scholar'}</span>
                 </h1>
             );
         }
         return (
-            <h1 className="text-[36px] font-bold font-serif text-gray-900 dark:text-white tracking-tight">
+            <h1 className="text-2xl md:text-3xl lg:text-[36px] font-bold font-serif text-gray-900 dark:text-white tracking-tight truncate px-1">
                 {TAB_TITLES[activeTab] || 'PrepBond'}
             </h1>
         );
@@ -251,11 +251,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                 </div>
             </aside>
 
-            <main className={`flex-1 w-full h-full relative flex flex-col bg-white dark:bg-dark-bg ${isSettingsView ? 'md:translate-x-0' : ''} ${DS.animation.theme}`}>
+            <main className={`flex-1 min-w-0 h-full relative flex flex-col bg-white dark:bg-dark-bg ${isSettingsView ? 'md:translate-x-0' : ''} ${DS.animation.theme}`}>
                 {!isFocusMode && (
                     <header className="hidden md:flex pt-4 pb-4 shrink-0">
                         <div className="max-w-[1600px] mx-auto w-full px-6 md:px-8 flex items-center justify-between">
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                                 {getDynamicHeaderTitle()}
                             </div>
 
@@ -344,7 +344,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                     </header>
                 )}
 
-                <div className={`flex-1 w-full overflow-x-hidden ${activeTab === 'dashboard' ? 'overflow-hidden h-full' : 'overflow-y-auto'}`}>
+                <div className={`flex-1 min-w-0 overflow-x-auto ${activeTab === 'dashboard' ? 'overflow-hidden h-full' : 'overflow-y-auto'}`}>
                     <div className={`mx-auto transition-all duration-500 min-h-full h-full
                 ${isFocusMode ? 'p-0' : 'max-w-[1600px] px-6 md:px-8 py-6 pb-32 ' + (activeTab === 'dashboard' ? 'md:pb-6' : 'md:pb-10')}
                 ${isSettingsView ? 'animate-slide-in-right md:animate-none' : 'animate-fade-in'}

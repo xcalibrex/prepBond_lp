@@ -105,6 +105,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                         instructions,
                         questions (
                             id, 
+                            order_index,
                             section_id, 
                             type, 
                             scenario_context, 
@@ -694,10 +695,10 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
             }
 
             return (
-                <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col p-6">
-                    <div className="w-full max-w-3xl mx-auto flex-1 animate-fade-in-up">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-white/10">
+                <div className="h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col">
+                    {/* Header - Sticky */}
+                    <div className="flex-shrink-0 px-6 pt-6 bg-white dark:bg-black z-20">
+                        <div className="w-full max-w-3xl mx-auto flex items-center justify-between pb-4 border-b border-gray-100 dark:border-white/10">
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => onCancel()}
@@ -717,194 +718,203 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                                 {reviewQuestionIndex + 1} / {allQuestions.length}
                             </div>
                         </div>
+                    </div>
 
-                        {currentReviewQuestion && (
-                            <div className="space-y-6">
-                                {/* Question Context */}
-                                {currentReviewQuestion.scenario_context && (
-                                    <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{currentReviewQuestion.scenario_context}</p>
-                                    </div>
-                                )}
+                    {/* Content - Scrollable */}
+                    <div className="flex-1 overflow-y-auto px-6 py-8 custom-scrollbar">
+                        <div className="w-full max-w-3xl mx-auto animate-fade-in-up">
 
-                                {/* Question Image */}
-                                {currentReviewQuestion.scenario_image_url && (
-                                    <div className="rounded-2xl overflow-hidden max-w-[240px] mx-auto">
-                                        <img src={currentReviewQuestion.scenario_image_url} alt="Question stimulus" className="w-full h-full object-cover" />
-                                    </div>
-                                )}
+                            {currentReviewQuestion && (
+                                <div className="space-y-6">
+                                    {/* Question Context */}
+                                    {currentReviewQuestion.scenario_context && (
+                                        <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{currentReviewQuestion.scenario_context}</p>
+                                        </div>
+                                    )}
 
-                                {/* Video Question Support */}
-                                {currentReviewQuestion.type === 'VIDEO' && currentReviewQuestion.video_url && (
-                                    <div className="rounded-2xl overflow-hidden shadow-lg bg-black aspect-video max-w-lg mx-auto">
-                                        {/* Simple render - ideally reuse VideoPlayer but we didn't export it. 
+                                    {/* Question Image */}
+                                    {currentReviewQuestion.scenario_image_url && (
+                                        <div className="rounded-2xl overflow-hidden max-w-[240px] mx-auto">
+                                            <img src={currentReviewQuestion.scenario_image_url} alt="Question stimulus" className="w-full h-full object-cover" />
+                                        </div>
+                                    )}
+
+                                    {/* Video Question Support */}
+                                    {currentReviewQuestion.type === 'VIDEO' && currentReviewQuestion.video_url && (
+                                        <div className="rounded-2xl overflow-hidden shadow-lg bg-black aspect-video max-w-lg mx-auto">
+                                            {/* Simple render - ideally reuse VideoPlayer but we didn't export it. 
                                             We'll just duplicate simple iframe logic or show link if lazy. 
                                             Let's do simple iframe for now. */}
-                                        <iframe
-                                            src={currentReviewQuestion.video_url.includes('embed') ? currentReviewQuestion.video_url : currentReviewQuestion.video_url.replace('watch?v=', 'embed/')}
-                                            className="w-full h-full" allowFullScreen
-                                        />
-                                    </div>
-                                )}
-
-                                {currentReviewQuestion.type === 'SLIDING_SCALE' && (
-                                    <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 text-center">
-                                        <div className="mb-2 text-xs font-bold uppercase tracking-widest text-gray-400">Your Answer</div>
-                                        <div className="text-4xl font-black mb-4">{userResponse}</div>
-
-                                        <div className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-500">Correct Answer</div>
-                                        <div className="text-4xl font-black text-emerald-600 dark:text-emerald-400">
-                                            {questionKeys ? questionKeys['correct_value'] : 'N/A'}
+                                            <iframe
+                                                src={currentReviewQuestion.video_url.includes('embed') ? currentReviewQuestion.video_url : currentReviewQuestion.video_url.replace('watch?v=', 'embed/')}
+                                                className="w-full h-full" allowFullScreen
+                                            />
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {currentReviewQuestion.type === 'EMOTION_ORDER' && (
-                                    <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                                        <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Sequence Comparison</p>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <h4 className="text-center font-bold mb-2 text-sm">Your Order</h4>
-                                                <div className="space-y-2">
-                                                    {(userResponse || []).map((id: string, idx: number) => {
-                                                        const opt = currentReviewQuestion.options.find((o: any) => o.id === id);
-                                                        return (
-                                                            <div key={idx} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-2 rounded-lg text-xs font-medium flex gap-2">
-                                                                <span className="font-bold text-gray-400">{idx + 1}</span>
-                                                                {opt?.label || 'Unknown'}
-                                                            </div>
-                                                        )
-                                                    })}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-center font-bold mb-2 text-sm text-emerald-500">Correct Order</h4>
-                                                <div className="space-y-2">
-                                                    {(currentReviewQuestion.correct_order || []).map((id: string, idx: number) => {
-                                                        const opt = currentReviewQuestion.options.find((o: any) => o.id === id);
-                                                        return (
-                                                            <div key={idx} className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-2 rounded-lg text-xs font-medium flex gap-2">
-                                                                <span className="font-bold text-emerald-400">{idx + 1}</span>
-                                                                {opt?.label || 'Unknown'}
-                                                            </div>
-                                                        )
-                                                    })}
-                                                </div>
+                                    {currentReviewQuestion.type === 'SLIDING_SCALE' && (
+                                        <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 text-center">
+                                            <div className="mb-2 text-xs font-bold uppercase tracking-widest text-gray-400">Your Answer</div>
+                                            <div className="text-4xl font-black mb-4">{userResponse}</div>
+
+                                            <div className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-500">Correct Answer</div>
+                                            <div className="text-4xl font-black text-emerald-600 dark:text-emerald-400">
+                                                {questionKeys ? questionKeys['correct_value'] : 'N/A'}
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* Question Text */}
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
-                                    {currentReviewQuestion.question_text}
-                                </h3>
-
-                                {/* Options with feedback */}
-                                <div className="space-y-3">
-                                    {currentReviewQuestion.options?.map((opt: any) => {
-                                        const isUserChoice = currentReviewQuestion.type === 'LIKERT_GRID'
-                                            ? false  // Likert handled differently
-                                            : userResponse === opt.id;
-                                        const isCorrect = opt.id === correctOptionId;
-                                        const optPoints = questionKeys && typeof questionKeys[opt.id] === 'number'
-                                            ? questionKeys[opt.id] as number
-                                            : 0;
-
-                                        return (
-                                            <div
-                                                key={opt.id}
-                                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${isUserChoice && isCorrect
-                                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
-                                                    : isUserChoice && !isCorrect
-                                                        ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800'
-                                                        : isCorrect
-                                                            ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30'
-                                                            : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    {/* Indicator */}
-                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isUserChoice && isCorrect
-                                                        ? 'bg-emerald-500 text-white'
-                                                        : isUserChoice && !isCorrect
-                                                            ? 'bg-rose-500 text-white'
-                                                            : isCorrect
-                                                                ? 'bg-emerald-200 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-200'
-                                                                : 'bg-gray-200 dark:bg-white/10'
-                                                        }`}>
-                                                        {isCorrect && (
-                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                        )}
-                                                        {isUserChoice && !isCorrect && (
-                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
-                                                        )}
+                                    {currentReviewQuestion.type === 'EMOTION_ORDER' && (
+                                        <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                                            <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Sequence Comparison</p>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h4 className="text-center font-bold mb-2 text-sm">Your Order</h4>
+                                                    <div className="space-y-2">
+                                                        {(userResponse || []).map((id: string, idx: number) => {
+                                                            const opt = currentReviewQuestion.options.find((o: any) => o.id === id);
+                                                            return (
+                                                                <div key={idx} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-2 rounded-lg text-xs font-medium flex gap-2">
+                                                                    <span className="font-bold text-gray-400">{idx + 1}</span>
+                                                                    {opt?.label || 'Unknown'}
+                                                                </div>
+                                                            )
+                                                        })}
                                                     </div>
-                                                    <span className={`text-sm font-medium capitalize ${isUserChoice || isCorrect ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
-                                                        }`}>
-                                                        {opt.label}
-                                                    </span>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    {isUserChoice && (
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Your Answer</span>
-                                                    )}
-                                                    {isCorrect && (
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">Correct Answer</span>
-                                                    )}
-                                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${optPoints > 0
-                                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
-                                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
-                                                        }`}>
-                                                        {optPoints} pts
-                                                    </span>
+                                                <div>
+                                                    <h4 className="text-center font-bold mb-2 text-sm text-emerald-500">Correct Order</h4>
+                                                    <div className="space-y-2">
+                                                        {(currentReviewQuestion.correct_order || []).map((id: string, idx: number) => {
+                                                            const opt = currentReviewQuestion.options.find((o: any) => o.id === id);
+                                                            return (
+                                                                <div key={idx} className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-2 rounded-lg text-xs font-medium flex gap-2">
+                                                                    <span className="font-bold text-emerald-400">{idx + 1}</span>
+                                                                    {opt?.label || 'Unknown'}
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                        </div>
+                                    )}
 
-                                {/* Explanation */}
-                                {currentReviewQuestion.explanation && (
-                                    <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30 mt-6">
-                                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Expert Explanation</h4>
-                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                            {currentReviewQuestion.explanation}
-                                        </p>
+                                    {/* Question Text */}
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                                        {currentReviewQuestion.question_text}
+                                    </h3>
+
+                                    {/* Options with feedback */}
+                                    <div className="space-y-3">
+                                        {currentReviewQuestion.options?.map((opt: any) => {
+                                            const isUserChoice = currentReviewQuestion.type === 'LIKERT_GRID'
+                                                ? false  // Likert handled differently
+                                                : userResponse === opt.id;
+                                            const isCorrect = opt.id === correctOptionId;
+                                            const optPoints = questionKeys && typeof questionKeys[opt.id] === 'number'
+                                                ? questionKeys[opt.id] as number
+                                                : 0;
+
+                                            return (
+                                                <div
+                                                    key={opt.id}
+                                                    className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${isUserChoice && isCorrect
+                                                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+                                                        : isUserChoice && !isCorrect
+                                                            ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800'
+                                                            : isCorrect
+                                                                ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30'
+                                                                : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        {/* Indicator */}
+                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isUserChoice && isCorrect
+                                                            ? 'bg-emerald-500 text-white'
+                                                            : isUserChoice && !isCorrect
+                                                                ? 'bg-rose-500 text-white'
+                                                                : isCorrect
+                                                                    ? 'bg-emerald-200 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-200'
+                                                                    : 'bg-gray-200 dark:bg-white/10'
+                                                            }`}>
+                                                            {isCorrect && (
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            )}
+                                                            {isUserChoice && !isCorrect && (
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                            )}
+                                                        </div>
+                                                        <span className={`text-sm font-medium capitalize ${isUserChoice || isCorrect ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
+                                                            }`}>
+                                                            {opt.label}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {isUserChoice && (
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Your Answer</span>
+                                                        )}
+                                                        {isCorrect && (
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">Correct Answer</span>
+                                                        )}
+                                                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${optPoints > 0
+                                                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                                                            }`}>
+                                                            {optPoints} pts
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
+
+                                    {/* Explanation */}
+                                    {currentReviewQuestion.explanation && (
+                                        <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30 mt-6">
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Expert Explanation</h4>
+                                            <div
+                                                className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed explanation-content"
+                                                dangerouslySetInnerHTML={{ __html: currentReviewQuestion.explanation }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer - Sticky */}
+                        <div className="flex-shrink-0 px-6 pb-6 bg-white dark:bg-black border-t border-gray-100 dark:border-white/10 z-20">
+                            <div className="w-full max-w-3xl mx-auto flex justify-between items-center pt-6">
+                                <button
+                                    onClick={() => setReviewQuestionIndex(prev => Math.max(0, prev - 1))}
+                                    disabled={reviewQuestionIndex === 0}
+                                    className="px-6 py-3 rounded-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-white/20 transition-all"
+                                >
+                                    Previous
+                                </button>
+
+                                {reviewQuestionIndex < allQuestions.length - 1 ? (
+                                    <button
+                                        onClick={() => setReviewQuestionIndex(prev => prev + 1)}
+                                        className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
+                                    >
+                                        Next Question
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => reviewSessionId ? setResultsPhase('insights') : setResultsPhase('reflection')}
+                                        className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
+                                    >
+                                        Finish Review
+                                    </button>
                                 )}
                             </div>
-                        )}
-
-                        {/* Navigation */}
-                        <div className="flex justify-between items-center mt-10 pt-6 border-t border-gray-100 dark:border-white/10">
-                            <button
-                                onClick={() => setReviewQuestionIndex(prev => Math.max(0, prev - 1))}
-                                disabled={reviewQuestionIndex === 0}
-                                className="px-6 py-3 rounded-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-white/20 transition-all"
-                            >
-                                Previous
-                            </button>
-
-                            {reviewQuestionIndex < allQuestions.length - 1 ? (
-                                <button
-                                    onClick={() => setReviewQuestionIndex(prev => prev + 1)}
-                                    className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
-                                >
-                                    Next Question
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => reviewSessionId ? setResultsPhase('insights') : setResultsPhase('reflection')}
-                                    className="px-8 py-3 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.95] transition-all"
-                                >
-                                    Finish Review
-                                </button>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -988,7 +998,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
 
     const currentLocalAnswer = responses[currentQuestion.id];
     const isGridComplete = currentQuestion.type === 'LIKERT_GRID'
-        ? Object.keys(currentLocalAnswer || {}).length === currentQuestion.options.length
+        ? Object.keys(currentLocalAnswer || {}).length === (currentQuestion.options || []).length
         : !!currentLocalAnswer;
 
     return (
