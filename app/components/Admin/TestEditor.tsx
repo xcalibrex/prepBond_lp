@@ -711,15 +711,21 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                     const options = (q.options || []).map((opt: any, idx: number) => ({
                         id: crypto.randomUUID(),
                         question_id: qId,
-                        label: opt.label,
-                        value: opt.value,
-                        order_index: idx
+                        label: opt.value || opt.label, // Fix: Map content (AI value) to label. Fallback to AI label if empty.
+                        value: '0', // Default score
+                        order_index: idx,
+                        _aiLabel: opt.label // Temp helper for matching correct answer
                     }));
 
                     // Determine correct option ID
                     let correctOptionId = null;
                     if (q.correct_option_label) {
-                        const found = options.find((o: any) => o.label === q.correct_option_label);
+                        const found = options.find((o: any) => o._aiLabel === q.correct_option_label);
+                        if (found) correctOptionId = found.id;
+                    } else if (q.correct_answer) {
+                        // Try finding by value match or label match if provided in loose format
+                        // Note: options.label is now the content (e.g. "Sadness")
+                        const found = options.find((o: any) => o.label === q.correct_answer);
                         if (found) correctOptionId = found.id;
                     }
 
@@ -730,6 +736,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                         type: q.type || 'MCQ',
                         order_index: currentOrderIndex++,
                         scenario_context: q.scenario_context || null,
+                        scenario_image_url: q.scenario_image_url || null,
                         explanation: q.explanation || '',
                         options: options,
                         correct_option_id: correctOptionId,
@@ -897,7 +904,7 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                                                                 onSave={(val) => updateQuestion(section.id, q.id, { scenario_context: val })}
                                                             />
                                                         )}
-                                                        {(q.type === 'SCENARIO' || q.type === 'LIKERT_GRID') && (
+                                                        {(q.type === 'SCENARIO' || q.type === 'LIKERT_GRID' || q.type === 'MCQ') && (
                                                             <AutoSaveInput
                                                                 className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-medium placeholder-gray-400"
                                                                 placeholder="Stimulus Image URL (Optional)"

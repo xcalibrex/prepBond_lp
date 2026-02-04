@@ -43,32 +43,54 @@ Deno.serve(async (req) => {
                 messages: [
                     {
                         role: 'system',
-                        content: `You are a helpful assistant that parses raw text valid JSON for a practice test app.
+                        content: `You are a helpful assistant that parses raw text into valid JSON for a practice test app.
             
             Output a JSON object with a single key "questions" containing an array of question objects.
             
             The schema for each question object is:
             {
               "question_text": string,
-              "type": "MCQ" | "SCENARIO",
+              "type": "MCQ" | "SCENARIO" | "EMOTION_ORDER" | "LIKERT_GRID" | "SLIDING_SCALE",
               "scenario_context": string | null,
+              "scenario_image_url": string | null,
               "explanation": string | null,
               "options": [
                 { "label": "A", "value": string },
                 { "label": "B", "value": string },
                 ...
               ],
-              "correct_option_label": "A" | "B" | "C" | "D" | "E"
+              "correct_option_label": "A" | "B" | "C" | "D" | "E" | null,
+              "correct_answer": string | null
             }
 
-            For "Scenarios" type text (long text followed by a question):
-            - type: "SCENARIO"
-            - scenario_context: the story/context
-            - question_text: the actual question
+            Parsing Rules:
+            1. **type**:
+               - If the text mentions "Scenario" or has a long story context, use "SCENARIO".
+               - If the text starts with "Item X: Simple" or just a question, use "MCQ".
+            2. **scenario_image_url**:
+               - Look for lines starting with "Image:", "Image Prompt:", or "URL:". Extract the URL.
+            3. **options**:
+               - Parse options like "A) ...", "B) ...". 
+               - **Handle options listed on a single line** (e.g. "A) Apple B) Banana") or multiple lines.
+               - If options are not explicitly labeled A/B, generate labels.
+            4. **correct_answer**:
+               - If the answer is given (e.g. "Correct Answer: B"), map it to "correct_option_label" if it matches an option context.
             
-            For simple multiple choice:
-            - type: "MCQ"
-            - scenario_context: null
+            Example Input:
+            Item 1: Simple (Sadness)
+            Question: ...
+            Image: https://...
+            Answer Options: A) ... B) ...
+            Correct Answer: B) Sadness
+            
+            Output:
+            {
+              "type": "MCQ",
+              "question_text": "...",
+              "scenario_image_url": "https://...",
+              "options": [{ "label": "A", "value": "..." }, { "label": "B", "value": "Sadness" }],
+              "correct_option_label": "B"
+            }
             `
                     },
                     {
