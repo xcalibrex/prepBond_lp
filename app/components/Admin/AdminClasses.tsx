@@ -15,6 +15,7 @@ interface ClassSession {
     duration: string;
     branch: string; // Renamed from module
     module_id?: string | null;
+    resource_url?: string;
     created_at?: string;
     is_live?: boolean;
     training_modules?: {
@@ -70,6 +71,7 @@ export const AdminClasses: React.FC = () => {
         branch: string;
         duration: string;
         video_url: string;
+        resource_url: string;
         selectedModuleId: string | null;
         is_live: boolean;
     }>({
@@ -78,6 +80,7 @@ export const AdminClasses: React.FC = () => {
         branch: Branch.Perceiving, // Default
         duration: '10 min',
         video_url: '',
+        resource_url: '',
         selectedModuleId: null,
         is_live: false
     });
@@ -239,6 +242,7 @@ export const AdminClasses: React.FC = () => {
                     branch: newClass.branch,
                     duration: newClass.duration,
                     video_url: finalVideoUrl,
+                    resource_url: newClass.resource_url,
                     module_id: newClass.selectedModuleId,
                     is_live: newClass.is_live
                 })
@@ -253,7 +257,9 @@ export const AdminClasses: React.FC = () => {
                     description: newClass.description,
                     branch: newClass.branch,
                     duration: newClass.duration,
+                    duration: newClass.duration,
                     video_url: finalVideoUrl,
+                    resource_url: newClass.resource_url,
                     module_id: newClass.selectedModuleId,
                     is_live: newClass.is_live
                 }]);
@@ -284,6 +290,7 @@ export const AdminClasses: React.FC = () => {
             branch: selectedClass.branch,
             duration: selectedClass.duration,
             video_url: selectedClass.video_url,
+            resource_url: selectedClass.resource_url || '',
             selectedModuleId: selectedClass.module_id || (selectedClass.training_modules?.id ?? null),
             is_live: selectedClass.is_live || false
         });
@@ -301,6 +308,7 @@ export const AdminClasses: React.FC = () => {
             branch: Branch.Perceiving,
             duration: '10 min',
             video_url: '',
+            resource_url: '',
             selectedModuleId: null,
             is_live: false
         });
@@ -624,7 +632,7 @@ export const AdminClasses: React.FC = () => {
                             <div className="space-y-6">
                                 <div>
                                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Description</h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-white/5 p-5 rounded-2xl border border-gray-100 dark:border-white/5">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-white/5 p-5 rounded-2xl border border-gray-100 dark:border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
                                         {selectedClass.description}
                                     </p>
                                 </div>
@@ -637,6 +645,18 @@ export const AdminClasses: React.FC = () => {
                                         </a>
                                     </div>
                                 </div>
+
+                                {selectedClass.resource_url && (
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Resource URL</h4>
+                                        <div className="p-4 rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+                                            <a href={selectedClass.resource_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline break-all flex items-center gap-2">
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                {selectedClass.resource_url}
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="mt-auto pt-8 flex gap-3">
@@ -785,6 +805,17 @@ export const AdminClasses: React.FC = () => {
                                     className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
                                 />
                                 <p className="text-[10px] text-gray-400 mt-2 px-1">Must be an embeddable URL.</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Resource URL (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={newClass.resource_url}
+                                    onChange={e => setNewClass({ ...newClass, resource_url: e.target.value })}
+                                    placeholder="https://..."
+                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all outline-none"
+                                />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

@@ -735,8 +735,8 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
 
                                     {/* Question Image */}
                                     {currentReviewQuestion.scenario_image_url && (
-                                        <div className="rounded-2xl overflow-hidden max-w-[240px] mx-auto">
-                                            <img src={currentReviewQuestion.scenario_image_url} alt="Question stimulus" className="w-full h-full object-cover" />
+                                        <div className="rounded-2xl overflow-hidden mx-auto mb-6">
+                                            <img src={currentReviewQuestion.scenario_image_url} alt="Question stimulus" className="w-full h-auto object-cover max-h-[500px]" />
                                         </div>
                                     )}
 
@@ -879,7 +879,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({ testId, reviewSessionId,
                                         <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30 mt-6">
                                             <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Expert Explanation</h4>
                                             <div
-                                                className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed explanation-content"
+                                                className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed explanation-content max-h-[240px] overflow-y-auto custom-scrollbar pr-2"
                                                 dangerouslySetInnerHTML={{ __html: currentReviewQuestion.explanation }}
                                             />
                                         </div>

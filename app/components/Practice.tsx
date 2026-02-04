@@ -17,6 +17,7 @@ interface PracticeTest {
     duration?: string;
     time_limit_minutes?: number;
     status?: 'not_started' | 'in_progress' | 'completed';
+    hasCompleted?: boolean;
 }
 
 const BRANCH_META = {
@@ -65,7 +66,8 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
             const { data: testData, error: testError } = await query;
 
             // Fetch My Sessions to map status
-            let sessionsMap: Record<string, string> = {};
+            // Map structure: test_id -> { status: string, hasCompleted: boolean }
+            let sessionsMap: Record<string, { status: string, hasCompleted: boolean }> = {};
             if (user) {
                 const { data: sessionData } = await supabase
                     .from('user_test_sessions')
@@ -78,9 +80,23 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
                 // Let's assume 1 active session per test for now or show 'Resume' if existing.
                 if (sessionData) {
                     sessionData.forEach((s: any) => {
-                        // Prioritize in_progress
-                        if (s.status === 'in_progress') sessionsMap[s.test_id] = 'in_progress';
-                        else if (!sessionsMap[s.test_id]) sessionsMap[s.test_id] = s.status;
+                        if (!sessionsMap[s.test_id]) {
+                            sessionsMap[s.test_id] = { status: 'not_started', hasCompleted: false };
+                        }
+
+                        // Mark as completed if ANY session is completed
+                        if (s.status === 'completed') {
+                            sessionsMap[s.test_id].hasCompleted = true;
+                        }
+
+                        // Determine active status: prioritize in_progress
+                        const currentStatus = sessionsMap[s.test_id].status;
+                        if (s.status === 'in_progress') {
+                            sessionsMap[s.test_id].status = 'in_progress';
+                        } else if (s.status === 'completed' && currentStatus !== 'in_progress') {
+                            // If we don't have an active session, show completed
+                            sessionsMap[s.test_id].status = 'completed';
+                        }
                     });
                 }
             }
@@ -104,21 +120,14 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
                         branch: mappedBranch as Branch,
                         duration: t.time_limit_minutes ? `${t.time_limit_minutes} min` : 'Untimed',
                         time_limit_minutes: t.time_limit_minutes,
-                        status: sessionsMap[t.id] as any || 'not_started'
+                        time_limit_minutes: t.time_limit_minutes,
+                        status: sessionsMap[t.id]?.status || 'not_started',
+                        hasCompleted: sessionsMap[t.id]?.hasCompleted || false
                     };
                 });
 
-                // Sort: Uncompleted first, then by creation date (already sorted by query, so just stable sort or re-sort)
-                // Actually, just need to partition: not_started/in_progress vs completed
-                formatted.sort((a, b) => {
-                    const isCompletedA = a.status === 'completed';
-                    const isCompletedB = b.status === 'completed';
-
-                    if (isCompletedA && !isCompletedB) return 1;
-                    if (!isCompletedA && isCompletedB) return -1;
-
-                    return 0; // Keep original order (created_at) for same status group
-                });
+                // Sort: Alphabetical by Title
+                formatted.sort((a, b) => a.title.localeCompare(b.title));
 
                 setTests(formatted);
             }
@@ -137,26 +146,33 @@ export const Practice: React.FC<PracticeProps> = ({ onStartTest }) => {
     const renderWorksheetCard = (test: PracticeTest) => {
         // Fallback for branch meta if data is inconsistent
         const meta = test.branch ? BRANCH_META[test.branch] : { color: 'bg-gray-400', textColor: 'text-gray-500', label: 'Unknown' };
-        const isCompleted = test.status === 'completed';
+        // Use hasCompleted for visual styling/checkmark, but allow status to drive 'Resume' logic
+        const showCompletedStyle = test.hasCompleted;
 
         return (
             <div
                 key={test.id}
                 onClick={() => setSelectedTest(test)}
-                className={`group relative bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg cursor-pointer hover:-translate-y-1 ${isCompleted ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                className={`group relative bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg cursor-pointer hover:-translate-y-1 ${showCompletedStyle ? 'opacity-60 grayscale-[0.5]' : ''}`}
             >
                 <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${meta.color}`}></div>
                 <div className="pl-3">
                     <div className="flex justify-between items-start mb-2">
                         <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">PRACTICE</span>
-                        <div className={`w-2 h-2 rounded-full ${meta.color}`}></div>
+                        {showCompletedStyle ? (
+                            <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                        ) : (
+                            <div className={`w-2 h-2 rounded-full ${meta.color}`}></div>
+                        )}
                     </div>
                     <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-1 line-clamp-2">{test.title}</h4>
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2">{test.description}</p>
                     <div className="mt-3 pt-3 border-t border-gray-50 dark:border-white/5 flex justify-between items-center">
                         <span className="text-[10px] font-bold text-gray-400">{test.duration}</span>
                         <span className={`text-[10px] font-bold ${test.status === 'in_progress' ? 'text-blue-500' : meta.textColor}`}>
-                            {test.status === 'in_progress' ? 'Resume →' : (isCompleted ? 'Review →' : 'Start →')}
+                            {test.status === 'in_progress' ? 'Resume →' : (showCompletedStyle ? 'Review →' : 'Start →')}
                         </span>
                     </div>
                 </div>

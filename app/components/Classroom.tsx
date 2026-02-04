@@ -7,6 +7,7 @@ interface ClassSession {
     description: string;
     video_url: string;
     duration: string;
+    resource_url?: string;
     thumbnail?: string;
     isCompleted?: boolean;
 }
@@ -55,6 +56,7 @@ export const Classroom: React.FC = () => {
                     title: cls.title,
                     description: cls.description,
                     video_url: cls.video_url,
+                    resource_url: cls.resource_url,
                     duration: cls.duration,
                     isCompleted: completedIds.has(cls.id)
                 };
@@ -289,29 +291,43 @@ export const Classroom: React.FC = () => {
                                     <span className="text-xs text-gray-500 font-bold">{selectedClass.duration}</span>
                                 </div>
 
-                                <button
-                                    onClick={handleMarkComplete}
-                                    disabled={selectedClass.isCompleted}
-                                    className={`
+                                <div className="flex items-center gap-3">
+                                    {selectedClass.resource_url && (
+                                        <a
+                                            href={selectedClass.resource_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 active:scale-95"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                            Access Resource
+                                        </a>
+                                    )}
+
+                                    <button
+                                        onClick={handleMarkComplete}
+                                        disabled={selectedClass.isCompleted}
+                                        className={`
                                         flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all
                                         ${selectedClass.isCompleted
-                                            ? 'bg-emerald-100 text-emerald-700 cursor-default dark:bg-emerald-500/20 dark:text-emerald-400'
-                                            : 'bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 active:scale-95 shadow-lg'
-                                        }
+                                                ? 'bg-emerald-100 text-emerald-700 cursor-default dark:bg-emerald-500/20 dark:text-emerald-400'
+                                                : 'bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 active:scale-95 shadow-lg'
+                                            }
                                     `}
-                                >
-                                    {selectedClass.isCompleted ? (
-                                        <>
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                                            Completed
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            Mark Complete
-                                        </>
-                                    )}
-                                </button>
+                                    >
+                                        {selectedClass.isCompleted ? (
+                                            <>
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                                Completed
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                Mark Complete
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
 
                             <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-serif mb-4">{selectedClass.title}</h1>

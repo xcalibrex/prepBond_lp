@@ -73,6 +73,8 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
     const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
     const [bulkUploadText, setBulkUploadText] = useState('');
     const [isParsing, setIsParsing] = useState(false);
+    const [importTargetSectionId, setImportTargetSectionId] = useState<string>('NEW');
+    const [importNewSectionTitle, setImportNewSectionTitle] = useState('');
 
     // helper to sort
     const sortHierarchy = (data: any[]) => {
@@ -674,23 +676,22 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
 
             const parsedQuestions = data.questions;
 
-            // Add to the FIRST section by default, or create one if none exist
-            let targetSectionId = sections[0]?.id;
+            let targetSectionId = importTargetSectionId;
 
-            if (!targetSectionId) {
-                // Create a default section
+            // HANDLE NEW SECTION CREATION
+            if (targetSectionId === 'NEW') {
                 const newSectionId = crypto.randomUUID();
                 const newSection = {
                     id: newSectionId,
                     test_id: testId,
-                    title: 'Section 1',
+                    title: importNewSectionTitle || `Section ${sections.length + 1}`,
                     instructions: '',
-                    order_index: 0,
+                    order_index: sections.length,
                     questions: []
                 };
 
                 // Optimistic update for section
-                setSections([newSection]);
+                setSections(prev => [...prev, newSection]);
                 await supabase.from('test_sections').insert([newSection]);
                 targetSectionId = newSectionId;
             }
@@ -1155,6 +1156,37 @@ export const TestEditor: React.FC<TestEditorProps> = ({ testId, onClose }) => {
                             <button onClick={() => setIsBulkUploadOpen(false)} className="text-gray-400 hover:text-black dark:hover:text-white">
                                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
+                        </div>
+
+                        <div className="flex gap-4 mb-4">
+                            <div className="flex-1">
+                                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Import Destination</label>
+                                <select
+                                    value={importTargetSectionId}
+                                    onChange={(e) => setImportTargetSectionId(e.target.value)}
+                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                                >
+                                    <option value="NEW">✨ Create New Section</option>
+                                    <option disabled>──────────</option>
+                                    {sections.map((s, idx) => (
+                                        <option key={s.id} value={s.id}>
+                                            Section {idx + 1}: {s.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            {importTargetSectionId === 'NEW' && (
+                                <div className="flex-1 animate-fade-in">
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">New Section Title</label>
+                                    <input
+                                        type="text"
+                                        placeholder={`e.g. Section ${sections.length + 1}`}
+                                        value={importNewSectionTitle}
+                                        onChange={(e) => setImportNewSectionTitle(e.target.value)}
+                                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <textarea

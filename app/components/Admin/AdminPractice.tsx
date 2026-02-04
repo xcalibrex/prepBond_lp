@@ -24,6 +24,7 @@ export const AdminPractice: React.FC = () => {
     const [editingTestId, setEditingTestId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<'all' | 'live'>('all');
     const [filterType, setFilterType] = useState<'all' | 'worksheet' | 'exam'>('all');
+    const [searchQuery, setSearchQuery] = useState('');
 
     // URL Param Logic
     const [searchParams, setSearchParams] = useSearchParams();
@@ -160,34 +161,52 @@ export const AdminPractice: React.FC = () => {
     const filteredTests = tests.filter(test => {
         const statusMatch = filterStatus === 'all' ? true : test.is_live;
         const typeMatch = filterType === 'all' ? true : test.type === filterType;
-        return statusMatch && typeMatch;
+        const searchMatch = !searchQuery || test.title.toLowerCase().includes(searchQuery.toLowerCase());
+        return statusMatch && typeMatch && searchMatch;
     });
 
     return (
         <div className="pb-32 animate-fade-in">
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-full">
-                    <button
-                        onClick={() => setFilterType('all')}
-                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
-                    >
-                        All
-                    </button>
-                    <button
-                        onClick={() => setFilterType('worksheet')}
-                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'worksheet' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
-                    >
-                        Worksheets
-                    </button>
-                    <button
-                        onClick={() => setFilterType('exam')}
-                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'exam' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
-                    >
-                        Exams
-                    </button>
+                <div className="flex gap-4">
+                    {/* Search Bar (Moved to Left) */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search tests..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-full px-4 py-2 pl-10 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white w-64"
+                        />
+                        <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
                 </div>
 
                 <div className="flex gap-4">
+                    {/* Type Filters (Moved to Right) */}
+                    <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-full">
+                        <button
+                            onClick={() => setFilterType('all')}
+                            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
+                        >
+                            All
+                        </button>
+                        <button
+                            onClick={() => setFilterType('worksheet')}
+                            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'worksheet' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
+                        >
+                            Worksheets
+                        </button>
+                        <button
+                            onClick={() => setFilterType('exam')}
+                            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filterType === 'exam' ? 'bg-white dark:bg-white text-black dark:text-black shadow-sm' : 'text-gray-400'}`}
+                        >
+                            Exams
+                        </button>
+                    </div>
+
                     <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-full">
                         <button
                             onClick={() => setFilterStatus('all')}
